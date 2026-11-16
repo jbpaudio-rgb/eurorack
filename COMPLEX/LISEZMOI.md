@@ -10,14 +10,15 @@ Architecture reprise du **Buchla 259** (et de sa version Eurorack 259t), avec **
 
 **MODULATION**
 - **MOD INDEX** : atténuverteur (− / 0 / +) sur le signal de modulation, + jack **INDEX CV**
-- Inverseurs **AMPL**, **PITCH**, **TIMBRE** (haut = ON) : la modulation va vers l'amplitude, la hauteur et/ou le timbre de l'oscillateur principal
-- **PHASE LOCK** (atténuateur + jack) : accroche l'oscillateur principal sur le signal entrant
+- **PHASE LOCK** (atténuateur, sous MOD INDEX) : accroche l'oscillateur principal sur le signal entrant
+- Inverseurs **AMPL**, **PITCH**, **TIMBRE** l'un sous l'autre, levier couché (gauche = ON, comme le 259t) : la modulation va vers l'amplitude, la hauteur et/ou le timbre de l'oscillateur principal
+- Jacks **INDEX CV** et **PHASE LOCK** en bas de la section
 
 **PRINCIPAL OSCILLATOR**
-- **FREQUENCY**, **FINE**, **CV** (atténuverteur), **FM** (atténuateur) ; jacks **1V/OCT**, **CV**, **FM** ; sorties **SINE** et **SQUARE**
+- **FREQUENCY**, puis **FINE** seul, puis **CV** (atténuverteur) et **FM** (atténuateur) côte à côte ; jacks **1V/OCT**, **CV**, **FM** ; sorties **SINE** et **SQUARE**
 
 **HARMONICS**
-- **TIMBRE** (gros bouton) + **TIMBRE CV** (atténuateur) ; **SYMMETRY** et **ORDER** (+ leurs jacks CV) ; sortie **FINAL**
+- **TIMBRE** (gros bouton), **TIMBRE CV** (atténuateur) seul dessous, puis **SYMMETRY** et **ORDER** côte à côte (+ leurs jacks CV) ; sortie **FINAL**
 - **ORDER à gauche (FOLD)** : sortie = replieur ; TIMBRE = quantité de repli, SYMMETRY = décalage continu → repli asymétrique
 - **ORDER à droite (SHAPE)** : TIMBRE fond le sinus vers la paire dent de scie / forme en M, SYMMETRY dose entre les deux
 - Entre les deux, ORDER fond les deux chemins
@@ -37,6 +38,6 @@ Architecture reprise du **Buchla 259** (et de sa version Eurorack 259t), avec **
 3. Symétrie du sinus : TIMBRE, SYMMETRY au centre, ORDER à gauche → sinus symétrique sur SINE.
 
 ## À vérifier avant de commander
-- Inverseurs : SW2 SPDT **ON-OFF-ON** (centre = carré), les autres **ON-ON** (C&K T101 / T103) ; espacement de 11 mm entre AMPL / PITCH / TIMBRE (vérifier les écrous).
+- Inverseurs : SW2 SPDT **ON-OFF-ON** (centre = carré), les autres **ON-ON** (C&K T101 / T103) ; AMPL / PITCH / TIMBRE espacés de 12,5 mm.
 - **LM13700**, **BC847DS**, **MMBFJ112**, résistances tempco 1k +3300 ppm (×2) : disponibilité LCSC.
 - Carte 32 HP placée (≈ 320 composants), **pas encore routée** : prévoir 4 couches ou deux cartes empilées.

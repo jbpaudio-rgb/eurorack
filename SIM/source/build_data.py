@@ -57,20 +57,20 @@ M.append(dict(id='adsr', name='ADSR', w=40.3, **p, ctl=[
     J('gate', 30.2, 96.5, 'in'), J('out', 10.1, 109.5, 'out'), J('nout', 30.2, 109.5, 'out')]))
 p = panel(W + 'cx/panel.json', W + 'out/COMPLEX/panel/octavio-complex-panel.kicad_pcb')
 M.append(dict(id='cx', name='COMPLEX', w=162.3, **p, ctl=[
-    K('mfreq', 21.0, 27.0, 1.0, 0.35, 'MOD FREQUENCY'), K('index', 61.0, 27.0, 1.0, 0.65, 'MOD INDEX'), K('pfreq', 98.0, 27.0, 1.0, 0.45, 'FREQUENCY'), K('timbre', 139.0, 27.0, 1.0, 0.3, 'TIMBRE'),
+    K('mfreq', 21.0, 27.0, 1.0, 0.35, 'MOD FREQUENCY'), K('index', 54.0, 27.0, 1.0, 0.65, 'MOD INDEX'), K('pfreq', 89.5, 27.0, 1.0, 0.45, 'FREQUENCY'), K('timbre', 136.5, 27.0, 1.0, 0.3, 'TIMBRE'),
     dict(t='toggle', id='range', label='RANGE', x=8.0, y=50.0, v=0, vert=1, opts=['AUDIO', 'LFO']),
     dict(t='toggle', id='mwave', label='WAVE', x=21.0, y=50.0, v=0, vert=1, opts=['TRIANGLE', 'SQUARE', 'SAW']),
     K('mcv', 34.0, 50.0, 0.8, 0.5, 'MOD CV'), K('mfine', 8.0, 69.0, 0.8, 0.5, 'MOD FINE'), K('mfm', 34.0, 69.0, 0.8, 0.0, 'MOD FM'),
-    dict(t='toggle', id='ampl', label='AMPL', x=50.0, y=50.0, v=1, vert=1, opts=['ON', 'OFF']),
-    dict(t='toggle', id='pitch', label='PITCH', x=61.0, y=50.0, v=0, vert=1, opts=['ON', 'OFF']),
-    dict(t='toggle', id='timbresw', label='TIMBRE MOD', x=72.0, y=50.0, v=1, vert=1, opts=['ON', 'OFF']),
-    K('plock', 61.0, 69.0, 0.8, 0.0, 'PHASE LOCK'),
-    K('pfine', 85.0, 50.0, 0.8, 0.5, 'FINE'), K('pcv', 98.0, 50.0, 0.8, 0.5, 'CV'), K('pfm', 111.0, 50.0, 0.8, 0.0, 'FM'),
-    K('sym', 125.0, 50.0, 0.8, 0.5, 'SYMMETRY'), K('tcv', 139.0, 50.0, 0.8, 0.0, 'TIMBRE CV'), K('order', 153.0, 50.0, 0.8, 0.0, 'ORDER'),
+    dict(t='toggle', id='ampl', label='AMPL', x=57.0, y=59.0, v=1, opts=['ON', 'OFF']),
+    dict(t='toggle', id='pitch', label='PITCH', x=57.0, y=71.5, v=0, opts=['ON', 'OFF']),
+    dict(t='toggle', id='timbresw', label='TIMBRE MOD', x=57.0, y=84.0, v=1, opts=['ON', 'OFF']),
+    K('plock', 54.0, 45.0, 0.8, 0.0, 'PHASE LOCK'),
+    K('pfine', 89.5, 48.0, 0.8, 0.5, 'FINE'), K('pcv', 78.5, 67.0, 0.8, 0.5, 'CV'), K('pfm', 100.5, 67.0, 0.8, 0.0, 'FM'),
+    K('sym', 125.5, 67.0, 0.8, 0.5, 'SYMMETRY'), K('tcv', 136.5, 48.0, 0.8, 0.0, 'TIMBRE CV'), K('order', 147.5, 67.0, 0.8, 0.0, 'ORDER'),
     J('mvoct', 8.0, 90.0, 'in'), J('mcv', 21.0, 90.0, 'in'), J('mfm', 34.0, 90.0, 'in'), J('tri', 14.5, 106.0, 'out'), J('signal', 27.5, 106.0, 'out'),
-    J('indexcv', 50.0, 90.0, 'in'), J('plock', 72.0, 90.0, 'in'),
-    J('pvoct', 85.0, 90.0, 'in'), J('pcv', 98.0, 90.0, 'in'), J('pfm', 111.0, 90.0, 'in'), J('sine', 91.5, 106.0, 'out'), J('square', 104.5, 106.0, 'out'),
-    J('symcv', 125.0, 90.0, 'in'), J('timbrecv', 139.0, 90.0, 'in'), J('ordercv', 153.0, 90.0, 'in'), J('final', 139.0, 106.0, 'out')]))
+    J('indexcv', 48.0, 106.0, 'in'), J('plock', 60.0, 106.0, 'in'),
+    J('pvoct', 73.0, 90.0, 'in'), J('pcv', 89.5, 90.0, 'in'), J('pfm', 106.0, 90.0, 'in'), J('sine', 81.0, 106.0, 'out'), J('square', 98.0, 106.0, 'out'),
+    J('symcv', 120.0, 90.0, 'in'), J('timbrecv', 136.5, 90.0, 'in'), J('ordercv', 153.0, 90.0, 'in'), J('final', 136.5, 106.0, 'out')]))
 p = panel(W + 'stg/panel.json', W + 'out/STAGES/panel/octavio-stages-panel.kicad_pcb')
 SXs = [53.0 + 12.6 * i for i in range(8)]
 ctl = [K('time', 23.0, 27.0, 1.0, 0.45, 'TIME'), K('tcvatt', 12.0, 49.0, 0.8, 0.5, 'TIME CV'), K('analogk', 34.0, 49.0, 0.8, 0.5, 'ANALOG'),
