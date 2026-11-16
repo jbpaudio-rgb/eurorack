@@ -267,7 +267,8 @@ class OctavioEngine {
               const t1 = tanh(s.y1), t2 = tanh(s.y2), t3 = tanh(s.y3);
               s.y1 += g * (u - t1); s.y2 += g * (t1 - t2); s.y3 += g * (t2 - t3); s.y4 += g * (t3 - tanh(s.y4));
             }
-            const LP = s.y4, BP = 2 * s.y1 - 2 * s.y2, HP = u - 2 * s.y1 + s.y2;
+            const q1 = tanh(s.y1), q2 = tanh(s.y2); // taps after the stage tanh: exact cancellation at low freq, like the real ladder
+            const LP = s.y4, BP = 2 * q1 - 2 * q2, HP = u - 2 * q1 + q2;
             const fo = -(BP + k.a * (LP - BP) + k.c * (HP - BP)) / 0.18;
             s.hp = 0.9993 * (s.hp + fo - s.hpx); s.hpx = fo; O[0] = s.hp;
             break;
