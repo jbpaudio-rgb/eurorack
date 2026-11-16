@@ -1,11 +1,11 @@
-# Octavio VCO — oscillateur façon Moog 921, Eurorack 8 HP (rev 0.2)
+# Octavio VCO — oscillateur façon Moog 921, Eurorack 8 HP (rev 0.3)
 
 ## Façade (de haut en bas)
 - **VCO** entre les trous du haut
 - **RANGE** (sélecteur 6 positions comme le 921) : **LO, 32', 16', 8', 4', 2'** = −7, −2, −1, 0, +1, +2 octaves. 8' ≈ do central (≈ 262 Hz), LO ≈ 2 Hz (LFO).
 - **FREQUENCY** (± 6 demi-tons à l'intérieur de la plage, comme sur le Moog) et **WIDTH** (largeur du carré)
-- Entrées : **1V/OCT** et **SYNC** (colonne de gauche), **FM** et **PWM** avec leur petit atténuateur
-- Sorties : **SINE**, **TRIANGLE**, **SAW**, **PULSE** (± 5 V), comme les 4 sorties du 921
+- Rangée du milieu : **FM** (atténuateur + entrée), **PWM** (atténuateur + entrée), **BLEND** (bouton entouré des 4 formes d'onde dessinées) et sa sortie **OUT** juste en dessous
+- Grille du bas : **1V/OCT** et **SYNC** (colonne de gauche), sorties **SINE**, **TRIANGLE**, **SAW**, **PULSE** (± 5 V), comme les 4 sorties du 921
 
 ## Circuit
 - **RANGE** : échelle de résistances 0,1 % (R1, R2, R6, R48–R51) entre +12 V et −12 V qui donne exactement −7, −2, −1, 0, +1, +2 V ; le commutateur choisit un point, U2D le tamponne et l'envoie au convertisseur par R53 (100k 0,1 %). La justesse des octaves dépend de la précision des rails ±12 V (≈ 1 %), corrigeable avec FREQUENCY.
@@ -14,6 +14,8 @@
 - **Cœur dent de scie** (comme le 921) : le courant charge C10 (10 nF C0G) dans l'intégrateur U1C ; quand la rampe atteint 5 V, le comparateur U1D envoie une impulsion qui fait conduire le JFET Q2 et vide le condensateur.
 - **SYNC** : un front montant sur l'entrée déclenche la même remise à zéro (synchro dure).
 - **SAW** (U2A), **TRIANGLE** (redresseur double alternance U2B/U2C), **SINE** (paire différentielle Q3 qui arrondit le triangle, ≈ 1,4 % de distorsion, puis U3A), **PULSE** (comparateur U3B, largeur U3C = WIDTH + PWM, sortie U3D).
+
+- **BLEND** : fondu continu SINE → TRIANGLE → SAW → PULSE. OUT = S + c1·(T−S) + c2·(SAW−T) + c3·(P−SAW). U4 calcule les trois différences et la somme ; trois OTA (U6, U7 = LM13700) dosent chaque différence ; U5 fabrique c1, c2, c3 à partir du bouton (chacun monte de 0 à 1 sur un tiers de la course, butées par zener) ; U5D remet la sortie dans le bon sens. Le carré peut sonner plus fort que le sinus en fin de course : c'est voulu (comme passer d'une sortie à l'autre).
 
 ## Simulation
 - Convertisseur expo (transistors) : rapport d'octave exact à mieux que 0,4 % de −5 à +5 V (≈ 6 cents à +5 octaves).
@@ -30,4 +32,6 @@
 - **R9 tempco** (1k +3300 ppm, ex. KOA LT73V ou Panasonic ERA-S) : disponibilité LCSC.
 - **MMBFJ112** (JFET N, SOT-23) : brochage D-S-G à confirmer avec la fiche du fabricant choisi.
 - Empreintes de façade (`octavio_mu`) : jacks et pots 9 mm (FM et PWM montés tournés de 180°).
+- **LM13700** (U6, U7) : disponibilité LCSC (sinon NJM13700).
+- Carte dense : résistances et condensateurs en **0603**, trimmers en **CMS (Bourns 3314J)**.
 - Carte placée, **pas encore routée**. Au routage : Q1, R9 et C10 près de U1, pistes courtes.
