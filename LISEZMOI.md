@@ -8,3 +8,10 @@ Modules Eurorack inspirés du Moog modulaire (façades alu noir, lettrage blanc,
 | AD | Enveloppe Attack/Decay contrôlée en tension, 6 HP (rev 0.1) : ATTACK, DECAY, CV attack et CV decay avec atténuateurs, TRIG, OUT, LED, mode ONE/CYCLE | schéma + façade prêts ; carte placée, à router |
 
 Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), jacks Thonkiconn, pots 9 mm, façades PCB aluminium 1,6 mm (vernis noir, sérigraphie blanche, HASL sans plomb), montage JLCPCB.
+
+## Style des façades (commun à tous les modules)
+- Titre du module entre les trous du haut : 2,6 mm, gras
+- Titres de section (ATTACK, DECAY, CV LEVEL, RESPONSE, FIXED CONTROL VOLTAGE…) : 1,06 mm, gras
+- Étiquettes de jacks, d'inverseurs, LIN./EXP. : 0,94 mm, gras
+- Chiffres des graduations : 1,0 mm
+- Logo ocTavio 16 mm de large en bas, bandes argent sur les côtés, lignes de cadre grises façon Moog
