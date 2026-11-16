@@ -1,0 +1,10 @@
+Qté,Pièce,Référence conseillée,Où l'acheter,Pour quoi,Note
+1,Carte du VCO (5 exemplaires minimum),fichiers 1-carte/,JLCPCB,circuit principal,2 couches FR-4 1,6 mm ; CMS du dos soudés par JLC (option PCBA)
+1,Façade aluminium (5 exemplaires minimum),fichiers 2-facade/,JLCPCB,façade,Aluminium 1 couche 1,6 mm ; masque noir ; sérigraphie blanche ; finition HASL sans plomb (bandes argentées)
+9,Jack 3,5 mm Thonkiconn,QingPu WQP-PJ301M-12 (WQP518MA),Thonk / Tayda / LCSC,FM PWM OUT 1V/OCT SYNC SINE TRIANGLE SAW PULSE,écrous fournis
+5,Potentiomètre 10k linéaire (B) 9 mm vertical axe D 6 mm,Alpha RV09 B10K axe D,Thonk / Tayda,FREQUENCY WIDTH FM PWM BLEND,axe D pour les boutons D
+1,Commutateur rotatif 1 circuit 6 positions (ou 12 avec butée),Alpha SR1712F-0106 ou SR2612F 1P12T,Mouser / Tayda / Stompboxparts,RANGE (LO 32' 16' 8' 4' 2'),VÉRIFIER l'empreinte de la carte avec la fiche du modèle acheté avant de commander
+6,Bouton Davies 1900H clone axe D 6 mm,Thonk « Davies 1900h Clone – D Shaft » noir,Thonk,5 pots + RANGE,12 mm à la base ; 16 mm de haut
+1,Barrette mâle blindée 2×5 2,54 mm,Shrouded header 2x5 (IDC box header),LCSC / Tayda,alimentation (dos de la carte),détrompeur vers le bas ; -12 V à gauche (bande rouge)
+1,Câble d'alimentation Eurorack 10 vers 16 broches,10-16 pin ribbon 25 cm,Thonk / Tayda / magasin synthé,raccord au bus du cabinet,bande rouge = -12 V
+2,Vis M3 × 6 mm + rondelles nylon,vis de rail Eurorack,souvent fournies avec le cabinet,fixer la façade sur les rails,

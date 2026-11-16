@@ -25,3 +25,8 @@ Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), ja
 - Étiquettes de jacks, d'inverseurs, LIN./EXP. : 0,94 mm, gras
 - Chiffres des graduations : 1,0 mm
 - Logo ocTavio 16 mm de large en bas, bandes argent sur les côtés, lignes de cadre grises façon Moog
+
+
+## Fabrication
+- **VCO** : dossier `VCO/FABRICATION` (ou `VCO/OCTAVIO-VCO-FABRICATION.zip`) : Gerbers de la carte 4 couches routée et de la façade aluminium, fichiers d'assemblage JLCPCB, liste d'achat (jacks, pots, boutons, câble) et guide pas à pas.
+- `outils/` : les scripts qui produisent ces fichiers (export Freerouting, Gerbers, vérification des liaisons et des écartements).
