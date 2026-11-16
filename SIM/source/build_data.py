@@ -110,7 +110,7 @@ ctl = [K('rate', 12.6, 24.0, 1.0, 0.55, 'PULSE RATE'), K('slew', 37.9, 24.0, 1.0
        J('slin', 9.0, 109.5, 'in'), J('slew', 41.5, 109.5, 'out')]
 M.append(dict(id='nt', name='NOISE TOOLS', w=50.5, **p, ctl=ctl))
 p = panel(W + 'att/panel.json', W + 'out/ATTINV/panel/octavio-attinv-panel.kicad_pcb')
-ROWa = [15.0, 28.0, 41.0, 54.0]; JYa = [69.0, 82.5, 96.0, 109.5]
+ROWa = [14.5, 28.5, 42.5, 56.5]; JYa = [70.5, 83.5, 96.5, 109.5]
 ctl = []
 for i in range(4):
     n = i + 1

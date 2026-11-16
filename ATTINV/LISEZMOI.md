@@ -4,7 +4,7 @@
 - En haut, une rangée par canal (1 à 4) : bouton de niveau, LED bicolore (rouge = sortie positive, vert = négative), inverseur **INV / ATT**.
   - **INV** (levier à gauche) : atténuverteur, de −1 (à gauche) à 0 (au centre) à +1 (à droite).
   - **ATT** (levier à droite) : simple atténuateur, de 0 (à gauche) à +1 (à droite).
-- En bas, les 8 jacks regroupés : **IN 1–4** à gauche, **OUT 1–4** à droite.
+- En bas, les 8 jacks serrés (13 mm entre les rangées, le minimum pour des Thonkiconn) : **IN 1–4** à gauche, **OUT 1–4** à droite.
 - **IN vide** = +5 V : le canal devient une source de tension réglable (−5 à +5 V en INV, 0 à +5 V en ATT).
 
 ## Circuit
