@@ -1,6 +1,7 @@
-# Octavio VCF — filtre ladder façon Moog, LP / BP / HP, Eurorack 8 HP (rev 0.2)
+# Octavio VCF — filtre ladder façon Moog, LP / BP / HP, Eurorack 10 HP (rev 0.3)
 
 ## Façade (de haut en bas)
+- **rev 0.3 : passage en 10 HP** pour donner de l'espace : colonnes plus larges, atténuateurs CONTOUR / FREQ CV / EMPH CV plus gros.
 - **VCF** entre les trous du haut
 - Bouton **LP → BP → HP** (en haut) : passe en continu du LP 24 dB au BP puis au HP
 - **FREQUENCY** (gros bouton 0–10) : coupure ≈ 20 Hz → ≈ 20 kHz

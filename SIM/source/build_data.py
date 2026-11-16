@@ -18,13 +18,13 @@ def J(id, x, y, d):
     return dict(t='jack', id=id, x=x, y=y, d=d)
 M = []
 p = panel(W + 'vco/panel.json', W + 'out/VCO/panel/octavio-vco-panel.kicad_pcb')
-M.append(dict(id='vco', name='VCO', w=40.3, **p, ctl=[
-    dict(t='rotary', id='range', label='RANGE', x=20.15, y=21.5, s=1.15, v=3, angles=[-75, -45, -15, 15, 45, 75]),
-    K('fine', 10.0, 43.0, 0.8, 0.5, 'FREQUENCY'), K('width', 30.3, 43.0, 0.8, 0.5, 'WIDTH'),
-    K('fm', 7.6, 60.0, 0.62, 0.0, 'FM'), K('pwm', 20.15, 60.0, 0.62, 0.0, 'PWM'), K('blend', 32.7, 60.0, 0.62, 0.33, 'BLEND'),
-    J('fm', 7.6, 73.5, 'in'), J('pwm', 20.15, 73.5, 'in'), J('blend', 32.7, 73.5, 'out'),
-    J('voct', 7.6, 89.5, 'in'), J('sync', 7.6, 105.5, 'in'), J('sine', 20.15, 89.5, 'out'), J('tri', 32.7, 89.5, 'out'),
-    J('saw', 20.15, 105.5, 'out'), J('pulse', 32.7, 105.5, 'out')]))
+M.append(dict(id='vco', name='VCO', w=60.6, **p, ctl=[
+    dict(t='rotary', id='range', label='RANGE', x=30.3, y=21.5, s=1.15, v=3, angles=[-75, -45, -15, 15, 45, 75]),
+    K('fine', 13.5, 44.5, 1.0, 0.5, 'FREQUENCY'), K('width', 47.1, 44.5, 1.0, 0.5, 'WIDTH'),
+    K('fm', 10.1, 66.0, 0.8, 0.0, 'FM'), K('pwm', 30.3, 66.0, 0.8, 0.0, 'PWM'), K('blend', 50.5, 66.0, 0.8, 0.33, 'BLEND'),
+    J('fm', 10.1, 81.5, 'in'), J('pwm', 30.3, 81.5, 'in'), J('blend', 50.5, 81.5, 'out'),
+    J('voct', 10.1, 96.0, 'in'), J('sync', 10.1, 109.5, 'in'), J('sine', 30.3, 96.0, 'out'), J('tri', 50.5, 96.0, 'out'),
+    J('saw', 30.3, 109.5, 'out'), J('pulse', 50.5, 109.5, 'out')]))
 p = panel(W + 'mix/panel.json', W + 'out/MIX/panel/octavio-mix-panel.kicad_pcb')
 M.append(dict(id='mix', name='MIX', w=40.3, **p, ctl=[
     K('l1', 10.1, 23.0, 0.8, 0.6, 'LEVEL 1'), K('l2', 30.2, 23.0, 0.8, 0.45, 'LEVEL 2'), K('l3', 10.1, 43.0, 0.8, 0.35, 'LEVEL 3'), K('l4', 30.2, 43.0, 0.8, 0.0, 'LEVEL 4'),
@@ -32,11 +32,11 @@ M.append(dict(id='mix', name='MIX', w=40.3, **p, ctl=[
     J('in1', 7.6, 91.0, 'in'), J('in2', 20.15, 91.0, 'in'), J('in3', 7.6, 108.0, 'in'), J('in4', 20.15, 108.0, 'in'),
     J('out', 32.7, 91.0, 'out'), J('nout', 32.7, 108.0, 'out')]))
 p = panel(W + 'vcf/panel.json', W + 'out/VCF/panel/octavio-vcf-panel.kicad_pcb')
-M.append(dict(id='vcf', name='VCF', w=40.3, **p, ctl=[
-    K('mode', 20.15, 17.0, 0.8, 0.0, 'LP · BP · HP'), K('freq', 20.15, 38.6, 1.0, 0.42, 'FREQUENCY'), K('emph', 20.15, 61.8, 1.0, 0.55, 'EMPHASIS'),
-    K('contour', 7.6, 79.6, 0.62, 0.6, 'CONTOUR'), K('fcv', 20.15, 79.6, 0.62, 0.0, 'FREQ CV'), K('ecv', 32.7, 79.6, 0.62, 0.0, 'EMPH CV'),
-    J('contour', 7.6, 93.0, 'in'), J('fcv', 20.15, 93.0, 'in'), J('ecv', 32.7, 93.0, 'in'),
-    J('in1', 7.6, 109.0, 'in'), J('in2', 20.15, 109.0, 'in'), J('out', 32.7, 109.0, 'out')]))
+M.append(dict(id='vcf', name='VCF', w=50.5, **p, ctl=[
+    K('mode', 25.25, 17.0, 0.8, 0.0, 'LP · BP · HP'), K('freq', 25.25, 38.6, 1.0, 0.42, 'FREQUENCY'), K('emph', 25.25, 61.8, 1.0, 0.55, 'EMPHASIS'),
+    K('contour', 10.1, 81.0, 0.8, 0.6, 'CONTOUR'), K('fcv', 25.25, 81.0, 0.8, 0.0, 'FREQ CV'), K('ecv', 40.4, 81.0, 0.8, 0.0, 'EMPH CV'),
+    J('contour', 10.1, 94.5, 'in'), J('fcv', 25.25, 94.5, 'in'), J('ecv', 40.4, 94.5, 'in'),
+    J('in1', 10.1, 109.0, 'in'), J('in2', 25.25, 109.0, 'in'), J('out', 40.4, 109.0, 'out')]))
 p = panel(W + 'panel.json', W + 'out/octavio-902-vca/panel/octavio-902-vca-panel.kicad_pcb')
 M.append(dict(id='vca', name='VCA', w=30.0, **p, ctl=[
     K('cvlevel', 15.0, 15.8, 0.8, 0.6, 'CV LEVEL'), K('response', 15.0, 31.2, 0.8, 0.5, 'RESPONSE'), K('fixed', 15.0, 55.8, 1.0, 0.0, 'FIXED CONTROL VOLTAGE'),

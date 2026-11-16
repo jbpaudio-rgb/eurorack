@@ -1,6 +1,7 @@
-# Octavio VCO — oscillateur façon Moog 921, Eurorack 8 HP (rev 0.3)
+# Octavio VCO — oscillateur façon Moog 921, Eurorack 12 HP (rev 0.4)
 
 ## Façade (de haut en bas)
+- **rev 0.4 : passage en 12 HP** pour donner de l'espace : FREQUENCY et WIDTH en gros boutons gradués, FM / PWM / BLEND en boutons moyens, colonnes plus larges.
 - **VCO** entre les trous du haut
 - **RANGE** (sélecteur 6 positions comme le 921) : **LO, 32', 16', 8', 4', 2'** = −7, −2, −1, 0, +1, +2 octaves. 8' ≈ do central (≈ 262 Hz), LO ≈ 2 Hz (LFO).
 - **FREQUENCY** (± 6 demi-tons à l'intérieur de la plage, comme sur le Moog) et **WIDTH** (largeur du carré)
