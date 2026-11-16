@@ -12,7 +12,7 @@ const DESC = {
   adsr: 'Enveloppe ADSR façon Moog 911 : courbes RC, attaque ≈ 2 ms à 10 s, sustain 0 à 10 V, sorties OUT et −OUT.',
   cx: 'Oscillateur complexe façon Buchla 259 : oscillateur de modulation, MOD INDEX vers AMPL / PITCH / TIMBRE, PHASE LOCK, oscillateur principal et HARMONICS (TIMBRE, SYMMETRY, ORDER).',
   stg: 'Séquenceur 8 étapes façon Verbos Multistage (RP2040) : A, B et TIME par étape, SLIDE, LOOP / ONCE / ENV, entrées SELECT et sorties GATE par étape.',
-  lfo: 'QUAD LFO (RP2040) : 4 LFO avec fondu SINE → SAW → SQUARE, FREE (0,02 à 25 Hz) ou CLOCKED (/16 à ×16 du CLOCK), entrée RESET.',
+  lfo: 'LFOs (RP2040) : 4 LFO avec fondu SINE → SAW → SQUARE, FREE (0,02 à 25 Hz) ou CLOCKED (/16 à ×16 du CLOCK), entrée RESET.',
   sim: 'Outil du simulateur : séquence, CV/GATE du clavier, sortie son et oscilloscope.',
 };
 const TYPE = {}; DATA.modules.forEach(m => TYPE[m.id] = m);

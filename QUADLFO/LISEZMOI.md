@@ -1,4 +1,4 @@
-# Octavio QUAD LFO — quatre LFO libres ou synchronisés, Eurorack 12 HP (rev 0.1)
+# Octavio LFOs — quatre LFO libres ou synchronisés, Eurorack 12 HP (rev 0.1)
 
 Quatre LFO sur une **Raspberry Pi Pico (RP2040)**, en version la moins chère possible : pas de convertisseur DAC, les ondes sortent directement de la Pico en PWM, puis passent dans un filtre RC à deux pôles et un TL074.
 

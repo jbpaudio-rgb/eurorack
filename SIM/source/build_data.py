@@ -99,7 +99,7 @@ for i, x in enumerate(LX):
             dict(t='toggle', id=f's{n}', label=f'CLOCKED / FREE {n}', x=x, y=67.5, v=1, vert=1, opts=['CLOCKED', 'FREE']),
             J(f'o{n}', x, 90.0, 'out')]
 ctl += [J('clock', 16.33, 106.0, 'in'), J('reset', 44.33, 106.0, 'in'), dict(t='led', id='lc', x=30.33, y=106.0)]
-M.append(dict(id='lfo', name='QUAD LFO', w=60.66, **p, ctl=ctl))
+M.append(dict(id='lfo', name='LFOs', w=60.66, **p, ctl=ctl))
 # simulator utility panel (not a real module)
 SW = 50.5
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]

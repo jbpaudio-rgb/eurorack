@@ -1,4 +1,4 @@
-// ocTavio QUAD LFO - four LFOs, free or locked to a clock
+// ocTavio LFOs - four LFOs, free or locked to a clock
 // Board : Raspberry Pi Pico, Arduino core "Raspberry Pi Pico/RP2040" by Earle Philhower (arduino-pico).
 // Arduino IDE : Tools > Board > Raspberry Pi Pico ; upload over USB (hold BOOTSEL the first time).
 //

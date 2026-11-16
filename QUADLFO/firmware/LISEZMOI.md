@@ -1,4 +1,4 @@
-# Programme du QUAD LFO (Raspberry Pi Pico)
+# Programme du module LFOs (Raspberry Pi Pico)
 
 ## Installer (une fois)
 1. Arduino IDE 2 → Préférences → « URL de gestionnaire de cartes supplémentaires » :
