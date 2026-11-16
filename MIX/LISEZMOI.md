@@ -1,10 +1,10 @@
-# Octavio MIX — mixeur 4 entrées façon Moog CP3, Eurorack 6 HP (rev 0.2)
+# Octavio MIX — mixeur 4 entrées façon Moog CP3, Eurorack 8 HP (rev 0.3)
 
 ## Façade (de haut en bas)
 - **MIX** entre les trous du haut
-- **LEVEL** : 4 boutons de niveau en colonne (1 à 4), comme sur le CP3
-- **MASTER GAIN** juste en dessous : gain général, saturation douce quand on le monte (CP3 poussé)
-- Jacks en bas (grille resserrée, pas de 13 à 13,6 mm : les câbles 3,5 mm passent sans problème) : **IN 1**, **IN 2**, **IN 3**, **IN 4**, puis **OUT** et **−OUT** (sortie inversée)
+- **LEVEL** : 4 boutons de niveau en carré (1 2 / 3 4), bien espacés
+- **MASTER GAIN** : grand bouton gradué 0 à 10 ; gain général, saturation douce quand on le monte (CP3 poussé)
+- Jacks en bas : entrées **IN 1**, **IN 2**, **IN 3**, **IN 4** (2 rangées), colonne de droite séparée : **OUT** et **−OUT** (sortie inversée)
 
 ## Circuit
 - Chaque entrée passe par son potentiomètre (100k B) puis une résistance de 100k vers un sommateur inverseur (U1A, TL074). Bouton au maximum = gain de 1 pour cette entrée.
