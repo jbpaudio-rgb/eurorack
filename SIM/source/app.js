@@ -497,6 +497,15 @@ function fit() {
   const rowPx = Math.max(160, wrap.clientHeight - 20 - 28) * zoom, s = rowPx / RH;
   svg.style.height = (TH * s) + 'px'; svg.style.width = (TW * s) + 'px';
 }
+let curRow = 0;
+function goRow(r) {
+  curRow = ((r % L.rows.length) + L.rows.length) % L.rows.length;
+  const s = svg.getBoundingClientRect().height / TH;
+  wrap.scrollTo({ top: rowY(curRow) * s, behavior: 'smooth' });
+  $('#zRow').textContent = 'Rangée ' + (curRow + 1);
+}
+$('#zRow').onclick = () => goRow(curRow + 1);
+wrap.addEventListener('scroll', () => { const s = svg.getBoundingClientRect().height / TH; const r = Math.round(wrap.scrollTop / s / (RH + GAPY)); if (r !== curRow && r < L.rows.length) { curRow = r; $('#zRow').textContent = 'Rangée ' + (r + 1); } });
 $('#zFit').onclick = () => { zoom = 1; fit(); };
 $('#zIn').onclick = () => { zoom = Math.min(3, zoom * 1.25); fit(); };
 $('#zOut').onclick = () => { zoom = Math.max(.25, zoom / 1.25); fit(); };

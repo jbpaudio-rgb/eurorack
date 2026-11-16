@@ -80,6 +80,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
     <button id="bClear">Tout débrancher</button>
   </div>
   <div class="grp">
+    <button id="zRow">Rangée 1</button>
     <button id="zFit">Ajuster</button>
     <button id="zOut" aria-label="Dézoomer">−</button>
     <button id="zIn" aria-label="Zoomer">+</button>
@@ -106,7 +107,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
 <div class="ov" id="startOv">
   <div class="card">
     <h2>ocTavio Eurorack</h2>
-    <p>Nos cinq modules dans un cabinet : VCO façon 921, mixeur CP3, filtre en échelle, VCA 902 et enveloppe AD, avec leurs vraies façades. Le patch de départ joue une séquence.</p>
+    <p>Tous nos modules dans un cabinet de deux rangées de 104 HP : VCO, MIX, VCF, VCA, AD et ADSR en haut ; COMPLEX et STAGES en bas (bouton RANGÉE pour y aller). Le patch de départ joue une séquence.</p>
     <ul>
       <li>Glisse d’une prise à une autre pour tirer un câble.</li>
       <li>Touche une prise branchée pour la débrancher.</li>
@@ -901,6 +902,15 @@ function fit() {
   const rowPx = Math.max(160, wrap.clientHeight - 20 - 28) * zoom, s = rowPx / RH;
   svg.style.height = (TH * s) + 'px'; svg.style.width = (TW * s) + 'px';
 }
+let curRow = 0;
+function goRow(r) {
+  curRow = ((r % L.rows.length) + L.rows.length) % L.rows.length;
+  const s = svg.getBoundingClientRect().height / TH;
+  wrap.scrollTo({ top: rowY(curRow) * s, behavior: 'smooth' });
+  $('#zRow').textContent = 'Rangée ' + (curRow + 1);
+}
+$('#zRow').onclick = () => goRow(curRow + 1);
+wrap.addEventListener('scroll', () => { const s = svg.getBoundingClientRect().height / TH; const r = Math.round(wrap.scrollTop / s / (RH + GAPY)); if (r !== curRow && r < L.rows.length) { curRow = r; $('#zRow').textContent = 'Rangée ' + (r + 1); } });
 $('#zFit').onclick = () => { zoom = 1; fit(); };
 $('#zIn').onclick = () => { zoom = Math.min(3, zoom * 1.25); fit(); };
 $('#zOut').onclick = () => { zoom = Math.max(.25, zoom / 1.25); fit(); };
