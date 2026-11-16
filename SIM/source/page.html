@@ -51,6 +51,16 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
 .card p{font-size:15px;line-height:1.4;color:#cfc6b3;margin:8px 0}
 .card ul{margin:10px 0 16px;padding-left:18px;font-size:15px;line-height:1.45;color:#cfc6b3}
 .card .go{width:100%;min-height:48px;font-size:17px;background:var(--lamp);color:#1a1209;border-color:var(--lamp)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:40;max-height:72%;overflow:auto;background:var(--bar);border-top:1px solid var(--line);border-radius:12px 12px 0 0;box-shadow:0 -14px 40px #000;padding:14px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.sheet h3{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;font-family:var(--f-disp);font-weight:800;font-size:24px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.mc{text-align:left;text-transform:none;letter-spacing:0;font-weight:400;display:flex;flex-direction:column;gap:4px;padding:10px 12px;background:#141311}
+.mc .t{display:flex;align-items:baseline;gap:8px}
+.mc .t b{font-family:var(--f-disp);font-size:22px;font-weight:800;color:var(--silk)}
+.mc .t u{margin-left:auto;text-decoration:none;font-family:var(--f-mono);font-size:10px;color:var(--lamp)}
+.mc p{margin:0;font-size:13px;line-height:1.35;color:#bdb4a2}
+#rack.move .pan{cursor:grab} #rack.move .ctl,#rack.move .jack{pointer-events:none}
+#toast{position:fixed;left:50%;bottom:140px;transform:translateX(-50%);z-index:60;background:#2a2620;border:1px solid #4a443b;color:var(--ink);padding:8px 14px;border-radius:6px;font-size:14px;max-width:calc(100% - 32px);text-align:center}
 @media (max-width:640px){ .brand small{display:none} #status{order:9;margin-left:0;max-width:100%;flex-basis:100%} button{font-size:13px;padding:6px 8px} }
 </style>
 </head>
@@ -60,6 +70,10 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
   <div class="grp">
     <button id="power" class="lb"><span class="led" id="pled"></span>Son</button>
     <button id="bSeq" class="lb"><span class="led on" id="sled"></span>Séquence</button>
+  </div>
+  <div class="grp">
+    <button id="addMod">+ Module</button>
+    <button id="bMove" class="lb"><span class="led" id="mvled"></span>Déplacer</button>
   </div>
   <div class="grp">
     <button id="bPatch">Patch de départ</button>
@@ -84,6 +98,11 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
   <div id="kbd" aria-label="Clavier"></div>
 </div>
 
+<div class="sheet" id="lib" hidden>
+  <h3>Ajouter un module <button id="libClose">Fermer</button></h3>
+  <div class="cards" id="libCards"></div>
+</div>
+<div id="toast" hidden></div>
 <div class="ov" id="startOv">
   <div class="card">
     <h2>ocTavio Eurorack</h2>
@@ -92,6 +111,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
       <li>Glisse d’une prise à une autre pour tirer un câble.</li>
       <li>Touche une prise branchée pour la débrancher.</li>
       <li>Potards : glisse vers le haut ou le bas, double-touche pour revenir au réglage de départ. RANGE, ONE/CYCLE et SEQ : touche.</li>
+      <li>+ Module en ajoute (plusieurs VCO, VCA…). Déplacer : glisse un module pour le changer de place ou de rangée, × pour le retirer.</li>
       <li>Le panneau SIM n’est pas un vrai module : séquence, CV/GATE du clavier, sortie son et oscilloscope.</li>
     </ul>
     <button class="go" id="startBtn">Allumer le système</button>
@@ -104,6 +124,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
       <li><b>Câble :</b> glisse d’une sortie vers une entrée, ou l’inverse. Une sortie peut alimenter plusieurs câbles ; une entrée n’en prend qu’un. Lâché près d’une prise, le câble s’y aimante.</li>
       <li><b>Tensions :</b> 1 V/oct partout, audio ±5 V, enveloppe AD 0 à 9,3 V, comme sur les vraies cartes.</li>
       <li><b>Clavier :</b> joue par-dessus la séquence. Clavier d’ordi : A W S E D F T G Y H U J K, Z/X pour l’octave. Hold garde la note.</li>
+      <li><b>Modules :</b> + Module ajoute un module à la première place libre (une rangée de 84 HP est créée si besoin). Déplacer : glisse un module ; la place visée s’affiche en pointillé (rouge si ça ne rentre pas). × puis « Retirer ? » pour l’enlever avec ses câbles.</li>
       <li><b>Câbles :</b> le bouton Câbles les rend transparents pour voir les façades.</li>
       <li><b>Son :</b> modèles de comportement de nos circuits, réglés sur nos simulations transistor. Ça montre le caractère et les plages, pas une vérification composant par composant. Sur iPhone, enlève le mode silencieux.</li>
     </ul>
@@ -112,317 +133,7 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block
 </div>
 <script>
 __ENGINE__
-const DATA = __DATA__;
-const $ = s => document.querySelector(s);
-const PH = 128.5, MX = 1.2, MY = 4.5;
-const svg = $('#rack'), NS = 'http://www.w3.org/2000/svg';
-const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
-const PARAMS = {}, DEF = {}, CTL = {}, JACKS = {}, LAB = {};
-let cables = [];
-let X = MX; const OFF = {};
-DATA.modules.forEach(m => { OFF[m.id] = X; X += m.w + 0.2; });
-const TW = X - 0.2 + MX, TH = PH + 2 * MY;
-svg.setAttribute('viewBox', `0 0 ${TW} ${TH}`);
-el('defs', {}, svg).innerHTML = `
-<linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
-<radialGradient id="cap" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d6d1c3"/><stop offset="1" stop-color="#a39e8f"/></radialGradient>
-<radialGradient id="nut" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#f0f0eb"/><stop offset=".6" stop-color="#b7b7b1"/><stop offset="1" stop-color="#6f6e68"/></radialGradient>
-<radialGradient id="screw" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d2cdc1"/><stop offset="1" stop-color="#6d685e"/></radialGradient>
-<radialGradient id="ledg" cx=".4" cy=".35"><stop offset="0" stop-color="#fff3cc"/><stop offset=".45" stop-color="#ff5a4a"/><stop offset="1" stop-color="#9c1d16"/></radialGradient>
-<radialGradient id="lamp" cx=".4" cy=".35"><stop offset="0" stop-color="#fff3cc"/><stop offset=".45" stop-color="#ffae3d"/><stop offset="1" stop-color="#b5560e"/></radialGradient>
-<pattern id="railp" width="5.08" height="3.4" patternUnits="userSpaceOnUse"><rect width="5.08" height="3.4" fill="#26231f"/><circle cx="2.54" cy="1.7" r=".55" fill="#958e80"/><circle cx="2.54" cy="1.7" r=".75" fill="none" stroke="#36322d" stroke-width=".2"/></pattern>`;
-el('rect', { x: 0, y: 0, width: TW, height: TH, fill: '#0b0a09' }, svg);
-el('rect', { x: 0, y: MY - 3.4, width: TW, height: 3.4, fill: 'url(#railp)' }, svg);
-el('rect', { x: 0, y: MY + PH, width: TW, height: 3.4, fill: 'url(#railp)' }, svg);
-const gPanels = el('g', {}, svg), gCables = el('g', { id: 'cables', 'pointer-events': 'none' }, svg);
-// ------------------------------------------------------------------ panels
-function knobGfx(g, s) {
-  el('circle', { r: 5.4 * s, fill: '#151515', stroke: '#777', 'stroke-width': .25 }, g);
-  const rot = el('g', {}, g);
-  el('circle', { r: 3.4 * s, fill: 'url(#cap)', stroke: '#666', 'stroke-width': .15 }, rot);
-  el('line', { x1: 0, y1: -1.0 * s, x2: 0, y2: -3.1 * s, stroke: '#2a2a2a', 'stroke-width': .45 * s, 'stroke-linecap': 'round' }, rot);
-  el('line', { x1: 0, y1: -3.75 * s, x2: 0, y2: -5.15 * s, stroke: '#fff', 'stroke-width': .5, 'stroke-linecap': 'round' }, rot);
-  return rot;
-}
-DATA.modules.forEach(m => {
-  const g = el('g', { transform: `translate(${OFF[m.id]},${MY})` }, gPanels);
-  el('rect', { x: .25, y: .6, width: m.w, height: PH, fill: 'rgba(0,0,0,.6)' }, g);
-  el('rect', { x: 0, y: 0, width: m.w, height: PH, fill: '#111' }, g);
-  el('rect', { x: 0, y: 0, width: 1.6, height: PH, fill: 'url(#alu)' }, g);
-  el('rect', { x: m.w - 1.6, y: 0, width: 1.6, height: PH, fill: 'url(#alu)' }, g);
-  m.lines.forEach(([x1, y1, x2, y2, w]) => el('line', { x1, y1, x2, y2, stroke: w >= .29 ? '#9a9a9a' : '#fff', 'stroke-width': w >= .29 ? .3 : Math.max(w, .18), 'stroke-linecap': 'round' }, g));
-  m.text.forEach(([t, x, y, s]) => { const e = el('text', { x, y: y + s * 0.02, 'font-size': s * 1.38, 'font-weight': 700, fill: '#fff', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-family': 'Helvetica Neue,Arial,DejaVu Sans,sans-serif' }, g); e.textContent = t; });
-  const L = m.logo; el('image', { href: DATA.logo, x: L[0], y: L[1], width: L[2], height: L[3], preserveAspectRatio: 'none' }, g);
-  m.holes.forEach(([hx, hy]) => {
-    el('rect', { x: hx - 2.6, y: hy - 1.6, width: 5.2, height: 3.2, rx: 1.6, fill: '#050505' }, g);
-    const s = el('g', { transform: `translate(${hx},${hy})` }, g);
-    el('circle', { r: 2.3, fill: 'url(#screw)', stroke: '#2c2a26', 'stroke-width': .25 }, s);
-    el('line', { x1: -1.4, y1: -.5, x2: 1.4, y2: .5, stroke: '#3a3733', 'stroke-width': .4 }, s);
-  });
-  m.ctl.forEach(c => {
-    const key = m.id + '.' + c.id;
-    if (c.label) LAB[key] = m.name + ' · ' + c.label;
-    if (c.t === 'knob' || c.t === 'rotary') {
-      const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
-      const rot = knobGfx(cg, c.s);
-      el('circle', { r: 5.6 * c.s + 1, fill: 'transparent' }, cg);
-      CTL[key] = { c, rot, kind: c.t }; PARAMS[key] = DEF[key] = c.v;
-      bindKnob(cg, key);
-    } else if (c.t === 'toggle') {
-      const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
-      el('circle', { r: 3.0, fill: 'url(#nut)', stroke: '#555', 'stroke-width': .2 }, cg);
-      const lev = el('line', { x1: 0, y1: 0, x2: -3.6, y2: 0, stroke: '#e4e4e4', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, cg);
-      el('circle', { r: 1.0, fill: '#bbb' }, cg);
-      el('rect', { x: -6, y: -4, width: 12, height: 8, fill: 'transparent' }, cg);
-      CTL[key] = { c, lev, kind: 'toggle' }; PARAMS[key] = DEF[key] = c.v;
-      cg.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
-    } else if (c.t === 'button') {
-      const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
-      el('rect', { x: -3.6, y: -3.6, width: 7.2, height: 7.2, rx: 1.2, fill: '#0d0c0b', stroke: '#3b3733', 'stroke-width': .3 }, cg);
-      const led = el('circle', { r: 1.4, fill: 'url(#lamp)' }, cg);
-      CTL[key] = { c, led, kind: 'button' }; PARAMS[key] = DEF[key] = c.v;
-      cg.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
-    } else if (c.t === 'led') {
-      CTL[key] = { c, kind: 'led', e: el('circle', { cx: c.x, cy: c.y, r: 1.6, fill: 'url(#ledg)', stroke: '#444', 'stroke-width': .2, opacity: .2 }, g) };
-    } else if (c.t === 'scope') {
-      el('rect', { x: c.x, y: c.y, width: c.w, height: c.h, rx: 1.4, fill: '#070806', stroke: '#2b2926', 'stroke-width': .6 }, g);
-      for (let k = 1; k < 4; k++) el('line', { x1: c.x, x2: c.x + c.w, y1: c.y + c.h * k / 4, y2: c.y + c.h * k / 4, stroke: '#2a2015', 'stroke-width': .15 }, g);
-      for (let k = 1; k < 6; k++) el('line', { y1: c.y, y2: c.y + c.h, x1: c.x + c.w * k / 6, x2: c.x + c.w * k / 6, stroke: '#2a2015', 'stroke-width': .15 }, g);
-      CTL[m.id + '.screen'] = { c, kind: 'scope', path: el('polyline', { fill: 'none', stroke: '#ffae3d', 'stroke-width': .38, 'stroke-linejoin': 'round', points: '' }, g),
-        txt: el('text', { x: c.x + 1.2, y: c.y + c.h - 1.4, 'font-size': 1.7, fill: '#b5772a', 'font-family': 'JetBrains Mono,monospace' }, g) };
-    } else if (c.t === 'jack') {
-      const jg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'jack' }, g);
-      el('circle', { r: 3.6, fill: 'url(#nut)', stroke: '#3a3935', 'stroke-width': .25 }, jg);
-      el('circle', { r: 2.0, fill: '#292826' }, jg);
-      el('circle', { r: 1.6, fill: '#000' }, jg);
-      el('circle', { r: 5, fill: 'transparent' }, jg);
-      jg.dataset.key = key;
-      JACKS[key] = { x: OFF[m.id] + c.x, y: MY + c.y, d: c.d, g: jg };
-      bindJack(jg, key);
-    }
-  });
-});
-document.querySelectorAll('.ctl,.jack').forEach(n => n.addEventListener('touchstart', e => e.preventDefault(), { passive: false }));
-// ------------------------------------------------------------------ values
-const NAMES = ['LO', "32'", "16'", "8'", "4'", "2'"], WAVES = ['SINE', 'TRIANGLE', 'SAW', 'PULSE'];
-const tm = s => s < 1 ? (s * 1000).toFixed(s < .01 ? 1 : 0) + ' ms' : s.toFixed(2) + ' s';
-const pc = v => Math.round(v * 100) + ' %';
-function fmt(key, v) {
-  switch (key) {
-    case 'vco.range': return NAMES[v];
-    case 'vco.fine': { const st = (v - .5) * 12; return (st >= 0 ? '+' : '') + st.toFixed(1) + ' demi-tons'; }
-    case 'vco.width': return 'rapport ' + Math.round(5 + 90 * v) + ' %';
-    case 'vco.blend': { const p = v * 3, i = Math.min(2, Math.floor(p)), f = p - i; return f < .02 ? WAVES[i] : f > .98 ? WAVES[i + 1] : WAVES[i] + ' → ' + WAVES[i + 1] + ' ' + Math.round(f * 100) + ' %'; }
-    case 'mix.master': return 'gain ×' + (1 + 10 * v).toFixed(1);
-    case 'vcf.mode': return v < .02 ? 'LP 24 dB' : v < .48 ? 'LP → BP ' + Math.round(v * 200) + ' %' : v <= .52 ? 'BP 12 dB' : v < .98 ? 'BP → HP ' + Math.round((v - .5) * 200) + ' %' : 'HP 12 dB';
-    case 'vcf.freq': { const f = 20 * Math.pow(2, 10 * v); return f < 1000 ? Math.round(f) + ' Hz' : (f / 1000).toFixed(2) + ' kHz'; }
-    case 'vca.response': return v < .02 ? 'LIN' : v > .98 ? 'EXP' : 'LIN ' + Math.round((1 - v) * 100) + ' % · EXP ' + Math.round(v * 100) + ' %';
-    case 'vca.fixed': return (6 * v).toFixed(2) + ' V';
-    case 'ad.attack': case 'ad.decay': return tm(0.0008 * Math.pow(10, 4 * v));
-    case 'ad.cycle': return v ? 'CYCLE (LFO)' : 'ONE';
-    case 'sim.tempo': return Math.round(50 + 190 * v) + ' BPM';
-    case 'sim.seq': return v ? 'en marche' : 'arrêtée';
-  }
-  if (/\.(l\d|emph)$/.test(key)) return (v * 10).toFixed(1);
-  return pc(v);
-}
-const status = $('#status');
-function show(key) { if (LAB[key]) status.textContent = LAB[key] + '  ' + fmt(key, PARAMS[key]); }
-function draw(key) {
-  const C = CTL[key], v = PARAMS[key];
-  if (!C) return;
-  if (C.kind === 'knob') C.rot.setAttribute('transform', `rotate(${-135 + 270 * v})`);
-  else if (C.kind === 'rotary') C.rot.setAttribute('transform', `rotate(${C.c.angles[v]})`);
-  else if (C.kind === 'toggle') C.lev.setAttribute('x2', v ? 3.6 : -3.6);
-  else if (C.kind === 'button') C.led.setAttribute('opacity', v ? 1 : .15);
-  if (key === 'sim.seq') $('#sled').classList.toggle('on', !!v);
-}
-function setParam(key, v) { PARAMS[key] = v; draw(key); show(key); send({ t: 'p', k: key, v }); }
-function svgPt(e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
-function bindKnob(g, key) {
-  let y0, v0, moved, lastTap = 0;
-  g.addEventListener('pointerdown', e => { e.preventDefault(); g.setPointerCapture(e.pointerId); y0 = e.clientY; v0 = PARAMS[key]; moved = false; show(key); });
-  g.addEventListener('pointermove', e => {
-    if (y0 === undefined) return;
-    const dy = y0 - e.clientY; if (Math.abs(dy) > 3) moved = true;
-    const fine = e.shiftKey ? 0.2 : 1;
-    if (CTL[key].kind === 'rotary') { const n = CTL[key].c.angles.length; const v = Math.max(0, Math.min(n - 1, v0 + Math.round(dy / 28))); if (v !== PARAMS[key]) setParam(key, v); }
-    else setParam(key, Math.max(0, Math.min(1, v0 + fine * dy / 180)));
-  });
-  const up = () => {
-    if (y0 !== undefined && !moved) {
-      const now = performance.now();
-      if (CTL[key].kind === 'rotary') setParam(key, (PARAMS[key] + 1) % CTL[key].c.angles.length);
-      else if (now - lastTap < 320) setParam(key, DEF[key]);
-      lastTap = now;
-    }
-    y0 = undefined;
-  };
-  g.addEventListener('pointerup', up); g.addEventListener('pointercancel', () => { y0 = undefined; });
-}
-// ------------------------------------------------------------------ cables (M55 look)
-const PAL = ['#c8332b', '#e3b23c', '#2f6fb5', '#2f8f5b', '#e9e2cf', '#d26a1e', '#7a4fa0', '#3fb8b0'];
-let ci = 0;
-function cablePath(a, b) {
-  const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), sag = 5 + d * 0.16, lim = TH - 2;
-  const y1 = Math.min(a.y + sag, lim), y2 = Math.min(b.y + sag, lim);
-  return `M${a.x},${a.y} C${a.x + dx * .15},${y1} ${b.x - dx * .15},${y2} ${b.x},${b.y}`;
-}
-function cableG(a, b, col, parent) {
-  const g = el('g', {}, parent), d = cablePath(a, b);
-  el('path', { d, fill: 'none', stroke: 'rgba(0,0,0,.45)', 'stroke-width': 2.1, transform: 'translate(.6 1.5)' }, g);
-  el('path', { d, fill: 'none', stroke: col, 'stroke-width': 1.5, 'stroke-linecap': 'round' }, g);
-  el('path', { d, fill: 'none', stroke: 'rgba(255,255,255,.22)', 'stroke-width': .42, transform: 'translate(-.3 -.3)' }, g);
-  for (const p of [a, b]) {
-    el('circle', { cx: p.x, cy: p.y, r: 2.6, fill: col, stroke: '#0a0908', 'stroke-width': .6 }, g);
-    el('circle', { cx: p.x - .6, cy: p.y - .6, r: .8, fill: 'rgba(255,255,255,.35)' }, g);
-  }
-  return g;
-}
-function renderCables() {
-  gCables.innerHTML = '';
-  for (const c of cables) cableG(JACKS[c.src], JACKS[c.dst], c.col, gCables);
-  send({ t: 'cables', list: cables.map(c => [c.src, c.dst]) });
-}
-function connect(a, b, col) {
-  if (a === b) return;
-  const A = JACKS[a], B = JACKS[b];
-  if (A.d === B.d) { status.textContent = A.d === 'in' ? 'Deux entrées : branche une sortie' : 'Deux sorties : branche une entrée'; return; }
-  if (A.d === 'in') [a, b] = [b, a];
-  cables = cables.filter(c => c.dst !== b);
-  cables.push({ src: a, dst: b, col: col || PAL[ci++ % PAL.length] });
-  renderCables();
-}
-let drag = null;
-function bindJack(g, key) {
-  g.addEventListener('pointerdown', e => {
-    e.preventDefault(); g.setPointerCapture(e.pointerId);
-    drag = { key, moved: false, x0: e.clientX, y0: e.clientY, col: PAL[ci % PAL.length], tmp: null };
-  });
-  g.addEventListener('pointermove', e => {
-    if (!drag) return;
-    if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 6) drag.moved = true;
-    if (!drag.moved) return;
-    if (drag.tmp) drag.tmp.remove();
-    drag.tmp = cableG(JACKS[drag.key], svgPt(e), drag.col, svg); drag.tmp.setAttribute('opacity', .85); drag.tmp.setAttribute('pointer-events', 'none');
-  });
-  g.addEventListener('pointerup', e => {
-    if (!drag) return;
-    const d = drag; drag = null;
-    if (d.tmp) d.tmp.remove();
-    if (!d.moved) { const n = cables.length; cables = cables.filter(c => c.src !== d.key && c.dst !== d.key); if (cables.length !== n) renderCables(); return; }
-    const t = document.elementFromPoint(e.clientX, e.clientY);
-    let jg = t && t.closest && t.closest('.jack');
-    if (!jg) { // snap to the nearest jack within 7 mm
-      const p = svgPt(e); let best = null, bd = 7;
-      for (const k in JACKS) { const J = JACKS[k], dd = Math.hypot(J.x - p.x, J.y - p.y); if (dd < bd) { bd = dd; best = J.g; } }
-      jg = best;
-    }
-    if (jg && jg.dataset.key) { ci++; connect(d.key, jg.dataset.key, d.col); }
-  });
-  g.addEventListener('pointercancel', () => { if (drag && drag.tmp) drag.tmp.remove(); drag = null; });
-}
-function loadPatch() {
-  cables = []; ci = 0;
-  for (const k in DEF) { PARAMS[k] = DEF[k]; draw(k); }
-  if (audioOn) send({ t: 'state', params: Object.assign({}, PARAMS), cables: [] });
-  DATA.patch.forEach(([m1, j1, m2, j2]) => connect(m1 + '.' + j1, m2 + '.' + j2));
-}
-// ------------------------------------------------------------------ audio
-let ctx = null, node = null, engine = null, sp = null, audioOn = false;
-function send(d) { if (node) node.port.postMessage(d); else if (engine) engine.msg(d); }
-function fullState() { return { t: 'state', params: Object.assign({}, PARAMS), cables: cables.map(c => [c.src, c.dst]) }; }
-function onReport(r) {
-  const S = CTL['sim.screen'], c = S.c, sc = r.scope;
-  let i0 = 0; for (let i = 1; i < 1024; i++) if (sc[i - 1] <= 0 && sc[i] > 0) { i0 = i; break; }
-  const N = 900, pts = [];
-  for (let i = 0; i < N; i += 3) { const v = sc[i0 + i]; pts.push((c.x + c.w * i / N).toFixed(2) + ',' + (c.y + c.h / 2 - Math.max(-1.05, Math.min(1.05, v / 10)) * c.h / 2).toFixed(2)); }
-  S.path.setAttribute('points', pts.join(' '));
-  let mx = 0; for (let i = 0; i < sc.length; i++) mx = Math.max(mx, Math.abs(sc[i]));
-  S.txt.textContent = `±10 V · crête ${mx.toFixed(1)} V`;
-  CTL['ad.led'].e.setAttribute('opacity', (0.15 + 0.85 * Math.min(1, r.led)).toFixed(2));
-}
-async function startAudio() {
-  if (ctx) { if (ctx.state !== 'running') await ctx.resume(); audioOn = true; $('#pled').classList.add('on'); return; }
-  ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
-  try {
-    await ctx.audioWorklet.addModule('dsp.js');
-    node = new AudioWorkletNode(ctx, 'octavio-sim', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
-    node.port.onmessage = e => onReport(e.data);
-    node.connect(ctx.destination);
-    node.port.postMessage(fullState());
-  } catch (err) {
-    node = null;
-    engine = new OctavioEngine(ctx.sampleRate); engine.msg(fullState());
-    engine.report = r => requestAnimationFrame(() => onReport(r));
-    sp = ctx.createScriptProcessor(2048, 0, 2);
-    sp.onaudioprocess = e => engine.render(e.outputBuffer.getChannelData(0), e.outputBuffer.getChannelData(1), e.outputBuffer.length);
-    sp.connect(ctx.destination);
-  }
-  await ctx.resume();
-  audioOn = true; $('#pled').classList.add('on');
-}
-async function stopAudio() { if (ctx) await ctx.suspend(); audioOn = false; $('#pled').classList.remove('on'); }
-$('#startBtn').onclick = () => { $('#startOv').hidden = true; startAudio(); };
-$('#power').onclick = () => audioOn ? stopAudio() : startAudio();
-$('#bSeq').onclick = () => setParam('sim.seq', PARAMS['sim.seq'] ? 0 : 1);
-$('#bPatch').onclick = loadPatch;
-$('#bClear').onclick = () => { cables = []; renderCables(); };
-$('#cabOp').onclick = () => svg.classList.toggle('faded');
-$('#help').onclick = () => { $('#helpOv').hidden = false; };
-$('#helpClose').onclick = () => { $('#helpOv').hidden = true; };
-// ------------------------------------------------------------------ keyboard (M55)
-const kbd = $('#kbd'); let kbBase = 48, keyEls = {}; const kbPtr = new Map(), noteCnt = {};
-const elh = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
-const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
-function buildKbd() {
-  kbd.innerHTML = ''; keyEls = {}; const w = kbd.clientWidth || 300; const nW = clamp(Math.floor(w / 36), 8, 36), kw = w / nW, WS = [0, 2, 4, 5, 7, 9, 11];
-  for (let i = 0; i < nW; i++) {
-    const s = WS[i % 7], n = kbBase + Math.floor(i / 7) * 12 + s; const e = elh('div', 'wk', s === 0 ? `<span>C${Math.floor(n / 12) - 1}</span>` : '');
-    e.style.left = i * kw + 'px'; e.style.width = kw + 'px'; e.dataset.n = n; kbd.appendChild(e); keyEls[n] = e;
-    if ([0, 2, 5, 7, 9].includes(s) && i < nW - 1) { const b = elh('div', 'bk'); b.style.left = (i + 1) * kw - kw * 0.31 + 'px'; b.style.width = kw * 0.62 + 'px'; b.dataset.n = n + 1; kbd.appendChild(b); keyEls[n + 1] = b; }
-  }
-  $('#kOct').textContent = 'C' + (Math.floor(kbBase / 12) - 1);
-  for (const n in noteCnt) if (noteCnt[n] > 0 && keyEls[n]) keyEls[n].classList.add('on');
-}
-let hold = false, physTotal = 0; const phys = {}, latched = new Set();
-function releaseLatched() { for (const l of latched) rawOff(l); latched.clear(); }
-function setHold(on) { hold = on; $('#kHold').classList.toggle('on', on); $('#hled').classList.toggle('on', on); if (!hold) releaseLatched(); }
-$('#kHold').onclick = () => setHold(!hold);
-function showKbd(on) { $('#kbdWrap').hidden = !on; $('#kled').classList.toggle('on', on); if (on) buildKbd(); fit(); }
-$('#kbToggle').onclick = () => showKbd($('#kbdWrap').hidden);
-function noteOn(n) { if (hold && physTotal === 0 && latched.size) releaseLatched(); if (latched.has(n)) { latched.delete(n); rawOff(n); } phys[n] = (phys[n] || 0) + 1; physTotal++; rawOn(n); }
-function noteOff(n) { if (!phys[n]) return; phys[n]--; physTotal--; if (hold) latched.add(n); else rawOff(n); }
-function rawOn(n) { if (!audioOn) { $('#startOv').hidden = true; startAudio(); } noteCnt[n] = (noteCnt[n] || 0) + 1; if (noteCnt[n] === 1) { send({ t: 'note', on: 1, n }); keyEls[n] && keyEls[n].classList.add('on'); } }
-function rawOff(n) { if (!noteCnt[n]) return; noteCnt[n]--; if (noteCnt[n] === 0) { send({ t: 'note', on: 0, n }); keyEls[n] && keyEls[n].classList.remove('on'); } }
-function noteAt(e) { const t = document.elementFromPoint(e.clientX, e.clientY); const k = t && t.closest && t.closest('.wk,.bk'); return k && kbd.contains(k) ? +k.dataset.n : null; }
-kbd.addEventListener('pointerdown', e => { e.preventDefault(); try { kbd.setPointerCapture(e.pointerId); } catch (_) { } const n = noteAt(e); if (n != null) { kbPtr.set(e.pointerId, n); noteOn(n); } });
-kbd.addEventListener('pointermove', e => {
-  if (!kbPtr.has(e.pointerId)) return; const cur = kbPtr.get(e.pointerId), n = noteAt(e);
-  if (n !== cur) { if (cur != null) noteOff(cur); if (n != null) noteOn(n); kbPtr.set(e.pointerId, n); }
-});
-const kUp = e => { if (!kbPtr.has(e.pointerId)) return; const n = kbPtr.get(e.pointerId); if (n != null) noteOff(n); kbPtr.delete(e.pointerId); };
-kbd.addEventListener('pointerup', kUp); kbd.addEventListener('pointercancel', kUp);
-$('#kUp').onclick = () => { kbBase = Math.min(84, kbBase + 12); buildKbd(); }; $('#kDn').onclick = () => { kbBase = Math.max(24, kbBase - 12); buildKbd(); };
-const KEYMAP = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12, o: 13, l: 14, p: 15 }; const qwHeld = {};
-window.addEventListener('keydown', e => {
-  if (e.repeat || e.metaKey || e.ctrlKey) return; const k = e.key.toLowerCase();
-  if (k === 'z') { kbBase = Math.max(24, kbBase - 12); buildKbd(); return; } if (k === 'x') { kbBase = Math.min(84, kbBase + 12); buildKbd(); return; }
-  if (k in KEYMAP && !qwHeld[k]) { const n = kbBase + 12 + KEYMAP[k]; qwHeld[k] = n; noteOn(n); }
-});
-window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (qwHeld[k] != null) { noteOff(qwHeld[k]); delete qwHeld[k]; } });
-// ------------------------------------------------------------------ zoom / fit
-const wrap = $('#rackWrap'); let zoom = 1;
-function fit() {
-  const h = Math.max(160, wrap.clientHeight - 20 - 28) * zoom;
-  svg.style.height = h + 'px'; svg.style.width = (h * TW / TH) + 'px';
-}
-$('#zFit').onclick = () => { zoom = 1; fit(); };
-$('#zIn').onclick = () => { zoom = Math.min(3, zoom * 1.25); fit(); };
-$('#zOut').onclick = () => { zoom = Math.max(.4, zoom / 1.25); fit(); };
-window.addEventListener('resize', () => { fit(); buildKbd(); });
-Object.keys(PARAMS).forEach(draw);
-buildKbd(); fit(); loadPatch();
+__APP__
 </script>
 </body>
 </html>
