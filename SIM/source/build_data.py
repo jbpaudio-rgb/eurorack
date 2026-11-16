@@ -51,10 +51,10 @@ M.append(dict(id='ad', name='AD', w=30.0, **p, ctl=[
     J('acv', 8.2, 93.0, 'in'), J('dcv', 21.8, 93.0, 'in'), J('trig', 8.2, 109.0, 'in'), J('out', 21.8, 109.0, 'out')]))
 p = panel(W + 'adsr/panel.json', W + 'out/ADSR/panel/octavio-adsr-panel.kicad_pcb')
 M.append(dict(id='adsr', name='ADSR', w=40.3, **p, ctl=[
-    K('attack', 26.0, 20.0, 1.0, 0.12, 'ATTACK'), K('decay', 26.0, 37.5, 1.0, 0.5, 'DECAY'),
-    K('sustain', 26.0, 55.0, 1.0, 0.6, 'SUSTAIN'), K('release', 26.0, 72.5, 1.0, 0.45, 'RELEASE'),
-    dict(t='led', id='led', x=20.15, y=90.0),
-    J('gate', 7.6, 104.0, 'in'), J('out', 20.15, 104.0, 'out'), J('nout', 32.7, 104.0, 'out')]))
+    K('attack', 20.15, 19.4, 1.0, 0.12, 'ATTACK'), K('decay', 20.15, 39.2, 1.0, 0.5, 'DECAY'),
+    K('sustain', 20.15, 59.0, 1.0, 0.6, 'SUSTAIN'), K('release', 20.15, 78.8, 1.0, 0.45, 'RELEASE'),
+    dict(t='led', id='led', x=10.1, y=96.5),
+    J('gate', 30.2, 96.5, 'in'), J('out', 10.1, 109.5, 'out'), J('nout', 30.2, 109.5, 'out')]))
 # simulator utility panel (not a real module)
 SW = 50.5
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]

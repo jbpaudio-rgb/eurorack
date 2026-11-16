@@ -2,9 +2,8 @@
 
 ## Façade (de haut en bas)
 - **ADSR** entre les trous du haut
-- **ATTACK**, **DECAY**, **SUSTAIN**, **RELEASE** : quatre gros boutons l'un par-dessus l'autre, nom à gauche, gradués 0–10
-- **ENV** : LED qui suit l'enveloppe
-- **GATE** (entrée), **OUT** (0 à 10 V), **−OUT** (0 à −10 V)
+- **ATTACK**, **DECAY**, **SUSTAIN**, **RELEASE** : quatre gros boutons l'un par-dessus l'autre, nom au-dessus, gradués 0–10
+- Grille 2 × 2 en bas : **ENV** (LED qui suit l'enveloppe) et **GATE** (entrée), puis **OUT** (0 à 10 V) et **−OUT** (0 à −10 V)
 
 ## Circuit (comme le 911 : un condensateur chargé à travers des résistances)
 - Condensateur de temps C10 (10 µF 50 V X7R, ≈ 6 µF réels sous 10 V), lu par le tampon U1A.
