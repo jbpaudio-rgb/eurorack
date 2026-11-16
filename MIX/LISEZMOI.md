@@ -1,13 +1,17 @@
-# Octavio MIX — mixeur 4 entrées façon Moog CP3, Eurorack 6 HP (rev 0.1)
+# Octavio MIX — mixeur 4 entrées façon Moog CP3, Eurorack 6 HP (rev 0.2)
 
 ## Façade (de haut en bas)
 - **MIX** entre les trous du haut
 - **LEVEL** : 4 boutons de niveau en colonne (1 à 4), comme sur le CP3
-- Jacks en bas : **IN 1**, **IN 2**, **IN 3**, **IN 4**, puis **OUT** et **−OUT** (sortie inversée)
+- **DRIVE** juste en dessous : saturation douce façon CP3 poussé
+- Jacks en bas (grille resserrée, pas de 13 à 13,6 mm : les câbles 3,5 mm passent sans problème) : **IN 1**, **IN 2**, **IN 3**, **IN 4**, puis **OUT** et **−OUT** (sortie inversée)
 
 ## Circuit
-- Chaque entrée passe par son potentiomètre (100k B) puis une résistance de 100k vers un sommateur inverseur (U1A, TL072). Bouton au maximum = gain de 1 pour cette entrée.
-- **−OUT** = sortie directe du sommateur (somme inversée), **OUT** = la même chose remise à l'endroit par U1B. Résistances de 1k en série sur les sorties.
+- Chaque entrée passe par son potentiomètre (100k B) puis une résistance de 100k vers un sommateur inverseur (U1A, TL074). Bouton au maximum = gain de 1 pour cette entrée.
+- **DRIVE** (U1C) : gain réglable de 1 à 11 ; au-delà d'environ ±5,8 V, deux zeners tête-bêche (BZT52C5V1) à travers 4k7 adoucissent le signal (genou progressif), puis écrêtage aux rails (±10,5 V).
+  - DRIVE au minimum : propre jusqu'à ±5 V (mélange de CV possible).
+  - DRIVE monté : compression puis saturation, sortie plus chaude (8 à 10 V crête).
+- **OUT** = sortie de l'étage DRIVE ; **−OUT** = la même chose inversée par U1B. Résistances de 1k en série sur les sorties.
 - Couplage **continu** (DC) : il mélange aussi bien l'audio que les tensions de contrôle (enveloppes, LFO, décalages). −OUT sert à inverser une modulation.
 - Entrées non branchées = à la masse (contact du jack), donc pas de bruit.
 
