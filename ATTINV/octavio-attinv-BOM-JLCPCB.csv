@@ -1,0 +1,23 @@
+Comment,Designator,Footprint,LCSC Part #,Notes
+10u 25V X5R/X7R 1206,"C1,C2",C_1206_3216Metric,,X5R/X7R 1206 - SMT bottom - laisser JLC choisir (Basic de preference)
+1u X7R 0603 25 V,C3,C_0603_1608Metric,,X7R 0603 25 V - SMT bottom - laisser JLC choisir (Basic de preference)
+100n,"C4,C5,C6,C7,C8,C9",C_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+SS14,"D1,D2",D_SMA,,SS14 (40 V 1 A Schottky) - SMT bottom - laisser JLC choisir (Basic de preference)
+LED,"D11,D12,D13,D14",LED_D3.0mm,,"LED 3 mm bicolore 2 pattes rouge / vert (rouge = +, vert = -) - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+Eurorack 2x5,J1,IDC-Header_2x05_P2.54mm_Vertical,,Shrouded header 2x5 2.54 mm - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+IN 1,J2,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+OUT 1,J3,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+IN 2,J4,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+OUT 2,J5,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+IN 3,J6,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+OUT 3,J7,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+IN 4,J8,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+OUT 4,J9,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+14k 1% 0805,R1,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+10k 1% 0805,"R2,R5,R6,R11,R12,R17,R18,R23,R24",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100k 1% 0805,"R3,R4,R9,R10,R15,R16,R21,R22",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k 1% 0805,"R7,R13,R19,R25",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+2k2 1% 0805,"R8,R14,R20,R26",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+10k B,"RV1,RV2,RV3,RV4",Pot_Alpha_9mm_Vertical,,POT-R09V-10K B (9 mm vertical) - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+INV / ATT,"SW1,SW2,SW3,SW4",Toggle_SPDT_Dailywell_2MS1,,"Dailywell 2MS1T1B1M2QES (SPDT ON-ON) : levier à gauche = INV, à droite = ATT - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+TL074CDR,"U1,U2,U3",SOIC-14_3.9x8.7mm_P1.27mm,C12594,TL074CDR - SMT bottom

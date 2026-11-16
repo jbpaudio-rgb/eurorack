@@ -11,6 +11,8 @@ const OCT_TYPES = {
          outs: ['cva', 'cvb', 'gate', 'end', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'] },
   cx: { ins: ['mvoct', 'mcv', 'mfm', 'indexcv', 'plock', 'pvoct', 'pcv', 'pfm', 'symcv', 'timbrecv', 'ordercv'], outs: ['tri', 'signal', 'sine', 'square', 'final'] },
   lfo: { ins: ['clock', 'reset'], outs: ['o1', 'o2', 'o3', 'o4'] },
+  att: { ins: ['in1', 'in2', 'in3', 'in4'], outs: ['o1', 'o2', 'o3', 'o4'] },
+  mult: { ins: ['a', 'b'], outs: ['a2', 'a3', 'a4', 'b2', 'b3', 'b4'] },
   nt: { ins: ['shin', 'trig', 'slin'], outs: ['pulse', 'white', 'pink', 'sh', 'slew'] },
   sim: { ins: ['audio', 'scope'], outs: ['cv', 'gate'] },
 };
@@ -53,6 +55,7 @@ class OctavioEngine {
     else if (m.type === 'ad') { s.env = 0; s.latch = 0; s.trHi = false; s.ledMax = 0; }
     else if (m.type === 'cx') { s.pm = Math.random(); s.pc = Math.random(); s.plPrev = 0; }
     else if (m.type === 'stg') { s.stage = 0; s.pos = 0; s.run = true; s.held = false; s.pA = 0; s.pB = 0; s.inHi = new Array(13).fill(false); s.lastClk = -1; s.per = 0.5 * this.sr; s.n = 0; s.endUntil = 0; s.btn = 0; }
+    else if (m.type === 'att') { s.led = [0, 0, 0, 0]; }
     else if (m.type === 'nt') { s.tri = 0; s.sq = 1; s.bit = 1; s.b = [0, 0, 0, 0, 0, 0, 0]; s.th = false; s.hold = 0; s.sl = 0; s.lp = 0; s.lsh = 0; s.lsl = 0; s.g2 = null; }
     else if (m.type === 'lfo') { s.ph = [0, 0, 0, 0]; s.y1 = [0, 0, 0, 0]; s.y2 = [0, 0, 0, 0]; s.led = [0, 0, 0, 0]; s.ledc = 0; s.t = 0; s.n = 0; s.last = -1; s.per = 0; s.ch = false; s.rh = false; }
     else if (m.type === 'adsr') { s.env = 0; s.att = 0; s.g = false; s.ledMax = 0; }
@@ -91,6 +94,8 @@ class OctavioEngine {
                  ix: g('index', .65) * 2 - 1, am: !g('ampl', 1), pm: !g('pitch', 0), tm: !g('timbresw', 1), pl: g('plock', 0),
                  pf: (g('pfreq', .45) - .5) * 8 + (g('pfine', .5) - .5) * 1.16, pcv: g('pcv', .5) * 2 - 1, pfm: g('pfm', 0),
                  tb: g('timbre', .3) * 10, tcv: g('tcv', 0), sy: g('sym', .5) * 10, or: g('order', 0) * 10 }; }
+      if (t === 'att') { const g = (q, d) => { const v = P[m.id + '.' + q]; return v === undefined ? d : v; };
+        return { G: [1, 2, 3, 4].map(i => { const a = g('a' + i, .75); return g('s' + i, 0) === 0 ? 2 * a - 1 : a; }) }; }
       if (t === 'nt') { const g = (q, d) => { const v = P[m.id + '.' + q]; return v === undefined ? d : v; };
         const A = x => (Math.pow(10, 2 * x) - 1) / 99;
         return { f: 106 * (A(g('rate', .55)) + 0.0045), rnd: g('mode', 0) === 1, th: g('shmode', 0) === 1, slr: 11 / ((1e3 + 1e6 * A(g('slew', .3))) * 1e-6) / sr }; }
@@ -171,6 +176,11 @@ class OctavioEngine {
             O[0] = s.env; if (s.env > s.ledMax) s.ledMax = s.env;
             break;
           }
+          case 'att': { // 4 attenuverters : pot between +IN and -IN (INV) or ground (ATT), +5 V normal
+            for (let c = 0; c < 4; c++) { const x = m.pat[c] ? I[c] : 5, y = cl(x * k.G[c], -11, 11); O[c] = y; const a = Math.abs(y) / 5; if (a > s.led[c]) s.led[c] = a; }
+            break;
+          }
+          case 'mult': { O[0] = O[1] = O[2] = I[0]; O[3] = O[4] = O[5] = I[1]; break; }
           case 'nt': { // NOISE TOOLS : avalanche noise, pinking filter, tri/square clock + CD4013 random gate, JFET S&H, linear slew
             let wn; if (s.g2 !== null) { wn = s.g2; s.g2 = null; } else {
               let u, v, q; do { this.seed = (this.seed * 16807) % 2147483647; u = this.seed / 1073741823.5 - 1; this.seed = (this.seed * 16807) % 2147483647; v = this.seed / 1073741823.5 - 1; q = u * u + v * v; } while (q >= 1 || q === 0);
@@ -312,6 +322,7 @@ class OctavioEngine {
             if (m.type === 'sim') r.scopes[m.id] = m.s.scope.slice(0);
             else if (m.type === 'ad') { r.leds[m.id] = m.s.ledMax / 9.3; m.s.ledMax = 0; }
             else if (m.type === 'adsr') { r.leds[m.id] = m.s.ledMax / 10; m.s.ledMax = 0; }
+            else if (m.type === 'att') { for (let c = 0; c < 4; c++) { r.leds[m.id + '.l' + (c + 1)] = m.s.led[c]; m.s.led[c] = 0; } }
             else if (m.type === 'nt') { r.leds[m.id + '.lp'] = m.s.lp / 10.5; r.leds[m.id + '.ls'] = m.s.lsh / 5; r.leds[m.id + '.ll'] = m.s.lsl / 5; m.s.lp = m.s.lsh = m.s.lsl = 0; }
             else if (m.type === 'lfo') { for (let c = 0; c < 4; c++) r.leds[m.id + '.l' + (c + 1)] = m.s.led[c]; r.leds[m.id + '.lc'] = m.s.t < m.s.ledc ? 1 : 0; }
             else if (m.type === 'stg') { r.stg = r.stg || {}; r.stg[m.id] = { stage: m.s.stage, run: m.s.run }; }

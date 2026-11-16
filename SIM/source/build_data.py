@@ -109,6 +109,20 @@ ctl = [K('rate', 12.6, 24.0, 1.0, 0.55, 'PULSE RATE'), K('slew', 37.9, 24.0, 1.0
        J('shin', 9.0, 93.0, 'in'), J('trig', 25.25, 93.0, 'in'), J('sh', 41.5, 93.0, 'out'),
        J('slin', 9.0, 109.5, 'in'), J('slew', 41.5, 109.5, 'out')]
 M.append(dict(id='nt', name='NOISE TOOLS', w=50.5, **p, ctl=ctl))
+p = panel(W + 'att/panel.json', W + 'out/ATTINV/panel/octavio-attinv-panel.kicad_pcb')
+ROWa = [15.0, 28.0, 41.0, 54.0]; JYa = [69.0, 82.5, 96.0, 109.5]
+ctl = []
+for i in range(4):
+    n = i + 1
+    ctl += [K(f'a{n}', 12.0, ROWa[i], 0.8, 0.75, f'NIVEAU {n}'), dict(t='led', id=f'l{n}', x=20.6, y=ROWa[i]),
+            dict(t='toggle', id=f's{n}', label=f'INV / ATT {n}', x=30.4, y=ROWa[i], v=0, opts=['INV', 'ATT']),
+            J(f'in{n}', 10.1, JYa[i], 'in'), J(f'o{n}', 30.2, JYa[i], 'out')]
+M.append(dict(id='att', name='ATT / INV', w=40.3, **p, ctl=ctl))
+p = panel(W + 'mult/panel.json', W + 'out/MULT/panel/octavio-mult-panel.kicad_pcb')
+MY = [15.5 + i * 13.29 for i in range(8)]
+ctl = [J('a', 10.01, MY[0], 'in'), J('a2', 10.01, MY[1], 'out'), J('a3', 10.01, MY[2], 'out'), J('a4', 10.01, MY[3], 'out'),
+       J('b', 10.01, MY[4], 'in'), J('b2', 10.01, MY[5], 'out'), J('b3', 10.01, MY[6], 'out'), J('b4', 10.01, MY[7], 'out')]
+M.append(dict(id='mult', name='MULT', w=20.02, **p, ctl=ctl))
 # simulator utility panel (not a real module)
 SW = 50.5
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]
