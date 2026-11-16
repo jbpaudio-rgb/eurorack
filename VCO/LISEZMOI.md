@@ -9,7 +9,7 @@
 - Grille du bas : **1V/OCT** et **SYNC** (colonne de gauche), sorties **SINE**, **TRIANGLE**, **SAW**, **PULSE** (± 5 V), comme les 4 sorties du 921
 
 ## Circuit
-- **RANGE** : échelle de résistances 0,1 % (R1, R2, R6, R48–R51) entre +12 V et −12 V qui donne exactement −7, −2, −1, 0, +1, +2 V ; le commutateur choisit un point, U2D le tamponne et l'envoie au convertisseur par R53 (100k 0,1 %). La justesse des octaves dépend de la précision des rails ±12 V (≈ 1 %), corrigeable avec FREQUENCY.
+- **RANGE** (mini commutateur SR16 1 circuit 8 positions, butée sur 6) : échelle de résistances 0,1 % (R1, R2, R6, R48–R51) entre +12 V et −12 V qui donne exactement −7, −2, −1, 0, +1, +2 V ; le commutateur choisit un point, U2D le tamponne et l'envoie au convertisseur par R53 (100k 0,1 %). La justesse des octaves dépend de la précision des rails ±12 V (≈ 1 %), corrigeable avec FREQUENCY.
 - **Convertisseur exponentiel** 1 V/oct : U1A additionne 1V/OCT (R5 100k 0,1 %), RANGE, FREQUENCY et FM, et attaque la base du transistor de référence d'une paire appairée (Q1, BC847DS) ; U1B fixe le courant de référence (≈ 13 µA à 0 V).
   - Compensation thermique : R9 = résistance 1k à **+3300 ppm/K**, à coller contre Q1 (pâte thermique ou colle). Sans elle, l'accord dérive avec la température.
 - **Cœur dent de scie** (comme le 921) : le courant charge C10 (10 nF C0G) dans l'intégrateur U1C ; quand la rampe atteint 5 V, le comparateur U1D envoie une impulsion qui fait conduire le JFET Q2 et vide le condensateur.

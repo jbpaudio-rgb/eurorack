@@ -57,7 +57,7 @@ MMBFJ112,Q2,SOT-23,,"MMBFJ112 (JFET N, D-S-G) - SMT bottom - laisser JLC choisir
 500 Bourns 3314J-1-501E,RV7,Trim_SMD_Bourns_3314J,,"Bourns 3314J-1-501E (trimmer CMS, réglage V/OCT) - SMT bottom - laisser JLC choisir (Basic de preference)"
 1k Bourns 3314J-1-102E,RV8,Trim_SMD_Bourns_3314J,,"Bourns 3314J-1-102E (trimmer CMS, réglage HF) - SMT bottom - laisser JLC choisir (Basic de preference)"
 1k Bourns 3314J-1-102E,RV9,Trim_SMD_Bourns_3314J,,"Bourns 3314J-1-102E (trimmer CMS, symétrie du sinus) - SMT bottom - laisser JLC choisir (Basic de preference)"
-RANGE,SW2,Rotary_1P12T_Alpha_SR16,,"Commutateur rotatif 1 circuit 12 positions, butée réglée sur 6 (type Alpha SR16) - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+RANGE,SW2,Rotary_SR16_1P8T,,"Mini commutateur rotatif SR16 1 circuit 8 positions, broches PCB, axe D 6 mm, butée réglée sur 6 - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
 TL074CDR,"U1,U2,U3,U4,U5",SOIC-14_3.9x8.7mm_P1.27mm,C12594,TL074CDR - SMT bottom
 LM13700MX/NOPB,"U6,U7",SOIC-16_3.9x9.9mm_P1.27mm,,LM13700MX/NOPB - SMT bottom - laisser JLC choisir (Basic de preference)
 BZT52C5V1,"Z1,Z2,Z3",D_SOD-123,,"BZT52C5V1 (zener 5,1 V) - SMT bottom - laisser JLC choisir (Basic de preference)"

@@ -70,6 +70,8 @@ def route(pcb):
         isl = islands(M, net)
         if len(isl) > 1:
             todo.append((net, isl))
+    prio = [x for x in os.environ.get('PRIO', '').split(',') if x]
+    todo.sort(key=lambda t: (0 if t[0] in prio else 1))
     print("to finish:", [(n, len(i)) for n, i in todo])
     for net, isl in todo:
         # obstacles for this net : every other-net copper, inflated

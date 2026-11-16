@@ -17,7 +17,7 @@
 - 140 CMS au dos (0603), le reste traversant côté façade.
 
 ## 1. Vérifier avant de commander (10 minutes)
-1. **Commutateur RANGE** : l'empreinte de la carte est générique (12 contacts sur un cercle de 14 mm + commun). Achète d'abord le commutateur (ou télécharge sa fiche), et compare la position des broches. Si elle ne correspond pas, dis-le moi avec la référence exacte : je corrige l'empreinte et je reroute.
+1. **Commutateur RANGE** : mini commutateur **SR16 1 circuit 8 positions** à broches PCB (corps 16 mm, filetage M9). L'empreinte est faite d'après son dessin coté : 8 contacts sur un cercle de 16 mm, commun à 2,65 mm du centre. La façade a un petit trou de 2,6 mm sous le bouton pour l'ergot anti-rotation. Règle la rondelle de butée sur **6 positions**, et serre le bouton (à vis) avec le repère sur **LO** en première position.
 2. **Potentiomètres** : Alpha 9 mm vertical, 3 broches au pas de 5 mm devant + 2 pattes de fixation. Prends l'axe **D** de 6 mm pour les boutons Davies D.
 3. Ouvre `apercu-carte.png` et `apercu-facade.png` : la façade doit être identique à celle du simulateur.
 
