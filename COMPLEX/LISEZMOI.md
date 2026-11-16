@@ -14,7 +14,7 @@ Architecture reprise du **Buchla 259** (et de sa version Eurorack 259t), avec **
 - Inverseurs **AMPL**, **TIMBRE**, **PITCH** l'un sous l'autre, levier couché (gauche = ON, comme le 259t) : la modulation va vers l'amplitude, la hauteur et/ou le timbre de l'oscillateur principal
 - Jacks **INDEX CV** et **PHASE LOCK** en bas de la section
 
-**PRINCIPAL OSCILLATOR**
+**COMPLEX OSCILLATOR**
 - **FREQUENCY**, puis **FINE** seul, puis **CV** (atténuverteur) et **FM** (atténuateur) côte à côte ; jacks **1V/OCT**, **CV**, **FM** ; sorties **SINE** et **SQUARE**
 
 **HARMONICS**
