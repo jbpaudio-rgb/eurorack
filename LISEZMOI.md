@@ -10,6 +10,7 @@ Modules Eurorack inspirés du Moog modulaire (façades alu noir, lettrage blanc,
 | VCO | Oscillateur façon Moog 921, 12 HP (rev 0.4) : RANGE LO–32’–16’–8’–4’–2’, FREQUENCY ±6 demi-tons, WIDTH, 1V/OCT, SYNC, FM et PWM avec atténuateurs, sorties SINE / TRIANGLE / SAW / PULSE + sortie BLEND (fondu continu des 4 formes) | schéma + façade prêts ; carte placée, à router |
 | MIX | Mixeur 4 entrées façon Moog CP3, 8 HP (rev 0.3) : 4 boutons LEVEL, MASTER GAIN (saturation douce), entrées IN 1–4, sorties OUT et −OUT, couplage DC (audio + CV) | schéma + façade prêts ; carte placée, à router |
 | ADSR | Enveloppe façon Moog 911, 8 HP (rev 0.1) : ATTACK, DECAY, SUSTAIN, RELEASE (courbes RC), GATE, OUT, −OUT, LED | schéma + façade prêts ; carte placée, à router |
+| COMPLEX | Oscillateur complexe façon Buchla Music Easel, 16 HP (rev 0.1) : oscillateur de modulation (FREQUENCY, HI/LO, saw/carré/triangle, INDEX, FM/AM) + oscillateur complexe (PITCH, TIMBRE replieur, WAVESHAPE vers spike/carré/triangle), 4 CV, MOD OUT, OUT | schéma + façade prêts ; carte placée, à router |
 
 Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), jacks Thonkiconn, pots 9 mm, façades PCB aluminium 1,6 mm (vernis noir, sérigraphie blanche, HASL sans plomb), montage JLCPCB.
 

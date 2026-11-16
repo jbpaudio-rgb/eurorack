@@ -2,7 +2,7 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const PH = 128.5, MX = 1.2, MY = 4.5, HPMM = 5.08, ROWHP = 104, GAPY = 5;
 const ROWW = ROWHP * HPMM, TW = ROWW + 2 * MX, RH = PH + 2 * MY;
-const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, sim: 10 };
+const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 16, sim: 10 };
 const DESC = {
   vco: 'Oscillateur façon 921 : RANGE LO à 2′, 4 formes d’onde, FM, PWM, sync et sortie BLEND.',
   mix: 'Mixeur 4 entrées façon CP3, MASTER GAIN avec saturation douce, OUT et −OUT.',
@@ -10,6 +10,7 @@ const DESC = {
   vca: 'VCA façon 902 : entrées différentielles, réponse LIN ↔ EXP, 3 entrées CV.',
   ad: 'Enveloppe AD à cœur OTA, 0,8 ms à 8 s, CV sur attaque et decay, mode CYCLE (LFO).',
   adsr: 'Enveloppe ADSR façon Moog 911 : courbes RC, attaque ≈ 2 ms à 10 s, sustain 0 à 10 V, sorties OUT et −OUT.',
+  cx: 'Oscillateur complexe façon Buchla Music Easel : oscillateur de modulation (FM / AM, INDEX) et oscillateur complexe avec TIMBRE (repliement) et WAVESHAPE.',
   sim: 'Outil du simulateur : séquence, CV/GATE du clavier, sortie son et oscilloscope.',
 };
 const TYPE = {}; DATA.modules.forEach(m => TYPE[m.id] = m);
@@ -19,7 +20,7 @@ let L = null;                 // layout { rows:[[id..]], mods:{id:{type,n}} }
 let PARAMS = {}, CTL = {}, JACKS = {}, LAB = {}, POS = {};
 let cables = [], moveMode = false, nRows = 1, TH = RH;
 const DEFV = {}; DATA.modules.forEach(m => m.ctl.forEach(c => { if (c.v !== undefined) DEFV[m.id + '.' + c.id] = c.v; }));
-const defaultLayout = () => ({ rows: [['vco', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim']], mods: { adsr: { type: 'adsr', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
+const defaultLayout = () => ({ rows: [['vco', 'cx', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim']], mods: { adsr: { type: 'adsr', n: 1 }, cx: { type: 'cx', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
 const DEFS_SVG = `
 <linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
 <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d4828"/><stop offset=".55" stop-color="#5c331b"/><stop offset="1" stop-color="#45260f"/></linearGradient>
@@ -113,10 +114,10 @@ function drawPanel(id, mi, m, X0, Y0) {
       const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
       el('circle', { r: 3.0, fill: 'url(#nut)', stroke: '#555', 'stroke-width': .2 }, cg);
       const lev = el('line', { x1: 0, y1: 0, x2: -3.6, y2: 0, stroke: '#e4e4e4', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, cg);
-      el('circle', { r: 1.0, fill: '#bbb' }, cg);
+      const tip = el('circle', { r: 1.0, fill: '#bbb' }, cg);
       el('rect', { x: -6, y: -4, width: 12, height: 8, fill: 'transparent' }, cg);
-      CTL[key] = { c, lev, kind: 'toggle', def: c.v };
-      cg.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
+      CTL[key] = { c, lev, tip, kind: 'toggle', def: c.v };
+      cg.addEventListener('pointerdown', e => { e.preventDefault(); const n = c.opts ? c.opts.length : 2; setParam(key, (PARAMS[key] + 1) % n); });
     } else if (c.t === 'button') {
       const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
       el('rect', { x: -3.6, y: -3.6, width: 7.2, height: 7.2, rx: 1.2, fill: '#0d0c0b', stroke: '#3b3733', 'stroke-width': .3 }, cg);
@@ -177,6 +178,13 @@ function fmt(key, v) {
     case 'adsr.attack': { const R = 320 + 1e6 * (Math.pow(100, v) - 1) / 99; return tm(R * 6e-6 * Math.log(6)); }
     case 'adsr.decay': case 'adsr.release': { const R = 320 + 1e6 * (Math.pow(100, v) - 1) / 99; return tm(R * 6e-6 * Math.log(10)) + ' (à 90 %)'; }
     case 'adsr.sustain': return (10 * v).toFixed(1) + ' V';
+    case 'cx.range': return v ? 'LO (LFO)' : 'HI (audio)';
+    case 'cx.mwave': return ['SAW', 'SQUARE', 'TRIANGLE'][v];
+    case 'cx.cwave': return ['SPIKE', 'SQUARE', 'TRIANGLE'][v];
+    case 'cx.mode': return v ? 'AM' : 'FM';
+    case 'cx.mfreq': { const f = 261.63 * Math.pow(2, (v - .5) * 6.72 + (PARAMS[id + '.range'] ? -6 : 0)); return f < 10 ? f.toFixed(2) + ' Hz' : f < 1000 ? Math.round(f) + ' Hz' : (f / 1000).toFixed(2) + ' kHz'; }
+    case 'cx.pitch': { const f = 261.63 * Math.pow(2, (v - .5) * 6.72); return f < 1000 ? Math.round(f) + ' Hz' : (f / 1000).toFixed(2) + ' kHz'; }
+    case 'cx.timbre': case 'cx.shape': case 'cx.index': return (v * 10).toFixed(1);
     case 'ad.cycle': return v ? 'CYCLE (LFO)' : 'ONE';
     case 'sim.tempo': return Math.round(50 + 190 * v) + ' BPM';
     case 'sim.seq': return v ? 'en marche' : 'arrêtée';
@@ -191,7 +199,10 @@ function draw(key) {
   if (!C || v === undefined) return;
   if (C.kind === 'knob') C.rot.setAttribute('transform', `rotate(${-135 + 270 * v})`);
   else if (C.kind === 'rotary') C.rot.setAttribute('transform', `rotate(${C.c.angles[v]})`);
-  else if (C.kind === 'toggle') C.lev.setAttribute('x2', v ? 3.6 : -3.6);
+  else if (C.kind === 'toggle') {
+    if (C.c.vert) { const n = C.c.opts.length, yy = v === 0 ? -3.6 : v === n - 1 ? 3.6 : 0; C.lev.setAttribute('x2', 0); C.lev.setAttribute('y2', yy); C.tip.setAttribute('r', yy ? 1.0 : 1.7); }
+    else C.lev.setAttribute('x2', v ? 3.6 : -3.6);
+  }
   else if (C.kind === 'button') C.led.setAttribute('opacity', v ? 1 : .15);
   if (key === 'sim.seq') $('#sled').classList.toggle('on', !!v);
 }
@@ -342,7 +353,7 @@ function bindPanelDrag(g, id) {
 function setMove(on) { moveMode = on; svg.classList.toggle('move', on); $('#mvled').classList.toggle('on', on); build(); if (on) toast('Glisse un module pour le déplacer'); }
 $('#bMove').onclick = () => setMove(!moveMode);
 const lib = $('#lib'), libCards = $('#libCards');
-['vco', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim'].forEach(t => {
+['vco', 'cx', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim'].forEach(t => {
   const b = document.createElement('button'); b.className = 'mc';
   b.innerHTML = `<span class="t"><b>${TYPE[t].name}</b><u>${HP[t]} HP</u></span><p>${DESC[t]}</p>`;
   b.onclick = () => { lib.hidden = true; addModule(t); };
