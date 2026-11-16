@@ -18,6 +18,12 @@ class OctavioEngine {
     if (d.t === 'p') this.P[d.k] = d.v;
     else if (d.t === 'cables') this.cab = d.list;
     else if (d.t === 'key') { this.key = d.note; }
+    else if (d.t === 'note') {
+      if (!this.held) this.held = [];
+      const i = this.held.indexOf(d.n); if (i >= 0) this.held.splice(i, 1);
+      if (d.on) this.held.push(d.n);
+      this.key = this.held.length ? this.held[this.held.length - 1] : null;
+    }
     else if (d.t === 'state') { this.P = Object.assign({}, d.params); this.cab = d.cables; }
   }
   p(k, def) { const v = this.P[k]; return v === undefined ? def : v; }

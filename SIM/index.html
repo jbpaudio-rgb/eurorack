@@ -2,49 +2,113 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ocTavio Eurorack – simulateur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow+Condensed:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-  :root { --bg:#17181a; --fg:#ece9e2; --mute:#9a978f; --acc:#e0b04a; }
-  * { box-sizing:border-box; }
-  html,body { margin:0; background:var(--bg); color:var(--fg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
-  header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 12px; }
-  header h1 { font-size:16px; margin:0 8px 0 0; font-weight:700; letter-spacing:.02em; }
-  button { font:inherit; font-size:14px; border:1px solid #444; background:#26272a; color:var(--fg); border-radius:8px; padding:7px 12px; cursor:pointer; }
-  button.on { background:var(--acc); color:#111; border-color:var(--acc); font-weight:700; }
-  #rackwrap { overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; padding:0 0 6px; }
-  #rack { display:block; touch-action:pan-x; user-select:none; -webkit-user-select:none; }
-  .ctl, .jack { cursor:grab; touch-action:none; }
-  #kb { display:flex; gap:8px; align-items:stretch; padding:8px 12px 4px; }
-  #keys { position:relative; flex:1; height:120px; max-width:760px; touch-action:none; user-select:none; -webkit-user-select:none; }
-  .k { position:absolute; top:0; border:1px solid #333; border-radius:0 0 6px 6px; }
-  .k.w { background:#efece4; height:100%; z-index:1; }
-  .k.b { background:#1b1b1b; height:62%; z-index:2; border-color:#000; }
-  .k.down.w { background:#e0b04a; } .k.down.b { background:#a77b1c; }
-  .oct { display:flex; flex-direction:column; gap:6px; }
-  .oct button { flex:1; min-width:44px; }
-  #info { color:var(--mute); font-size:13px; line-height:1.45; padding:4px 14px 18px; max-width:900px; }
-  #info b { color:var(--fg); font-weight:600; }
-  #status { font-size:13px; color:var(--mute); }
+/* Same shell as the Octavio M55 app: dark hardware bar, walnut cabinet, keyboard strip. */
+:root{ color-scheme:dark;
+  --bg:#100f0e; --bar:#1a1815; --ink:#ece5d3; --dim:#968d7c; --line:#2f2b27; --silk:#efe8d6; --silk2:#b9b09e; --lamp:#ffae3d; --red:#d9483a;
+  --f-disp:'Big Shoulders Display','Arial Narrow',Impact,sans-serif; --f-ui:'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif; --f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+*{box-sizing:border-box} [hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);overscroll-behavior:none}
+body{color:var(--ink);font-family:var(--f-ui);display:flex;flex-direction:column;overflow:hidden;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+button{font-family:var(--f-ui);font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#211f1b;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 10px;min-height:36px;cursor:pointer}
+button:active{background:#2c2924} button:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block:8px}
+.brand{font-family:var(--f-disp);font-weight:800;font-size:28px;line-height:.9;letter-spacing:.02em;margin-right:4px}
+.brand small{display:block;font-family:var(--f-ui);font-weight:500;font-size:10.5px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-top:3px}
+.grp{display:flex;gap:6px;align-items:center}
+.lb{display:flex;align-items:center;gap:8px}
+.led{width:10px;height:10px;border-radius:50%;background:#3a2414;box-shadow:inset 0 0 0 1px #000;flex:none}
+.led.on{background:var(--lamp);box-shadow:0 0 8px 2px #ffae3d88}
+#status{font-family:var(--f-mono);font-size:11px;color:var(--lamp);margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46ch}
+#rackWrap{flex:1;min-height:0;overflow:auto;position:relative;background:#0a0908;border-radius:6px;-webkit-overflow-scrolling:touch}
+.cab{position:relative;display:inline-block;margin:10px;padding:14px 22px;border-radius:7px;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.10) 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,rgba(255,214,170,.05) 0 1px,transparent 1px 19px),linear-gradient(180deg,#7d4828,#5c331b 55%,#45260f);
+  box-shadow:0 8px 20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,220,180,.18)}
+.cab b{position:absolute;right:30px;bottom:-1px;font:600 10px var(--f-ui);letter-spacing:.2em;color:rgba(255,225,190,.45);text-transform:uppercase}
+#rack{display:block;touch-action:pan-x pan-y}
+.ctl{cursor:ns-resize;touch-action:none}
+.jack{cursor:crosshair;touch-action:none}
+#rack.faded #cables{opacity:.35}
+#kbdWrap{display:flex;gap:8px;padding-block:8px calc(8px + env(safe-area-inset-bottom,0px));height:118px;flex:none}
+.octs{display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center}
+.octs button{width:44px;padding:0} .octs span{font-family:var(--f-mono);font-size:11px;color:var(--lamp)}
+#kHold{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:58px;padding:0;flex:none}
+#kHold.on{border-color:var(--lamp);color:var(--lamp)}
+#kbd{flex:1;position:relative;touch-action:none;background:#0b0a09;border-radius:4px;overflow:hidden;border-top:7px solid #5c331b;min-width:0}
+.wk{position:absolute;top:0;bottom:0;background:linear-gradient(#f4f0e4,#d9d2bf);border-right:1px solid #857c6d;border-radius:0 0 4px 4px}
+.wk span{position:absolute;bottom:5px;left:0;right:0;text-align:center;font:500 9px var(--f-mono);color:#6d6457;pointer-events:none}
+.wk.on{background:linear-gradient(#ffdca0,#e8b25e)}
+.bk{position:absolute;top:0;height:60%;z-index:2;background:linear-gradient(#2c2925,#0c0b0a);border-radius:0 0 3px 3px;box-shadow:0 2px 3px #000}
+.bk.on{background:linear-gradient(#b06d20,#5c330a)}
+.ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(5,4,3,.72);padding:16px}
+.card{background:var(--bar);border:1px solid var(--line);border-radius:8px;padding:22px;max-width:460px;width:100%;box-shadow:0 20px 50px #000;max-height:100%;overflow:auto}
+.card h2{font-family:var(--f-disp);font-weight:800;font-size:34px;line-height:1;margin:0 0 6px;text-wrap:balance}
+.card p{font-size:15px;line-height:1.4;color:#cfc6b3;margin:8px 0}
+.card ul{margin:10px 0 16px;padding-left:18px;font-size:15px;line-height:1.45;color:#cfc6b3}
+.card .go{width:100%;min-height:48px;font-size:17px;background:var(--lamp);color:#1a1209;border-color:var(--lamp)}
+@media (max-width:640px){ .brand small{display:none} #status{order:9;margin-left:0;max-width:100%;flex-basis:100%} button{font-size:13px;padding:6px 8px} }
 </style>
 </head>
 <body>
 <header>
-  <h1>ocTavio Eurorack · simulateur</h1>
-  <button id="bStart">▶ Démarrer le son</button>
-  <button id="bSeq" class="on">Séquence</button>
-  <button id="bPatch">Patch de départ</button>
-  <button id="bClear">Tout débrancher</button>
-  <span id="status"></span>
+  <div class="brand">ocTavio<small>Eurorack · simulateur</small></div>
+  <div class="grp">
+    <button id="power" class="lb"><span class="led" id="pled"></span>Son</button>
+    <button id="bSeq" class="lb"><span class="led on" id="sled"></span>Séquence</button>
+  </div>
+  <div class="grp">
+    <button id="bPatch">Patch de départ</button>
+    <button id="bClear">Tout débrancher</button>
+  </div>
+  <div class="grp">
+    <button id="zFit">Ajuster</button>
+    <button id="zOut" aria-label="Dézoomer">−</button>
+    <button id="zIn" aria-label="Zoomer">+</button>
+    <button id="cabOp">Câbles</button>
+    <button id="kbToggle" class="lb"><span class="led on" id="kled"></span>Clavier</button>
+    <button id="help" aria-label="Aide">?</button>
+  </div>
+  <div id="status">Touche un potard pour lire sa valeur</div>
 </header>
-<div id="rackwrap"><svg id="rack" xmlns="http://www.w3.org/2000/svg"></svg></div>
-<div id="kb">
-  <div class="oct"><button id="oUp">Oct +</button><button id="oDn">Oct −</button></div>
-  <div id="keys"></div>
+
+<div id="rackWrap"><div class="cab" id="cab"><svg id="rack" xmlns="http://www.w3.org/2000/svg"></svg><b>Cabinet ocTavio</b></div></div>
+
+<div id="kbdWrap">
+  <div class="octs"><button id="kUp" aria-label="Octave plus haut">▲</button><span id="kOct">C3</span><button id="kDn" aria-label="Octave plus bas">▼</button></div>
+  <button id="kHold"><span class="led" id="hled"></span>Hold</button>
+  <div id="kbd" aria-label="Clavier"></div>
 </div>
-<div id="info">
-  <b>Brancher :</b> glisse d'un jack à un autre. <b>Débrancher :</b> touche un jack branché. <b>Boutons :</b> glisse vers le haut ou le bas (RANGE et inverseurs : touche). Le panneau <b>SIM</b> n'est pas un vrai module : il donne le clavier/séquence (CV, GATE), la sortie vers les haut-parleurs (AUDIO) et un oscilloscope (SCOPE).<br>
-  Simulation par modèles de comportement de nos circuits (cœur 921 et formes d'onde, ladder 4 pôles avec ses prises LP/BP/HP, OTA de l'AD, paire différentielle du VCA, genou à zeners du mixeur), réglés sur les valeurs de nos simulations transistor : ça donne le caractère et les plages, pas une vérification composant par composant. Sur iPhone, enlève le mode silencieux pour entendre le son.
+
+<div class="ov" id="startOv">
+  <div class="card">
+    <h2>ocTavio Eurorack</h2>
+    <p>Nos cinq modules dans un cabinet : VCO façon 921, mixeur CP3, filtre en échelle, VCA 902 et enveloppe AD, avec leurs vraies façades. Le patch de départ joue une séquence.</p>
+    <ul>
+      <li>Glisse d’une prise à une autre pour tirer un câble.</li>
+      <li>Touche une prise branchée pour la débrancher.</li>
+      <li>Potards : glisse vers le haut ou le bas, double-touche pour revenir au réglage de départ. RANGE, ONE/CYCLE et SEQ : touche.</li>
+      <li>Le panneau SIM n’est pas un vrai module : séquence, CV/GATE du clavier, sortie son et oscilloscope.</li>
+    </ul>
+    <button class="go" id="startBtn">Allumer le système</button>
+  </div>
+</div>
+<div class="ov" id="helpOv" hidden>
+  <div class="card">
+    <h2>Patcher</h2>
+    <ul>
+      <li><b>Câble :</b> glisse d’une sortie vers une entrée, ou l’inverse. Une sortie peut alimenter plusieurs câbles ; une entrée n’en prend qu’un. Lâché près d’une prise, le câble s’y aimante.</li>
+      <li><b>Tensions :</b> 1 V/oct partout, audio ±5 V, enveloppe AD 0 à 9,3 V, comme sur les vraies cartes.</li>
+      <li><b>Clavier :</b> joue par-dessus la séquence. Clavier d’ordi : A W S E D F T G Y H U J K, Z/X pour l’octave. Hold garde la note.</li>
+      <li><b>Câbles :</b> le bouton Câbles les rend transparents pour voir les façades.</li>
+      <li><b>Son :</b> modèles de comportement de nos circuits, réglés sur nos simulations transistor. Ça montre le caractère et les plages, pas une vérification composant par composant. Sur iPhone, enlève le mode silencieux.</li>
+    </ul>
+    <button class="go" id="helpClose">Compris</button>
+  </div>
 </div>
 <script>
 // ocTavio Eurorack - behavioural models of our circuits, run per sample (voltages in volts)
@@ -67,6 +131,12 @@ class OctavioEngine {
     if (d.t === 'p') this.P[d.k] = d.v;
     else if (d.t === 'cables') this.cab = d.list;
     else if (d.t === 'key') { this.key = d.note; }
+    else if (d.t === 'note') {
+      if (!this.held) this.held = [];
+      const i = this.held.indexOf(d.n); if (i >= 0) this.held.splice(i, 1);
+      if (d.on) this.held.push(d.n);
+      this.key = this.held.length ? this.held[this.held.length - 1] : null;
+    }
     else if (d.t === 'state') { this.P = Object.assign({}, d.params); this.cab = d.cables; }
   }
   p(k, def) { const v = this.P[k]; return v === undefined ? def : v; }
@@ -187,30 +257,29 @@ class OctavioEngine {
   }
 }
 
-const DATA = {"modules": [{"id": "vco", "name": "VCO", "w": 40.3, "text": [["VCO", 20.15, 3.4, 2.6], ["RANGE", 20.15, 8.6, 1.062], ["LO", 9.33, 18.7, 1.0], ["32'", 12.23, 13.68, 1.0], ["16'", 17.25, 10.78, 1.0], ["8'", 23.05, 10.78, 1.0], ["4'", 28.07, 13.68, 1.0], ["2'", 30.97, 18.7, 1.0], ["FREQUENCY", 10.0, 34.8, 1.062], ["-6", 4.7, 48.6, 0.938], ["+6", 15.3, 48.6, 0.938], ["WIDTH", 30.3, 34.8, 1.062], ["FM", 7.6, 53.6, 0.938], ["PWM", 20.15, 53.6, 0.938], ["BLEND", 32.7, 53.6, 0.938], ["OUT", 32.7, 67.4, 0.938], ["1V/OCT", 7.6, 83.0, 0.938], ["SYNC", 7.6, 99.0, 0.938], ["SINE", 20.15, 83.0, 0.938], ["TRIANGLE", 32.7, 83.0, 0.938], ["SAW", 20.15, 99.0, 0.938], ["PULSE", 32.7, 99.0, 0.938]], "lines": [[12.809, 19.533, 11.65, 19.222, 0.25], [14.776, 16.126, 13.927, 15.278, 0.25], [18.183, 14.159, 17.872, 13.0, 0.25], [22.117, 14.159, 22.428, 13.0, 0.25], [25.524, 16.126, 26.373, 15.278, 0.25], [27.491, 19.533, 28.65, 19.222, 0.25], [6.323, 46.677, 5.757, 47.243, 0.2], [5.196, 41.01, 4.457, 40.704, 0.2], [10.0, 37.8, 10.0, 37.0, 0.2], [14.804, 41.01, 15.543, 40.704, 0.2], [13.677, 46.677, 14.243, 47.243, 0.2], [26.623, 46.677, 26.057, 47.243, 0.2], [25.496, 41.01, 24.757, 40.704, 0.2], [30.3, 37.8, 30.3, 37.0, 0.2], [35.104, 41.01, 35.843, 40.704, 0.2], [33.977, 46.677, 34.543, 47.243, 0.2], [4.559, 63.041, 4.064, 63.536, 0.18], [7.6, 55.7, 7.6, 55.0, 0.18], [10.641, 63.041, 11.135, 63.536, 0.18], [17.109, 63.041, 16.615, 63.536, 0.18], [20.15, 55.7, 20.15, 55.0, 0.18], [23.191, 63.041, 23.686, 63.536, 0.18], [27.428, 64.172, 27.611, 63.872, 0.16], [27.611, 63.872, 27.795, 63.652, 0.16], [27.795, 63.652, 27.978, 63.572, 0.16], [27.978, 63.572, 28.161, 63.652, 0.16], [28.161, 63.652, 28.345, 63.872, 0.16], [28.345, 63.872, 28.528, 64.172, 0.16], [28.528, 64.172, 28.711, 64.472, 0.16], [28.711, 64.472, 28.895, 64.691, 0.16], [28.895, 64.691, 29.078, 64.772, 0.16], [29.078, 64.772, 29.261, 64.691, 0.16], [29.261, 64.691, 29.445, 64.472, 0.16], [29.445, 64.472, 29.628, 64.172, 0.16], [29.942, 62.758, 29.518, 63.182, 0.18], [27.428, 55.828, 27.978, 55.228, 0.16], [27.978, 55.228, 29.078, 56.428, 0.16], [29.078, 56.428, 29.628, 55.828, 0.16], [29.942, 57.242, 29.518, 56.818, 0.18], [35.772, 56.428, 36.872, 55.228, 0.16], [36.872, 55.228, 36.872, 56.428, 0.16], [36.872, 56.428, 37.972, 55.228, 0.16], [37.972, 55.228, 37.972, 56.428, 0.16], [35.458, 57.242, 35.882, 56.818, 0.18], [35.772, 64.772, 35.772, 63.572, 0.16], [35.772, 63.572, 36.872, 63.572, 0.16], [36.872, 63.572, 36.872, 64.772, 0.16], [36.872, 64.772, 37.972, 64.772, 0.16], [37.972, 64.772, 37.972, 63.572, 0.16], [35.458, 62.758, 35.882, 63.182, 0.18], [1.2, 51.2, 39.1, 51.2, 0.3], [1.2, 80.2, 39.1, 80.2, 0.3], [13.9, 51.2, 13.9, 113.5, 0.3], [26.4, 51.2, 26.4, 113.5, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [32.9, 3.0, 3.2, [5.2, 3.2]], [32.9, 125.5, 3.2, [5.2, 3.2]]], "logo": [12.15, 119.859, 16.0, 2.882], "ctl": [{"t": "rotary", "id": "range", "x": 20.15, "y": 21.5, "s": 1.15, "v": 3, "angles": [-75, -45, -15, 15, 45, 75]}, {"t": "knob", "id": "fine", "x": 10.0, "y": 43.0, "s": 0.8, "v": 0.5}, {"t": "knob", "id": "width", "x": 30.3, "y": 43.0, "s": 0.8, "v": 0.5}, {"t": "knob", "id": "fm", "x": 7.6, "y": 60.0, "s": 0.62, "v": 0.0}, {"t": "knob", "id": "pwm", "x": 20.15, "y": 60.0, "s": 0.62, "v": 0.0}, {"t": "knob", "id": "blend", "x": 32.7, "y": 60.0, "s": 0.62, "v": 0.33}, {"t": "jack", "id": "fm", "x": 7.6, "y": 73.5, "d": "in"}, {"t": "jack", "id": "pwm", "x": 20.15, "y": 73.5, "d": "in"}, {"t": "jack", "id": "blend", "x": 32.7, "y": 73.5, "d": "out"}, {"t": "jack", "id": "voct", "x": 7.6, "y": 89.5, "d": "in"}, {"t": "jack", "id": "sync", "x": 7.6, "y": 105.5, "d": "in"}, {"t": "jack", "id": "sine", "x": 20.15, "y": 89.5, "d": "out"}, {"t": "jack", "id": "tri", "x": 32.7, "y": 89.5, "d": "out"}, {"t": "jack", "id": "saw", "x": 20.15, "y": 105.5, "d": "out"}, {"t": "jack", "id": "pulse", "x": 32.7, "y": 105.5, "d": "out"}]}, {"id": "mix", "name": "MIX", "w": 40.3, "text": [["MIX", 20.15, 3.4, 2.6], ["LEVEL", 20.15, 9.6, 1.062], ["1", 10.1, 15.4, 1.062], ["2", 30.2, 15.4, 1.062], ["3", 10.1, 35.4, 1.062], ["4", 30.2, 35.4, 1.062], ["MASTER GAIN", 20.15, 54.6, 1.062], ["0", 12.73, 75.52, 1.0], ["2", 9.78, 66.46, 1.0], ["4", 15.38, 58.74, 1.0], ["6", 24.92, 58.74, 1.0], ["8", 30.52, 66.46, 1.0], ["10", 27.57, 75.52, 1.0], ["IN 1", 7.6, 85.4, 0.938], ["IN 2", 20.15, 85.4, 0.938], ["IN 3", 7.6, 102.4, 0.938], ["IN 4", 20.15, 102.4, 0.938], ["OUT", 32.7, 85.4, 0.938], ["-OUT", 32.7, 102.4, 0.938]], "lines": [[6.564, 26.535, 6.07, 27.031, 0.18], [5.162, 22.218, 4.47, 22.108, 0.18], [7.83, 18.545, 7.512, 17.921, 0.18], [12.37, 18.545, 12.688, 17.921, 0.18], [15.038, 22.218, 15.73, 22.108, 0.18], [13.635, 26.535, 14.13, 27.031, 0.18], [26.665, 26.535, 26.169, 27.031, 0.18], [25.262, 22.218, 24.57, 22.108, 0.18], [27.93, 18.545, 27.612, 17.921, 0.18], [32.47, 18.545, 32.788, 17.921, 0.18], [35.138, 22.218, 35.83, 22.108, 0.18], [33.736, 26.535, 34.231, 27.031, 0.18], [6.564, 46.536, 6.07, 47.03, 0.18], [5.162, 42.218, 4.47, 42.108, 0.18], [7.83, 38.545, 7.512, 37.921, 0.18], [12.37, 38.545, 12.688, 37.921, 0.18], [15.038, 42.218, 15.73, 42.108, 0.18], [13.635, 46.536, 14.13, 47.03, 0.18], [26.665, 46.536, 26.169, 47.03, 0.18], [25.262, 42.218, 24.57, 42.108, 0.18], [27.93, 38.545, 27.612, 37.921, 0.18], [32.47, 38.545, 32.788, 37.921, 0.18], [35.138, 42.218, 35.83, 42.108, 0.18], [33.736, 46.536, 34.231, 47.03, 0.18], [15.907, 72.243, 15.2, 72.95, 0.2], [14.224, 67.061, 13.236, 66.905, 0.2], [17.426, 62.654, 16.972, 61.763, 0.2], [22.874, 62.654, 23.328, 61.763, 0.2], [26.076, 67.061, 27.064, 66.905, 0.2], [24.393, 72.243, 25.1, 72.95, 0.2], [1.2, 51.6, 39.1, 51.6, 0.3], [1.2, 80.6, 39.1, 80.6, 0.3], [26.4, 80.6, 26.4, 114.5, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [32.9, 3.0, 3.2, [5.2, 3.2]], [32.9, 125.5, 3.2, [5.2, 3.2]]], "logo": [12.15, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "l1", "x": 10.1, "y": 23.0, "s": 0.8, "v": 0.6}, {"t": "knob", "id": "l2", "x": 30.2, "y": 23.0, "s": 0.8, "v": 0.45}, {"t": "knob", "id": "l3", "x": 10.1, "y": 43.0, "s": 0.8, "v": 0.35}, {"t": "knob", "id": "l4", "x": 30.2, "y": 43.0, "s": 0.8, "v": 0.0}, {"t": "knob", "id": "master", "x": 20.15, "y": 68.0, "s": 1.0, "v": 0.08}, {"t": "jack", "id": "in1", "x": 7.6, "y": 91.0, "d": "in"}, {"t": "jack", "id": "in2", "x": 20.15, "y": 91.0, "d": "in"}, {"t": "jack", "id": "in3", "x": 7.6, "y": 108.0, "d": "in"}, {"t": "jack", "id": "in4", "x": 20.15, "y": 108.0, "d": "in"}, {"t": "jack", "id": "out", "x": 32.7, "y": 91.0, "d": "out"}, {"t": "jack", "id": "nout", "x": 32.7, "y": 108.0, "d": "out"}]}, {"id": "vcf", "name": "VCF", "w": 40.3, "text": [["VCF", 20.15, 3.4, 2.6], ["BP", 20.15, 9.7, 0.938], ["LP", 14.55, 22.4, 0.938], ["HP", 25.75, 22.4, 0.938], ["FREQUENCY", 20.15, 25.6, 1.062], ["0", 12.73, 46.12, 1.0], ["2", 9.78, 37.06, 1.0], ["4", 15.38, 29.34, 1.0], ["6", 24.92, 29.34, 1.0], ["8", 30.52, 37.06, 1.0], ["10", 27.57, 46.12, 1.0], ["EMPHASIS", 20.15, 49.2, 1.062], ["0", 12.73, 69.32, 1.0], ["2", 9.78, 60.26, 1.0], ["4", 15.38, 52.54, 1.0], ["6", 24.92, 52.54, 1.0], ["8", 30.52, 60.26, 1.0], ["10", 27.57, 69.32, 1.0], ["CONTOUR", 7.6, 73.6, 0.938], ["FREQ CV", 20.15, 73.6, 0.938], ["EMPH CV", 32.7, 73.6, 0.938], ["IN 1", 7.6, 103.4, 0.938], ["IN 2", 20.15, 103.4, 0.938], ["OUT", 32.7, 103.4, 0.938]], "lines": [[16.473, 20.677, 15.907, 21.243, 0.2], [15.346, 15.01, 14.607, 14.704, 0.2], [20.15, 11.8, 20.15, 11.0, 0.2], [24.954, 15.01, 25.693, 14.704, 0.2], [23.827, 20.677, 24.393, 21.243, 0.2], [15.907, 42.843, 15.2, 43.55, 0.2], [14.224, 37.661, 13.236, 37.505, 0.2], [17.426, 33.254, 16.972, 32.363, 0.2], [22.874, 33.254, 23.328, 32.363, 0.2], [26.076, 37.661, 27.064, 37.505, 0.2], [24.393, 42.843, 25.1, 43.55, 0.2], [15.907, 66.043, 15.2, 66.75, 0.2], [14.224, 60.861, 13.236, 60.705, 0.2], [17.426, 56.454, 16.972, 55.563, 0.2], [22.874, 56.454, 23.328, 55.563, 0.2], [26.076, 60.861, 27.064, 60.705, 0.2], [24.393, 66.043, 25.1, 66.75, 0.2], [4.559, 82.641, 4.064, 83.136, 0.18], [7.6, 75.3, 7.6, 74.6, 0.18], [10.641, 82.641, 11.135, 83.136, 0.18], [17.109, 82.641, 16.615, 83.136, 0.18], [20.15, 75.3, 20.15, 74.6, 0.18], [23.191, 82.641, 23.686, 83.136, 0.18], [29.659, 82.641, 29.165, 83.136, 0.18], [32.7, 75.3, 32.7, 74.6, 0.18], [35.741, 82.641, 36.236, 83.136, 0.18], [1.2, 71.0, 39.1, 71.0, 0.3], [1.2, 100.8, 39.1, 100.8, 0.3], [13.9, 71.0, 13.9, 114.5, 0.3], [26.4, 71.0, 26.4, 114.5, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [32.9, 3.0, 3.2, [5.2, 3.2]], [32.9, 125.5, 3.2, [5.2, 3.2]]], "logo": [12.15, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "mode", "x": 20.15, "y": 17.0, "s": 0.8, "v": 0.0}, {"t": "knob", "id": "freq", "x": 20.15, "y": 38.6, "s": 1.0, "v": 0.42}, {"t": "knob", "id": "emph", "x": 20.15, "y": 61.8, "s": 1.0, "v": 0.55}, {"t": "knob", "id": "contour", "x": 7.6, "y": 79.6, "s": 0.62, "v": 0.6}, {"t": "knob", "id": "fcv", "x": 20.15, "y": 79.6, "s": 0.62, "v": 0.0}, {"t": "knob", "id": "ecv", "x": 32.7, "y": 79.6, "s": 0.62, "v": 0.0}, {"t": "jack", "id": "contour", "x": 7.6, "y": 93.0, "d": "in"}, {"t": "jack", "id": "fcv", "x": 20.15, "y": 93.0, "d": "in"}, {"t": "jack", "id": "ecv", "x": 32.7, "y": 93.0, "d": "in"}, {"t": "jack", "id": "in1", "x": 7.6, "y": 109.0, "d": "in"}, {"t": "jack", "id": "in2", "x": 20.15, "y": 109.0, "d": "in"}, {"t": "jack", "id": "out", "x": 32.7, "y": 109.0, "d": "out"}]}, {"id": "vca", "name": "VCA", "w": 30.0, "text": [["VCA", 15.0, 3.4, 2.6], ["CV LEVEL", 15.0, 8.7, 1.062], ["RESPONSE", 15.0, 23.5, 1.062], ["LIN.", 9.3, 37.3, 0.938], ["EXP.", 20.7, 37.3, 0.938], ["FIXED", 15.0, 40.0, 1.062], ["CONTROL VOLTAGE", 15.0, 42.3, 1.062], ["0", 10.7, 63.2, 1.0], ["1", 6.1, 57.15, 1.0], ["2", 7.3, 49.3, 1.0], ["3", 15.0, 45.3, 1.0], ["4", 22.6, 49.3, 1.0], ["5", 23.9, 57.15, 1.0], ["6", 19.2, 63.2, 1.0], ["SIGNAL  INPUTS", 8.2, 67.4, 0.775], ["SIGNAL  OUTPUTS", 21.8, 67.4, 0.775], ["CONTROL  INPUTS", 15.0, 93.6, 0.775]], "lines": [[11.323, 34.877, 10.757, 35.443, 0.2], [10.196, 29.21, 9.457, 28.904, 0.2], [15.0, 26.0, 15.0, 25.2, 0.2], [19.804, 29.21, 20.543, 28.904, 0.2], [18.677, 34.877, 19.243, 35.443, 0.2], [11.323, 19.477, 10.757, 20.043, 0.2], [10.196, 13.81, 9.457, 13.504, 0.2], [15.0, 10.6, 15.0, 9.8, 0.2], [19.804, 13.81, 20.543, 13.504, 0.2], [18.677, 19.477, 19.243, 20.043, 0.2], [10.757, 60.043, 10.05, 60.75, 0.2], [9.0, 55.8, 8.0, 55.8, 0.2], [10.757, 51.557, 10.05, 50.85, 0.2], [15.0, 49.8, 15.0, 48.8, 0.2], [19.243, 51.557, 19.95, 50.85, 0.2], [21.0, 55.8, 22.0, 55.8, 0.2], [19.243, 60.043, 19.95, 60.75, 0.2], [1.2, 65.4, 28.8, 65.4, 0.3], [1.2, 91.6, 28.8, 91.6, 0.3], [15.0, 65.4, 15.0, 91.6, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [22.74, 3.0, 3.2, [5.2, 3.2]], [22.74, 125.5, 3.2, [5.2, 3.2]]], "logo": [7.0, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "cvlevel", "x": 15.0, "y": 15.8, "s": 0.8, "v": 0.6}, {"t": "knob", "id": "response", "x": 15.0, "y": 31.2, "s": 0.8, "v": 0.5}, {"t": "knob", "id": "fixed", "x": 15.0, "y": 55.8, "s": 1.0, "v": 0.0}, {"t": "jack", "id": "in1", "x": 8.2, "y": 73.4, "d": "in"}, {"t": "jack", "id": "in2", "x": 8.2, "y": 85.6, "d": "in"}, {"t": "jack", "id": "outn", "x": 21.8, "y": 73.4, "d": "out"}, {"t": "jack", "id": "outp", "x": 21.8, "y": 85.6, "d": "out"}, {"t": "jack", "id": "cv1", "x": 8.2, "y": 98.6, "d": "in"}, {"t": "jack", "id": "cv2", "x": 21.8, "y": 98.6, "d": "in"}, {"t": "jack", "id": "cv3", "x": 15.0, "y": 109.4, "d": "in"}]}, {"id": "ad", "name": "AD", "w": 30.0, "text": [["AD", 15.0, 3.4, 2.6], ["ATTACK", 15.0, 9.4, 1.062], ["0", 7.58, 30.52, 1.0], ["2", 4.63, 21.46, 1.0], ["4", 10.23, 13.74, 1.0], ["6", 19.77, 13.74, 1.0], ["8", 25.37, 21.46, 1.0], ["10", 22.42, 30.52, 1.0], ["DECAY", 15.0, 34.4, 1.062], ["0", 7.58, 55.52, 1.0], ["2", 4.63, 46.46, 1.0], ["4", 10.23, 38.74, 1.0], ["6", 19.77, 38.74, 1.0], ["8", 25.37, 46.46, 1.0], ["10", 22.42, 55.52, 1.0], ["ATTACK CV", 8.2, 72.9, 0.938], ["DECAY CV", 21.8, 72.9, 0.938], ["TRIG", 8.2, 103.4, 0.938], ["OUT", 21.8, 103.4, 0.938], ["ONE", 5.6, 65.0, 0.938], ["CYCLE", 24.6, 65.0, 0.938]], "lines": [[10.757, 27.243, 10.05, 27.95, 0.2], [9.074, 22.061, 8.086, 21.905, 0.2], [12.276, 17.654, 11.822, 16.763, 0.2], [17.724, 17.654, 18.178, 16.763, 0.2], [20.926, 22.061, 21.914, 21.905, 0.2], [19.243, 27.243, 19.95, 27.95, 0.2], [10.757, 52.243, 10.05, 52.95, 0.2], [9.074, 47.061, 8.086, 46.905, 0.2], [12.276, 42.654, 11.822, 41.763, 0.2], [17.724, 42.654, 18.178, 41.763, 0.2], [20.926, 47.061, 21.914, 46.905, 0.2], [19.243, 52.243, 19.95, 52.95, 0.2], [5.159, 82.141, 4.665, 82.636, 0.18], [8.2, 74.8, 8.2, 74.1, 0.18], [11.241, 82.141, 11.736, 82.636, 0.18], [18.759, 82.141, 18.264, 82.636, 0.18], [21.8, 74.8, 21.8, 74.1, 0.18], [24.841, 82.141, 25.335, 82.636, 0.18], [1.2, 70.5, 28.8, 70.5, 0.3], [1.2, 100.8, 28.8, 100.8, 0.3], [15.0, 70.5, 15.0, 100.8, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [22.74, 3.0, 3.2, [5.2, 3.2]], [22.74, 125.5, 3.2, [5.2, 3.2]]], "logo": [7.0, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "attack", "x": 15.0, "y": 23.0, "s": 1.0, "v": 0.12}, {"t": "knob", "id": "decay", "x": 15.0, "y": 48.0, "s": 1.0, "v": 0.62}, {"t": "knob", "id": "acv", "x": 8.2, "y": 79.1, "s": 0.62, "v": 0.0}, {"t": "knob", "id": "dcv", "x": 21.8, "y": 79.1, "s": 0.62, "v": 0.0}, {"t": "toggle", "id": "cycle", "x": 15.0, "y": 65.0, "v": 0}, {"t": "led", "id": "led", "x": 15.0, "y": 109.0}, {"t": "jack", "id": "acv", "x": 8.2, "y": 93.0, "d": "in"}, {"t": "jack", "id": "dcv", "x": 21.8, "y": 93.0, "d": "in"}, {"t": "jack", "id": "trig", "x": 8.2, "y": 109.0, "d": "in"}, {"t": "jack", "id": "out", "x": 21.8, "y": 109.0, "d": "out"}]}, {"id": "sim", "name": "SIM", "w": 50.5, "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [43.06, 3.0, 3.2, [5.2, 3.2]], [43.06, 125.5, 3.2, [5.2, 3.2]]], "logo": [17.25, 119.859, 16.0, 2.882], "text": [["SIM", 25.25, 3.4, 2.6], ["SCOPE", 25.25, 9.4, 1.06], ["TEMPO", 11.0, 52.0, 1.06], ["SEQ", 25.25, 52.0, 1.06], ["VOLUME", 39.5, 52.0, 1.06], ["CV", 12.6, 76.4, 0.94], ["GATE", 37.9, 76.4, 0.94], ["AUDIO", 12.6, 96.4, 0.94], ["SCOPE", 37.9, 96.4, 0.94]], "lines": [[1.2, 70.5, 49.3, 70.5, 0.3], [1.2, 90.5, 49.3, 90.5, 0.3], [25.25, 70.5, 25.25, 113.5, 0.3]], "ctl": [{"t": "scope", "x": 4.0, "y": 12.0, "w": 42.5, "h": 34.0}, {"t": "knob", "id": "tempo", "x": 11.0, "y": 60.0, "s": 0.8, "v": 0.45}, {"t": "button", "id": "seq", "x": 25.25, "y": 60.0, "v": 1}, {"t": "knob", "id": "volume", "x": 39.5, "y": 60.0, "s": 0.8, "v": 0.5}, {"t": "jack", "id": "cv", "x": 12.6, "y": 83.0, "d": "out"}, {"t": "jack", "id": "gate", "x": 37.9, "y": 83.0, "d": "out"}, {"t": "jack", "id": "audio", "x": 12.6, "y": 103.0, "d": "in"}, {"t": "jack", "id": "scope", "x": 37.9, "y": 103.0, "d": "in"}]}], "patch": [["sim", "cv", "vco", "voct"], ["sim", "gate", "ad", "trig"], ["vco", "saw", "mix", "in1"], ["vco", "pulse", "mix", "in2"], ["vco", "blend", "mix", "in3"], ["mix", "out", "vcf", "in1"], ["ad", "out", "vcf", "contour"], ["ad", "out", "vca", "cv1"], ["vcf", "out", "vca", "in1"], ["vca", "outp", "sim", "audio"], ["vca", "outp", "sim", "scope"]], "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARAAAAAxCAYAAAASjfYyAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjIsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvgI3uAAAAAAlwSFlzAAAPYQAAD2EBqD+naQAABCFJREFUeF7t3d2ym0gMBODgyvu/slPjKk4wBxi1pJE00N/NXtiMmvmRWcfZXf6Q2fv9fpsHKWJZlqVIFJrAa4KMRFQUGwgRqbGBEJEaGwgRqbGBEJEaGwgRqbGBEJEaGwgRqbGBEJEaGwgRqZl/tiz5GXe1n0dLMjeRuaWZrkTmpfoke8q6Z6AGIgkkZQ2O8Mo9MrNHxor5kEyaOUDGv4LWPqvrNQ4Krev1QSRqIJ7h9rw2wN7IzCOeTjzyVp1LJJdmHpDxz6B1qzQQNDdCMq9/PbuyxjoBkrBSIyd11Wp4ZqY8EfvFW0Rmydk8/RI1IuCWR702hsc4UpG1skTf4wxNOTtj9Jpc1TtsINEBt5/q2oMyY+anGL02lvEt12bIyntW91cDyQpoaSIzZqY5ZT59VNznXw0kO6CliWSrMneePO8JGSvzkFaFzN9I+xw/X6JaAl4tuHbcdp1kI2nHb7y+Sad80v2yhe4dyX4cAc25Nfpsmn6J2sL1JrX3eoZe7t7rZywLXU32vVTcNzOR7GGPOf40EM1mQYoj70U+IarmfhJkbTXr9XSaOUPWBHnv0dlUPYFoimquqaCXe+30ko5PmN7c7yGHDXlvg2bJosmpuWb1QifSwhLUsllW1vr7ZmEdryp0TyDzgI79ZJFzhazhluoJJFLkJJ7h08Ux7aabzVPuE9XOJtxAZp3MWXNHq9Cwt9B1k+SXvGdG6Fx5gBuIVcZN0njIut71AM8OWcNVeAOhe9BsNq3IWnuZtWfABkI/rE8GyGGz1rpyNfbIuk/EBkJTQJqTl4yas2EDoQ/kk3mGg4XcD+mxgZArpLlEH3KkHnIfT8YGQtDBysRDXc/lf9JwBORTgGryXEPN36KVGjn2HWnWlU8gQprJJX/apxBk/bQ1nghuIMhCePBaTEvu9dr2zy2P+8tmmRcvFTLcQfQ8trMJN5AqvBqLxd2ayR2hh6rCvprJK3LC0MWsQJp5bSYVMktJ760adM8+5T4ttHOkegLRFss2a+4n4Nr4iJ7HTwNBO3qDBNV+Ovdy9V4/gub2WVbypln7nhFjWmkyoXscef9qzaV6AllJGoMm3Gi93L3Xz2gWO0vVdcmaj7uR7GGPPfD1/8b1GNALchir5EYy73ncA1Lfo94IyD2gT8JX0Lpn0HmV1kXHHWmb+euHZO2FCkGlk7p9nMrOjWbOhM6V5d7QWnSs6tn89a8wls3iQVtfe52HzNp3w4ZzLnufHdU//A4kK6i1rvV6jYya9J/H/HuMESUr61nd0y9Ro4N61fMaRyKylhf0E956j5rr0YxPo5lTi6t6l38KExG01fCu4z3ekYgaJGNZC8u1mSJyS85m92/jboN6fjKMnoBZc4/kuX6Ur8Ie//pjXA3JphzdLFCSzE213EQIyT637vF/o6+wdcKGckwAAAAASUVORK5CYII="};
-const HPMM = 5.08, PH = 128.5, M = 6;               // case border (mm)
-const svg = document.getElementById('rack'), NS = 'http://www.w3.org/2000/svg';
+const DATA = {"modules": [{"id": "vco", "name": "VCO", "w": 40.3, "text": [["VCO", 20.15, 3.4, 2.6], ["RANGE", 20.15, 8.6, 1.062], ["LO", 9.33, 18.7, 1.0], ["32'", 12.23, 13.68, 1.0], ["16'", 17.25, 10.78, 1.0], ["8'", 23.05, 10.78, 1.0], ["4'", 28.07, 13.68, 1.0], ["2'", 30.97, 18.7, 1.0], ["FREQUENCY", 10.0, 34.8, 1.062], ["-6", 4.7, 48.6, 0.938], ["+6", 15.3, 48.6, 0.938], ["WIDTH", 30.3, 34.8, 1.062], ["FM", 7.6, 53.6, 0.938], ["PWM", 20.15, 53.6, 0.938], ["BLEND", 32.7, 53.6, 0.938], ["OUT", 32.7, 67.4, 0.938], ["1V/OCT", 7.6, 83.0, 0.938], ["SYNC", 7.6, 99.0, 0.938], ["SINE", 20.15, 83.0, 0.938], ["TRIANGLE", 32.7, 83.0, 0.938], ["SAW", 20.15, 99.0, 0.938], ["PULSE", 32.7, 99.0, 0.938]], "lines": [[12.809, 19.533, 11.65, 19.222, 0.25], [14.776, 16.126, 13.927, 15.278, 0.25], [18.183, 14.159, 17.872, 13.0, 0.25], [22.117, 14.159, 22.428, 13.0, 0.25], [25.524, 16.126, 26.373, 15.278, 0.25], [27.491, 19.533, 28.65, 19.222, 0.25], [6.323, 46.677, 5.757, 47.243, 0.2], [5.196, 41.01, 4.457, 40.704, 0.2], [10.0, 37.8, 10.0, 37.0, 0.2], [14.804, 41.01, 15.543, 40.704, 0.2], [13.677, 46.677, 14.243, 47.243, 0.2], [26.623, 46.677, 26.057, 47.243, 0.2], [25.496, 41.01, 24.757, 40.704, 0.2], [30.3, 37.8, 30.3, 37.0, 0.2], [35.104, 41.01, 35.843, 40.704, 0.2], [33.977, 46.677, 34.543, 47.243, 0.2], [4.559, 63.041, 4.064, 63.536, 0.18], [7.6, 55.7, 7.6, 55.0, 0.18], [10.641, 63.041, 11.135, 63.536, 0.18], [17.109, 63.041, 16.615, 63.536, 0.18], [20.15, 55.7, 20.15, 55.0, 0.18], [23.191, 63.041, 23.686, 63.536, 0.18], [27.428, 64.172, 27.611, 63.872, 0.16], [27.611, 63.872, 27.795, 63.652, 0.16], [27.795, 63.652, 27.978, 63.572, 0.16], [27.978, 63.572, 28.161, 63.652, 0.16], [28.161, 63.652, 28.345, 63.872, 0.16], [28.345, 63.872, 28.528, 64.172, 0.16], [28.528, 64.172, 28.711, 64.472, 0.16], [28.711, 64.472, 28.895, 64.691, 0.16], [28.895, 64.691, 29.078, 64.772, 0.16], [29.078, 64.772, 29.261, 64.691, 0.16], [29.261, 64.691, 29.445, 64.472, 0.16], [29.445, 64.472, 29.628, 64.172, 0.16], [29.942, 62.758, 29.518, 63.182, 0.18], [27.428, 55.828, 27.978, 55.228, 0.16], [27.978, 55.228, 29.078, 56.428, 0.16], [29.078, 56.428, 29.628, 55.828, 0.16], [29.942, 57.242, 29.518, 56.818, 0.18], [35.772, 56.428, 36.872, 55.228, 0.16], [36.872, 55.228, 36.872, 56.428, 0.16], [36.872, 56.428, 37.972, 55.228, 0.16], [37.972, 55.228, 37.972, 56.428, 0.16], [35.458, 57.242, 35.882, 56.818, 0.18], [35.772, 64.772, 35.772, 63.572, 0.16], [35.772, 63.572, 36.872, 63.572, 0.16], [36.872, 63.572, 36.872, 64.772, 0.16], [36.872, 64.772, 37.972, 64.772, 0.16], [37.972, 64.772, 37.972, 63.572, 0.16], [35.458, 62.758, 35.882, 63.182, 0.18], [1.2, 51.2, 39.1, 51.2, 0.3], [1.2, 80.2, 39.1, 80.2, 0.3], [13.9, 51.2, 13.9, 113.5, 0.3], [26.4, 51.2, 26.4, 113.5, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [32.9, 3.0, 3.2, [5.2, 3.2]], [32.9, 125.5, 3.2, [5.2, 3.2]]], "logo": [12.15, 119.859, 16.0, 2.882], "ctl": [{"t": "rotary", "id": "range", "label": "RANGE", "x": 20.15, "y": 21.5, "s": 1.15, "v": 3, "angles": [-75, -45, -15, 15, 45, 75]}, {"t": "knob", "id": "fine", "x": 10.0, "y": 43.0, "s": 0.8, "v": 0.5, "label": "FREQUENCY"}, {"t": "knob", "id": "width", "x": 30.3, "y": 43.0, "s": 0.8, "v": 0.5, "label": "WIDTH"}, {"t": "knob", "id": "fm", "x": 7.6, "y": 60.0, "s": 0.62, "v": 0.0, "label": "FM"}, {"t": "knob", "id": "pwm", "x": 20.15, "y": 60.0, "s": 0.62, "v": 0.0, "label": "PWM"}, {"t": "knob", "id": "blend", "x": 32.7, "y": 60.0, "s": 0.62, "v": 0.33, "label": "BLEND"}, {"t": "jack", "id": "fm", "x": 7.6, "y": 73.5, "d": "in"}, {"t": "jack", "id": "pwm", "x": 20.15, "y": 73.5, "d": "in"}, {"t": "jack", "id": "blend", "x": 32.7, "y": 73.5, "d": "out"}, {"t": "jack", "id": "voct", "x": 7.6, "y": 89.5, "d": "in"}, {"t": "jack", "id": "sync", "x": 7.6, "y": 105.5, "d": "in"}, {"t": "jack", "id": "sine", "x": 20.15, "y": 89.5, "d": "out"}, {"t": "jack", "id": "tri", "x": 32.7, "y": 89.5, "d": "out"}, {"t": "jack", "id": "saw", "x": 20.15, "y": 105.5, "d": "out"}, {"t": "jack", "id": "pulse", "x": 32.7, "y": 105.5, "d": "out"}]}, {"id": "mix", "name": "MIX", "w": 40.3, "text": [["MIX", 20.15, 3.4, 2.6], ["LEVEL", 20.15, 9.6, 1.062], ["1", 10.1, 15.4, 1.062], ["2", 30.2, 15.4, 1.062], ["3", 10.1, 35.4, 1.062], ["4", 30.2, 35.4, 1.062], ["MASTER GAIN", 20.15, 54.6, 1.062], ["0", 12.73, 75.52, 1.0], ["2", 9.78, 66.46, 1.0], ["4", 15.38, 58.74, 1.0], ["6", 24.92, 58.74, 1.0], ["8", 30.52, 66.46, 1.0], ["10", 27.57, 75.52, 1.0], ["IN 1", 7.6, 85.4, 0.938], ["IN 2", 20.15, 85.4, 0.938], ["IN 3", 7.6, 102.4, 0.938], ["IN 4", 20.15, 102.4, 0.938], ["OUT", 32.7, 85.4, 0.938], ["-OUT", 32.7, 102.4, 0.938]], "lines": [[6.564, 26.535, 6.07, 27.031, 0.18], [5.162, 22.218, 4.47, 22.108, 0.18], [7.83, 18.545, 7.512, 17.921, 0.18], [12.37, 18.545, 12.688, 17.921, 0.18], [15.038, 22.218, 15.73, 22.108, 0.18], [13.635, 26.535, 14.13, 27.031, 0.18], [26.665, 26.535, 26.169, 27.031, 0.18], [25.262, 22.218, 24.57, 22.108, 0.18], [27.93, 18.545, 27.612, 17.921, 0.18], [32.47, 18.545, 32.788, 17.921, 0.18], [35.138, 22.218, 35.83, 22.108, 0.18], [33.736, 26.535, 34.231, 27.031, 0.18], [6.564, 46.536, 6.07, 47.03, 0.18], [5.162, 42.218, 4.47, 42.108, 0.18], [7.83, 38.545, 7.512, 37.921, 0.18], [12.37, 38.545, 12.688, 37.921, 0.18], [15.038, 42.218, 15.73, 42.108, 0.18], [13.635, 46.536, 14.13, 47.03, 0.18], [26.665, 46.536, 26.169, 47.03, 0.18], [25.262, 42.218, 24.57, 42.108, 0.18], [27.93, 38.545, 27.612, 37.921, 0.18], [32.47, 38.545, 32.788, 37.921, 0.18], [35.138, 42.218, 35.83, 42.108, 0.18], [33.736, 46.536, 34.231, 47.03, 0.18], [15.907, 72.243, 15.2, 72.95, 0.2], [14.224, 67.061, 13.236, 66.905, 0.2], [17.426, 62.654, 16.972, 61.763, 0.2], [22.874, 62.654, 23.328, 61.763, 0.2], [26.076, 67.061, 27.064, 66.905, 0.2], [24.393, 72.243, 25.1, 72.95, 0.2], [1.2, 51.6, 39.1, 51.6, 0.3], [1.2, 80.6, 39.1, 80.6, 0.3], [26.4, 80.6, 26.4, 114.5, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [32.9, 3.0, 3.2, [5.2, 3.2]], [32.9, 125.5, 3.2, [5.2, 3.2]]], "logo": [12.15, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "l1", "x": 10.1, "y": 23.0, "s": 0.8, "v": 0.6, "label": "LEVEL 1"}, {"t": "knob", "id": "l2", "x": 30.2, "y": 23.0, "s": 0.8, "v": 0.45, "label": "LEVEL 2"}, {"t": "knob", "id": "l3", "x": 10.1, "y": 43.0, "s": 0.8, "v": 0.35, "label": "LEVEL 3"}, {"t": "knob", "id": "l4", "x": 30.2, "y": 43.0, "s": 0.8, "v": 0.0, "label": "LEVEL 4"}, {"t": "knob", "id": "master", "x": 20.15, "y": 68.0, "s": 1.0, "v": 0.08, "label": "MASTER GAIN"}, {"t": "jack", "id": "in1", "x": 7.6, "y": 91.0, "d": "in"}, {"t": "jack", "id": "in2", "x": 20.15, "y": 91.0, "d": "in"}, {"t": "jack", "id": "in3", "x": 7.6, "y": 108.0, "d": "in"}, {"t": "jack", "id": "in4", "x": 20.15, "y": 108.0, "d": "in"}, {"t": "jack", "id": "out", "x": 32.7, "y": 91.0, "d": "out"}, {"t": "jack", "id": "nout", "x": 32.7, "y": 108.0, "d": "out"}]}, {"id": "vcf", "name": "VCF", "w": 40.3, "text": [["VCF", 20.15, 3.4, 2.6], ["BP", 20.15, 9.7, 0.938], ["LP", 14.55, 22.4, 0.938], ["HP", 25.75, 22.4, 0.938], ["FREQUENCY", 20.15, 25.6, 1.062], ["0", 12.73, 46.12, 1.0], ["2", 9.78, 37.06, 1.0], ["4", 15.38, 29.34, 1.0], ["6", 24.92, 29.34, 1.0], ["8", 30.52, 37.06, 1.0], ["10", 27.57, 46.12, 1.0], ["EMPHASIS", 20.15, 49.2, 1.062], ["0", 12.73, 69.32, 1.0], ["2", 9.78, 60.26, 1.0], ["4", 15.38, 52.54, 1.0], ["6", 24.92, 52.54, 1.0], ["8", 30.52, 60.26, 1.0], ["10", 27.57, 69.32, 1.0], ["CONTOUR", 7.6, 73.6, 0.938], ["FREQ CV", 20.15, 73.6, 0.938], ["EMPH CV", 32.7, 73.6, 0.938], ["IN 1", 7.6, 103.4, 0.938], ["IN 2", 20.15, 103.4, 0.938], ["OUT", 32.7, 103.4, 0.938]], "lines": [[16.473, 20.677, 15.907, 21.243, 0.2], [15.346, 15.01, 14.607, 14.704, 0.2], [20.15, 11.8, 20.15, 11.0, 0.2], [24.954, 15.01, 25.693, 14.704, 0.2], [23.827, 20.677, 24.393, 21.243, 0.2], [15.907, 42.843, 15.2, 43.55, 0.2], [14.224, 37.661, 13.236, 37.505, 0.2], [17.426, 33.254, 16.972, 32.363, 0.2], [22.874, 33.254, 23.328, 32.363, 0.2], [26.076, 37.661, 27.064, 37.505, 0.2], [24.393, 42.843, 25.1, 43.55, 0.2], [15.907, 66.043, 15.2, 66.75, 0.2], [14.224, 60.861, 13.236, 60.705, 0.2], [17.426, 56.454, 16.972, 55.563, 0.2], [22.874, 56.454, 23.328, 55.563, 0.2], [26.076, 60.861, 27.064, 60.705, 0.2], [24.393, 66.043, 25.1, 66.75, 0.2], [4.559, 82.641, 4.064, 83.136, 0.18], [7.6, 75.3, 7.6, 74.6, 0.18], [10.641, 82.641, 11.135, 83.136, 0.18], [17.109, 82.641, 16.615, 83.136, 0.18], [20.15, 75.3, 20.15, 74.6, 0.18], [23.191, 82.641, 23.686, 83.136, 0.18], [29.659, 82.641, 29.165, 83.136, 0.18], [32.7, 75.3, 32.7, 74.6, 0.18], [35.741, 82.641, 36.236, 83.136, 0.18], [1.2, 71.0, 39.1, 71.0, 0.3], [1.2, 100.8, 39.1, 100.8, 0.3], [13.9, 71.0, 13.9, 114.5, 0.3], [26.4, 71.0, 26.4, 114.5, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [32.9, 3.0, 3.2, [5.2, 3.2]], [32.9, 125.5, 3.2, [5.2, 3.2]]], "logo": [12.15, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "mode", "x": 20.15, "y": 17.0, "s": 0.8, "v": 0.0, "label": "LP \u00b7 BP \u00b7 HP"}, {"t": "knob", "id": "freq", "x": 20.15, "y": 38.6, "s": 1.0, "v": 0.42, "label": "FREQUENCY"}, {"t": "knob", "id": "emph", "x": 20.15, "y": 61.8, "s": 1.0, "v": 0.55, "label": "EMPHASIS"}, {"t": "knob", "id": "contour", "x": 7.6, "y": 79.6, "s": 0.62, "v": 0.6, "label": "CONTOUR"}, {"t": "knob", "id": "fcv", "x": 20.15, "y": 79.6, "s": 0.62, "v": 0.0, "label": "FREQ CV"}, {"t": "knob", "id": "ecv", "x": 32.7, "y": 79.6, "s": 0.62, "v": 0.0, "label": "EMPH CV"}, {"t": "jack", "id": "contour", "x": 7.6, "y": 93.0, "d": "in"}, {"t": "jack", "id": "fcv", "x": 20.15, "y": 93.0, "d": "in"}, {"t": "jack", "id": "ecv", "x": 32.7, "y": 93.0, "d": "in"}, {"t": "jack", "id": "in1", "x": 7.6, "y": 109.0, "d": "in"}, {"t": "jack", "id": "in2", "x": 20.15, "y": 109.0, "d": "in"}, {"t": "jack", "id": "out", "x": 32.7, "y": 109.0, "d": "out"}]}, {"id": "vca", "name": "VCA", "w": 30.0, "text": [["VCA", 15.0, 3.4, 2.6], ["CV LEVEL", 15.0, 8.7, 1.062], ["RESPONSE", 15.0, 23.5, 1.062], ["LIN.", 9.3, 37.3, 0.938], ["EXP.", 20.7, 37.3, 0.938], ["FIXED", 15.0, 40.0, 1.062], ["CONTROL VOLTAGE", 15.0, 42.3, 1.062], ["0", 10.7, 63.2, 1.0], ["1", 6.1, 57.15, 1.0], ["2", 7.3, 49.3, 1.0], ["3", 15.0, 45.3, 1.0], ["4", 22.6, 49.3, 1.0], ["5", 23.9, 57.15, 1.0], ["6", 19.2, 63.2, 1.0], ["SIGNAL  INPUTS", 8.2, 67.4, 0.775], ["SIGNAL  OUTPUTS", 21.8, 67.4, 0.775], ["CONTROL  INPUTS", 15.0, 93.6, 0.775]], "lines": [[11.323, 34.877, 10.757, 35.443, 0.2], [10.196, 29.21, 9.457, 28.904, 0.2], [15.0, 26.0, 15.0, 25.2, 0.2], [19.804, 29.21, 20.543, 28.904, 0.2], [18.677, 34.877, 19.243, 35.443, 0.2], [11.323, 19.477, 10.757, 20.043, 0.2], [10.196, 13.81, 9.457, 13.504, 0.2], [15.0, 10.6, 15.0, 9.8, 0.2], [19.804, 13.81, 20.543, 13.504, 0.2], [18.677, 19.477, 19.243, 20.043, 0.2], [10.757, 60.043, 10.05, 60.75, 0.2], [9.0, 55.8, 8.0, 55.8, 0.2], [10.757, 51.557, 10.05, 50.85, 0.2], [15.0, 49.8, 15.0, 48.8, 0.2], [19.243, 51.557, 19.95, 50.85, 0.2], [21.0, 55.8, 22.0, 55.8, 0.2], [19.243, 60.043, 19.95, 60.75, 0.2], [1.2, 65.4, 28.8, 65.4, 0.3], [1.2, 91.6, 28.8, 91.6, 0.3], [15.0, 65.4, 15.0, 91.6, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [22.74, 3.0, 3.2, [5.2, 3.2]], [22.74, 125.5, 3.2, [5.2, 3.2]]], "logo": [7.0, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "cvlevel", "x": 15.0, "y": 15.8, "s": 0.8, "v": 0.6, "label": "CV LEVEL"}, {"t": "knob", "id": "response", "x": 15.0, "y": 31.2, "s": 0.8, "v": 0.5, "label": "RESPONSE"}, {"t": "knob", "id": "fixed", "x": 15.0, "y": 55.8, "s": 1.0, "v": 0.0, "label": "FIXED CONTROL VOLTAGE"}, {"t": "jack", "id": "in1", "x": 8.2, "y": 73.4, "d": "in"}, {"t": "jack", "id": "in2", "x": 8.2, "y": 85.6, "d": "in"}, {"t": "jack", "id": "outn", "x": 21.8, "y": 73.4, "d": "out"}, {"t": "jack", "id": "outp", "x": 21.8, "y": 85.6, "d": "out"}, {"t": "jack", "id": "cv1", "x": 8.2, "y": 98.6, "d": "in"}, {"t": "jack", "id": "cv2", "x": 21.8, "y": 98.6, "d": "in"}, {"t": "jack", "id": "cv3", "x": 15.0, "y": 109.4, "d": "in"}]}, {"id": "ad", "name": "AD", "w": 30.0, "text": [["AD", 15.0, 3.4, 2.6], ["ATTACK", 15.0, 9.4, 1.062], ["0", 7.58, 30.52, 1.0], ["2", 4.63, 21.46, 1.0], ["4", 10.23, 13.74, 1.0], ["6", 19.77, 13.74, 1.0], ["8", 25.37, 21.46, 1.0], ["10", 22.42, 30.52, 1.0], ["DECAY", 15.0, 34.4, 1.062], ["0", 7.58, 55.52, 1.0], ["2", 4.63, 46.46, 1.0], ["4", 10.23, 38.74, 1.0], ["6", 19.77, 38.74, 1.0], ["8", 25.37, 46.46, 1.0], ["10", 22.42, 55.52, 1.0], ["ATTACK CV", 8.2, 72.9, 0.938], ["DECAY CV", 21.8, 72.9, 0.938], ["TRIG", 8.2, 103.4, 0.938], ["OUT", 21.8, 103.4, 0.938], ["ONE", 5.6, 65.0, 0.938], ["CYCLE", 24.6, 65.0, 0.938]], "lines": [[10.757, 27.243, 10.05, 27.95, 0.2], [9.074, 22.061, 8.086, 21.905, 0.2], [12.276, 17.654, 11.822, 16.763, 0.2], [17.724, 17.654, 18.178, 16.763, 0.2], [20.926, 22.061, 21.914, 21.905, 0.2], [19.243, 27.243, 19.95, 27.95, 0.2], [10.757, 52.243, 10.05, 52.95, 0.2], [9.074, 47.061, 8.086, 46.905, 0.2], [12.276, 42.654, 11.822, 41.763, 0.2], [17.724, 42.654, 18.178, 41.763, 0.2], [20.926, 47.061, 21.914, 46.905, 0.2], [19.243, 52.243, 19.95, 52.95, 0.2], [5.159, 82.141, 4.665, 82.636, 0.18], [8.2, 74.8, 8.2, 74.1, 0.18], [11.241, 82.141, 11.736, 82.636, 0.18], [18.759, 82.141, 18.264, 82.636, 0.18], [21.8, 74.8, 21.8, 74.1, 0.18], [24.841, 82.141, 25.335, 82.636, 0.18], [1.2, 70.5, 28.8, 70.5, 0.3], [1.2, 100.8, 28.8, 100.8, 0.3], [15.0, 70.5, 15.0, 100.8, 0.3]], "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [22.74, 3.0, 3.2, [5.2, 3.2]], [22.74, 125.5, 3.2, [5.2, 3.2]]], "logo": [7.0, 119.859, 16.0, 2.882], "ctl": [{"t": "knob", "id": "attack", "x": 15.0, "y": 23.0, "s": 1.0, "v": 0.12, "label": "ATTACK"}, {"t": "knob", "id": "decay", "x": 15.0, "y": 48.0, "s": 1.0, "v": 0.62, "label": "DECAY"}, {"t": "knob", "id": "acv", "x": 8.2, "y": 79.1, "s": 0.62, "v": 0.0, "label": "ATTACK CV"}, {"t": "knob", "id": "dcv", "x": 21.8, "y": 79.1, "s": 0.62, "v": 0.0, "label": "DECAY CV"}, {"t": "toggle", "id": "cycle", "label": "ONE / CYCLE", "x": 15.0, "y": 65.0, "v": 0}, {"t": "led", "id": "led", "x": 15.0, "y": 109.0}, {"t": "jack", "id": "acv", "x": 8.2, "y": 93.0, "d": "in"}, {"t": "jack", "id": "dcv", "x": 21.8, "y": 93.0, "d": "in"}, {"t": "jack", "id": "trig", "x": 8.2, "y": 109.0, "d": "in"}, {"t": "jack", "id": "out", "x": 21.8, "y": 109.0, "d": "out"}]}, {"id": "sim", "name": "SIM", "w": 50.5, "holes": [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [43.06, 3.0, 3.2, [5.2, 3.2]], [43.06, 125.5, 3.2, [5.2, 3.2]]], "logo": [17.25, 119.859, 16.0, 2.882], "text": [["SIM", 25.25, 3.4, 2.6], ["SCOPE", 25.25, 9.4, 1.06], ["TEMPO", 11.0, 52.0, 1.06], ["SEQ", 25.25, 52.0, 1.06], ["VOLUME", 39.5, 52.0, 1.06], ["CV", 12.6, 76.4, 0.94], ["GATE", 37.9, 76.4, 0.94], ["AUDIO", 12.6, 96.4, 0.94], ["SCOPE", 37.9, 96.4, 0.94]], "lines": [[1.2, 70.5, 49.3, 70.5, 0.3], [1.2, 90.5, 49.3, 90.5, 0.3], [25.25, 70.5, 25.25, 113.5, 0.3]], "ctl": [{"t": "scope", "x": 4.0, "y": 12.0, "w": 42.5, "h": 34.0}, {"t": "knob", "id": "tempo", "x": 11.0, "y": 60.0, "s": 0.8, "v": 0.45, "label": "TEMPO"}, {"t": "button", "id": "seq", "label": "SEQ", "x": 25.25, "y": 60.0, "v": 1}, {"t": "knob", "id": "volume", "x": 39.5, "y": 60.0, "s": 0.8, "v": 0.5, "label": "VOLUME"}, {"t": "jack", "id": "cv", "x": 12.6, "y": 83.0, "d": "out"}, {"t": "jack", "id": "gate", "x": 37.9, "y": 83.0, "d": "out"}, {"t": "jack", "id": "audio", "x": 12.6, "y": 103.0, "d": "in"}, {"t": "jack", "id": "scope", "x": 37.9, "y": 103.0, "d": "in"}]}], "patch": [["sim", "cv", "vco", "voct"], ["sim", "gate", "ad", "trig"], ["vco", "saw", "mix", "in1"], ["vco", "pulse", "mix", "in2"], ["vco", "blend", "mix", "in3"], ["mix", "out", "vcf", "in1"], ["ad", "out", "vcf", "contour"], ["ad", "out", "vca", "cv1"], ["vcf", "out", "vca", "in1"], ["vca", "outp", "sim", "audio"], ["vca", "outp", "sim", "scope"]], "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARAAAAAxCAYAAAASjfYyAAAAOnRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjExLjIsIGh0dHBzOi8vbWF0cGxvdGxpYi5vcmcvgI3uAAAAAAlwSFlzAAAPYQAAD2EBqD+naQAABCFJREFUeF7t3d2ym0gMBODgyvu/slPjKk4wBxi1pJE00N/NXtiMmvmRWcfZXf6Q2fv9fpsHKWJZlqVIFJrAa4KMRFQUGwgRqbGBEJEaGwgRqbGBEJEaGwgRqbGBEJEaGwgRqbGBEJEaGwgRqZl/tiz5GXe1n0dLMjeRuaWZrkTmpfoke8q6Z6AGIgkkZQ2O8Mo9MrNHxor5kEyaOUDGv4LWPqvrNQ4Krev1QSRqIJ7h9rw2wN7IzCOeTjzyVp1LJJdmHpDxz6B1qzQQNDdCMq9/PbuyxjoBkrBSIyd11Wp4ZqY8EfvFW0Rmydk8/RI1IuCWR702hsc4UpG1skTf4wxNOTtj9Jpc1TtsINEBt5/q2oMyY+anGL02lvEt12bIyntW91cDyQpoaSIzZqY5ZT59VNznXw0kO6CliWSrMneePO8JGSvzkFaFzN9I+xw/X6JaAl4tuHbcdp1kI2nHb7y+Sad80v2yhe4dyX4cAc25Nfpsmn6J2sL1JrX3eoZe7t7rZywLXU32vVTcNzOR7GGPOf40EM1mQYoj70U+IarmfhJkbTXr9XSaOUPWBHnv0dlUPYFoimquqaCXe+30ko5PmN7c7yGHDXlvg2bJosmpuWb1QifSwhLUsllW1vr7ZmEdryp0TyDzgI79ZJFzhazhluoJJFLkJJ7h08Ux7aabzVPuE9XOJtxAZp3MWXNHq9Cwt9B1k+SXvGdG6Fx5gBuIVcZN0njIut71AM8OWcNVeAOhe9BsNq3IWnuZtWfABkI/rE8GyGGz1rpyNfbIuk/EBkJTQJqTl4yas2EDoQ/kk3mGg4XcD+mxgZArpLlEH3KkHnIfT8YGQtDBysRDXc/lf9JwBORTgGryXEPN36KVGjn2HWnWlU8gQprJJX/apxBk/bQ1nghuIMhCePBaTEvu9dr2zy2P+8tmmRcvFTLcQfQ8trMJN5AqvBqLxd2ayR2hh6rCvprJK3LC0MWsQJp5bSYVMktJ760adM8+5T4ttHOkegLRFss2a+4n4Nr4iJ7HTwNBO3qDBNV+Ovdy9V4/gub2WVbypln7nhFjWmkyoXscef9qzaV6AllJGoMm3Gi93L3Xz2gWO0vVdcmaj7uR7GGPPfD1/8b1GNALchir5EYy73ncA1Lfo94IyD2gT8JX0Lpn0HmV1kXHHWmb+euHZO2FCkGlk7p9nMrOjWbOhM6V5d7QWnSs6tn89a8wls3iQVtfe52HzNp3w4ZzLnufHdU//A4kK6i1rvV6jYya9J/H/HuMESUr61nd0y9Ro4N61fMaRyKylhf0E956j5rr0YxPo5lTi6t6l38KExG01fCu4z3ekYgaJGNZC8u1mSJyS85m92/jboN6fjKMnoBZc4/kuX6Ur8Ie//pjXA3JphzdLFCSzE213EQIyT637vF/o6+wdcKGckwAAAAASUVORK5CYII="};
+const $ = s => document.querySelector(s);
+const PH = 128.5, MX = 1.2, MY = 4.5;
+const svg = $('#rack'), NS = 'http://www.w3.org/2000/svg';
 const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
-const PARAMS = {}, CTL = {}, JACKS = {};
+const PARAMS = {}, DEF = {}, CTL = {}, JACKS = {}, LAB = {};
 let cables = [];
-// ------------------------------------------------------------------ layout
-let X = M; const OFF = {};
-DATA.modules.forEach(m => { OFF[m.id] = X; X += m.w + 0.25; });
-const TW = X + M - 0.25, TH = PH + 2 * M;
+let X = MX; const OFF = {};
+DATA.modules.forEach(m => { OFF[m.id] = X; X += m.w + 0.2; });
+const TW = X - 0.2 + MX, TH = PH + 2 * MY;
 svg.setAttribute('viewBox', `0 0 ${TW} ${TH}`);
-const defs = el('defs', {}, svg);
-defs.innerHTML = `
+el('defs', {}, svg).innerHTML = `
 <linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
-<linearGradient id="case" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a1e"/><stop offset="1" stop-color="#22180f"/></linearGradient>
-<linearGradient id="rail" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfcfcf"/><stop offset=".5" stop-color="#8a8a8a"/><stop offset="1" stop-color="#bdbdbd"/></linearGradient>
 <radialGradient id="cap" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d6d1c3"/><stop offset="1" stop-color="#a39e8f"/></radialGradient>
-<radialGradient id="nut" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#d0ccc2"/><stop offset="1" stop-color="#8f8b82"/></radialGradient>
-<radialGradient id="screw" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#f2f2f2"/><stop offset="1" stop-color="#8c8c8c"/></radialGradient>
-<radialGradient id="ledg"><stop offset="0" stop-color="#ff6b5e"/><stop offset="1" stop-color="#c0282d"/></radialGradient>`;
-el('rect', { x: 0, y: 0, width: TW, height: TH, rx: 2.5, fill: 'url(#case)' }, svg);
-el('rect', { x: M - 0.5, y: M - 0.5, width: TW - 2 * M + 1, height: PH + 1, fill: '#0a0a0a' }, svg);
-for (const ry of [M + 0.5, M + PH - 6.5]) el('rect', { x: M, y: ry, width: TW - 2 * M, height: 6, fill: 'url(#rail)' }, svg);
-const gPanels = el('g', {}, svg), gCables = el('g', { 'pointer-events': 'none' }, svg);
+<radialGradient id="nut" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#f0f0eb"/><stop offset=".6" stop-color="#b7b7b1"/><stop offset="1" stop-color="#6f6e68"/></radialGradient>
+<radialGradient id="screw" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d2cdc1"/><stop offset="1" stop-color="#6d685e"/></radialGradient>
+<radialGradient id="ledg" cx=".4" cy=".35"><stop offset="0" stop-color="#fff3cc"/><stop offset=".45" stop-color="#ff5a4a"/><stop offset="1" stop-color="#9c1d16"/></radialGradient>
+<radialGradient id="lamp" cx=".4" cy=".35"><stop offset="0" stop-color="#fff3cc"/><stop offset=".45" stop-color="#ffae3d"/><stop offset="1" stop-color="#b5560e"/></radialGradient>
+<pattern id="railp" width="5.08" height="3.4" patternUnits="userSpaceOnUse"><rect width="5.08" height="3.4" fill="#26231f"/><circle cx="2.54" cy="1.7" r=".55" fill="#958e80"/><circle cx="2.54" cy="1.7" r=".75" fill="none" stroke="#36322d" stroke-width=".2"/></pattern>`;
+el('rect', { x: 0, y: 0, width: TW, height: TH, fill: '#0b0a09' }, svg);
+el('rect', { x: 0, y: MY - 3.4, width: TW, height: 3.4, fill: 'url(#railp)' }, svg);
+el('rect', { x: 0, y: MY + PH, width: TW, height: 3.4, fill: 'url(#railp)' }, svg);
+const gPanels = el('g', {}, svg), gCables = el('g', { id: 'cables', 'pointer-events': 'none' }, svg);
 // ------------------------------------------------------------------ panels
 function knobGfx(g, s) {
   el('circle', { r: 5.4 * s, fill: '#151515', stroke: '#777', 'stroke-width': .25 }, g);
@@ -221,7 +290,8 @@ function knobGfx(g, s) {
   return rot;
 }
 DATA.modules.forEach(m => {
-  const g = el('g', { transform: `translate(${OFF[m.id]},${M})` }, gPanels);
+  const g = el('g', { transform: `translate(${OFF[m.id]},${MY})` }, gPanels);
+  el('rect', { x: .25, y: .6, width: m.w, height: PH, fill: 'rgba(0,0,0,.6)' }, g);
   el('rect', { x: 0, y: 0, width: m.w, height: PH, fill: '#111' }, g);
   el('rect', { x: 0, y: 0, width: 1.6, height: PH, fill: 'url(#alu)' }, g);
   el('rect', { x: m.w - 1.6, y: 0, width: 1.6, height: PH, fill: 'url(#alu)' }, g);
@@ -230,54 +300,79 @@ DATA.modules.forEach(m => {
   const L = m.logo; el('image', { href: DATA.logo, x: L[0], y: L[1], width: L[2], height: L[3], preserveAspectRatio: 'none' }, g);
   m.holes.forEach(([hx, hy]) => {
     el('rect', { x: hx - 2.6, y: hy - 1.6, width: 5.2, height: 3.2, rx: 1.6, fill: '#050505' }, g);
-    const s = el('g', { transform: `translate(${hx + (m.id.length % 2 ? -0.6 : 0.6)},${hy})` }, g);
-    el('circle', { r: 2.5, fill: 'url(#screw)', stroke: '#555', 'stroke-width': .15 }, s);
-    el('line', { x1: -1.5, y1: -.6, x2: 1.5, y2: .6, stroke: '#555', 'stroke-width': .45 }, s);
+    const s = el('g', { transform: `translate(${hx},${hy})` }, g);
+    el('circle', { r: 2.3, fill: 'url(#screw)', stroke: '#2c2a26', 'stroke-width': .25 }, s);
+    el('line', { x1: -1.4, y1: -.5, x2: 1.4, y2: .5, stroke: '#3a3733', 'stroke-width': .4 }, s);
   });
   m.ctl.forEach(c => {
     const key = m.id + '.' + c.id;
+    if (c.label) LAB[key] = m.name + ' · ' + c.label;
     if (c.t === 'knob' || c.t === 'rotary') {
       const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
       const rot = knobGfx(cg, c.s);
       el('circle', { r: 5.6 * c.s + 1, fill: 'transparent' }, cg);
-      CTL[key] = { c, rot, kind: c.t };
-      PARAMS[key] = c.v;
+      CTL[key] = { c, rot, kind: c.t }; PARAMS[key] = DEF[key] = c.v;
       bindKnob(cg, key);
     } else if (c.t === 'toggle') {
       const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
-      el('circle', { r: 3.0, fill: 'url(#nut)', stroke: '#666', 'stroke-width': .2 }, cg);
+      el('circle', { r: 3.0, fill: 'url(#nut)', stroke: '#555', 'stroke-width': .2 }, cg);
       const lev = el('line', { x1: 0, y1: 0, x2: -3.6, y2: 0, stroke: '#e4e4e4', 'stroke-width': 1.5, 'stroke-linecap': 'round' }, cg);
       el('circle', { r: 1.0, fill: '#bbb' }, cg);
       el('rect', { x: -6, y: -4, width: 12, height: 8, fill: 'transparent' }, cg);
-      CTL[key] = { c, lev, kind: 'toggle' }; PARAMS[key] = c.v;
+      CTL[key] = { c, lev, kind: 'toggle' }; PARAMS[key] = DEF[key] = c.v;
       cg.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
     } else if (c.t === 'button') {
       const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
-      el('rect', { x: -3.6, y: -3.6, width: 7.2, height: 7.2, rx: 1.2, fill: '#2b2b2b', stroke: '#888', 'stroke-width': .25 }, cg);
-      const led = el('circle', { r: 1.3, fill: 'url(#ledg)' }, cg);
-      CTL[key] = { c, led, kind: 'button' }; PARAMS[key] = c.v;
+      el('rect', { x: -3.6, y: -3.6, width: 7.2, height: 7.2, rx: 1.2, fill: '#0d0c0b', stroke: '#3b3733', 'stroke-width': .3 }, cg);
+      const led = el('circle', { r: 1.4, fill: 'url(#lamp)' }, cg);
+      CTL[key] = { c, led, kind: 'button' }; PARAMS[key] = DEF[key] = c.v;
       cg.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
     } else if (c.t === 'led') {
-      CTL[key] = { c, kind: 'led', e: el('circle', { cx: c.x, cy: c.y, r: 1.6, fill: 'url(#ledg)', stroke: '#666', 'stroke-width': .2, opacity: .2 }, g) };
+      CTL[key] = { c, kind: 'led', e: el('circle', { cx: c.x, cy: c.y, r: 1.6, fill: 'url(#ledg)', stroke: '#444', 'stroke-width': .2, opacity: .2 }, g) };
     } else if (c.t === 'scope') {
-      el('rect', { x: c.x, y: c.y, width: c.w, height: c.h, rx: 1, fill: '#06140b', stroke: '#555', 'stroke-width': .3 }, g);
-      for (let k = 1; k < 4; k++) el('line', { x1: c.x, x2: c.x + c.w, y1: c.y + c.h * k / 4, y2: c.y + c.h * k / 4, stroke: '#1d3a26', 'stroke-width': .15 }, g);
-      for (let k = 1; k < 6; k++) el('line', { y1: c.y, y2: c.y + c.h, x1: c.x + c.w * k / 6, x2: c.x + c.w * k / 6, stroke: '#1d3a26', 'stroke-width': .15 }, g);
-      CTL[m.id + '.screen'] = { c, kind: 'scope', path: el('polyline', { fill: 'none', stroke: '#7dffa0', 'stroke-width': .35, 'stroke-linejoin': 'round', points: '' }, g),
-        txt: (() => { const t = el('text', { x: c.x + 1, y: c.y + c.h - 1.2, 'font-size': 1.6, fill: '#5fbf7a', 'font-family': 'monospace' }, g); return t; })() };
+      el('rect', { x: c.x, y: c.y, width: c.w, height: c.h, rx: 1.4, fill: '#070806', stroke: '#2b2926', 'stroke-width': .6 }, g);
+      for (let k = 1; k < 4; k++) el('line', { x1: c.x, x2: c.x + c.w, y1: c.y + c.h * k / 4, y2: c.y + c.h * k / 4, stroke: '#2a2015', 'stroke-width': .15 }, g);
+      for (let k = 1; k < 6; k++) el('line', { y1: c.y, y2: c.y + c.h, x1: c.x + c.w * k / 6, x2: c.x + c.w * k / 6, stroke: '#2a2015', 'stroke-width': .15 }, g);
+      CTL[m.id + '.screen'] = { c, kind: 'scope', path: el('polyline', { fill: 'none', stroke: '#ffae3d', 'stroke-width': .38, 'stroke-linejoin': 'round', points: '' }, g),
+        txt: el('text', { x: c.x + 1.2, y: c.y + c.h - 1.4, 'font-size': 1.7, fill: '#b5772a', 'font-family': 'JetBrains Mono,monospace' }, g) };
     } else if (c.t === 'jack') {
       const jg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'jack' }, g);
-      el('circle', { r: 3.6, fill: 'url(#nut)', stroke: '#666', 'stroke-width': .2 }, jg);
-      el('circle', { r: 1.8, fill: '#050505' }, jg);
+      el('circle', { r: 3.6, fill: 'url(#nut)', stroke: '#3a3935', 'stroke-width': .25 }, jg);
+      el('circle', { r: 2.0, fill: '#292826' }, jg);
+      el('circle', { r: 1.6, fill: '#000' }, jg);
       el('circle', { r: 5, fill: 'transparent' }, jg);
       jg.dataset.key = key;
-      JACKS[key] = { x: OFF[m.id] + c.x, y: M + c.y, d: c.d, g: jg };
+      JACKS[key] = { x: OFF[m.id] + c.x, y: MY + c.y, d: c.d, g: jg };
       bindJack(jg, key);
     }
   });
 });
 document.querySelectorAll('.ctl,.jack').forEach(n => n.addEventListener('touchstart', e => e.preventDefault(), { passive: false }));
-// ------------------------------------------------------------------ controls
+// ------------------------------------------------------------------ values
+const NAMES = ['LO', "32'", "16'", "8'", "4'", "2'"], WAVES = ['SINE', 'TRIANGLE', 'SAW', 'PULSE'];
+const tm = s => s < 1 ? (s * 1000).toFixed(s < .01 ? 1 : 0) + ' ms' : s.toFixed(2) + ' s';
+const pc = v => Math.round(v * 100) + ' %';
+function fmt(key, v) {
+  switch (key) {
+    case 'vco.range': return NAMES[v];
+    case 'vco.fine': { const st = (v - .5) * 12; return (st >= 0 ? '+' : '') + st.toFixed(1) + ' demi-tons'; }
+    case 'vco.width': return 'rapport ' + Math.round(5 + 90 * v) + ' %';
+    case 'vco.blend': { const p = v * 3, i = Math.min(2, Math.floor(p)), f = p - i; return f < .02 ? WAVES[i] : f > .98 ? WAVES[i + 1] : WAVES[i] + ' → ' + WAVES[i + 1] + ' ' + Math.round(f * 100) + ' %'; }
+    case 'mix.master': return 'gain ×' + (1 + 10 * v).toFixed(1);
+    case 'vcf.mode': return v < .02 ? 'LP 24 dB' : v < .48 ? 'LP → BP ' + Math.round(v * 200) + ' %' : v <= .52 ? 'BP 12 dB' : v < .98 ? 'BP → HP ' + Math.round((v - .5) * 200) + ' %' : 'HP 12 dB';
+    case 'vcf.freq': { const f = 20 * Math.pow(2, 10 * v); return f < 1000 ? Math.round(f) + ' Hz' : (f / 1000).toFixed(2) + ' kHz'; }
+    case 'vca.response': return v < .02 ? 'LIN' : v > .98 ? 'EXP' : 'LIN ' + Math.round((1 - v) * 100) + ' % · EXP ' + Math.round(v * 100) + ' %';
+    case 'vca.fixed': return (6 * v).toFixed(2) + ' V';
+    case 'ad.attack': case 'ad.decay': return tm(0.0008 * Math.pow(10, 4 * v));
+    case 'ad.cycle': return v ? 'CYCLE (LFO)' : 'ONE';
+    case 'sim.tempo': return Math.round(50 + 190 * v) + ' BPM';
+    case 'sim.seq': return v ? 'en marche' : 'arrêtée';
+  }
+  if (/\.(l\d|emph)$/.test(key)) return (v * 10).toFixed(1);
+  return pc(v);
+}
+const status = $('#status');
+function show(key) { if (LAB[key]) status.textContent = LAB[key] + '  ' + fmt(key, PARAMS[key]); }
 function draw(key) {
   const C = CTL[key], v = PARAMS[key];
   if (!C) return;
@@ -285,67 +380,76 @@ function draw(key) {
   else if (C.kind === 'rotary') C.rot.setAttribute('transform', `rotate(${C.c.angles[v]})`);
   else if (C.kind === 'toggle') C.lev.setAttribute('x2', v ? 3.6 : -3.6);
   else if (C.kind === 'button') C.led.setAttribute('opacity', v ? 1 : .15);
-  if (key === 'sim.seq') document.getElementById('bSeq').classList.toggle('on', !!v);
+  if (key === 'sim.seq') $('#sled').classList.toggle('on', !!v);
 }
-function setParam(key, v) { PARAMS[key] = v; draw(key); send({ t: 'p', k: key, v }); }
+function setParam(key, v) { PARAMS[key] = v; draw(key); show(key); send({ t: 'p', k: key, v }); }
 function svgPt(e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
 function bindKnob(g, key) {
-  let y0, v0, moved;
-  g.addEventListener('pointerdown', e => { e.preventDefault(); g.setPointerCapture(e.pointerId); y0 = e.clientY; v0 = PARAMS[key]; moved = false; });
+  let y0, v0, moved, lastTap = 0;
+  g.addEventListener('pointerdown', e => { e.preventDefault(); g.setPointerCapture(e.pointerId); y0 = e.clientY; v0 = PARAMS[key]; moved = false; show(key); });
   g.addEventListener('pointermove', e => {
     if (y0 === undefined) return;
     const dy = y0 - e.clientY; if (Math.abs(dy) > 3) moved = true;
+    const fine = e.shiftKey ? 0.2 : 1;
     if (CTL[key].kind === 'rotary') { const n = CTL[key].c.angles.length; const v = Math.max(0, Math.min(n - 1, v0 + Math.round(dy / 28))); if (v !== PARAMS[key]) setParam(key, v); }
-    else setParam(key, Math.max(0, Math.min(1, v0 + dy / 180)));
+    else setParam(key, Math.max(0, Math.min(1, v0 + fine * dy / 180)));
   });
-  const up = () => { if (y0 !== undefined && !moved && CTL[key].kind === 'rotary') setParam(key, (PARAMS[key] + 1) % CTL[key].c.angles.length); y0 = undefined; };
+  const up = () => {
+    if (y0 !== undefined && !moved) {
+      const now = performance.now();
+      if (CTL[key].kind === 'rotary') setParam(key, (PARAMS[key] + 1) % CTL[key].c.angles.length);
+      else if (now - lastTap < 320) setParam(key, DEF[key]);
+      lastTap = now;
+    }
+    y0 = undefined;
+  };
   g.addEventListener('pointerup', up); g.addEventListener('pointercancel', () => { y0 = undefined; });
 }
-// ------------------------------------------------------------------ cables
-const COLORS = ['#e8443a', '#f2a93b', '#f4d03f', '#4fc36b', '#3aa0e8', '#9b6be8', '#ec6fb4', '#e6e6e6', '#3fd0c9'];
+// ------------------------------------------------------------------ cables (M55 look)
+const PAL = ['#c8332b', '#e3b23c', '#2f6fb5', '#2f8f5b', '#e9e2cf', '#d26a1e', '#7a4fa0', '#3fb8b0'];
 let ci = 0;
 function cablePath(a, b) {
-  const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), sag = 5 + d * 0.16, lim = TH - 4;
+  const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), sag = 5 + d * 0.16, lim = TH - 2;
   const y1 = Math.min(a.y + sag, lim), y2 = Math.min(b.y + sag, lim);
-  return `M${a.x},${a.y} C${a.x + dx * .2},${y1} ${b.x - dx * .2},${y2} ${b.x},${b.y}`;
+  return `M${a.x},${a.y} C${a.x + dx * .15},${y1} ${b.x - dx * .15},${y2} ${b.x},${b.y}`;
 }
-function plug(p, col, parent) {
-  const g = el('g', { transform: `translate(${p.x},${p.y})` }, parent);
-  el('circle', { r: 3.3, fill: '#1c1c1c', stroke: col, 'stroke-width': 1.1 }, g);
-  el('circle', { r: 1.4, fill: col, opacity: .9 }, g);
+function cableG(a, b, col, parent) {
+  const g = el('g', {}, parent), d = cablePath(a, b);
+  el('path', { d, fill: 'none', stroke: 'rgba(0,0,0,.45)', 'stroke-width': 2.1, transform: 'translate(.6 1.5)' }, g);
+  el('path', { d, fill: 'none', stroke: col, 'stroke-width': 1.5, 'stroke-linecap': 'round' }, g);
+  el('path', { d, fill: 'none', stroke: 'rgba(255,255,255,.22)', 'stroke-width': .42, transform: 'translate(-.3 -.3)' }, g);
+  for (const p of [a, b]) {
+    el('circle', { cx: p.x, cy: p.y, r: 2.6, fill: col, stroke: '#0a0908', 'stroke-width': .6 }, g);
+    el('circle', { cx: p.x - .6, cy: p.y - .6, r: .8, fill: 'rgba(255,255,255,.35)' }, g);
+  }
+  return g;
 }
 function renderCables() {
   gCables.innerHTML = '';
-  for (const c of cables) {
-    const a = JACKS[c.src], b = JACKS[c.dst];
-    el('path', { d: cablePath(a, b), fill: 'none', stroke: '#000', 'stroke-width': 2.4, opacity: .35, transform: 'translate(.5,1)' }, gCables);
-    el('path', { d: cablePath(a, b), fill: 'none', stroke: c.col, 'stroke-width': 1.9, 'stroke-linecap': 'round', opacity: .92 }, gCables);
-  }
-  for (const c of cables) { plug(JACKS[c.src], c.col, gCables); plug(JACKS[c.dst], c.col, gCables); }
+  for (const c of cables) cableG(JACKS[c.src], JACKS[c.dst], c.col, gCables);
   send({ t: 'cables', list: cables.map(c => [c.src, c.dst]) });
 }
 function connect(a, b, col) {
   if (a === b) return;
-  let A = JACKS[a], B = JACKS[b];
-  if (A.d === B.d) return;
+  const A = JACKS[a], B = JACKS[b];
+  if (A.d === B.d) { status.textContent = A.d === 'in' ? 'Deux entrées : branche une sortie' : 'Deux sorties : branche une entrée'; return; }
   if (A.d === 'in') [a, b] = [b, a];
   cables = cables.filter(c => c.dst !== b);
-  cables.push({ src: a, dst: b, col: col || COLORS[ci++ % COLORS.length] });
+  cables.push({ src: a, dst: b, col: col || PAL[ci++ % PAL.length] });
   renderCables();
 }
 let drag = null;
 function bindJack(g, key) {
   g.addEventListener('pointerdown', e => {
     e.preventDefault(); g.setPointerCapture(e.pointerId);
-    drag = { key, moved: false, x0: e.clientX, y0: e.clientY, col: COLORS[ci % COLORS.length], tmp: null };
+    drag = { key, moved: false, x0: e.clientX, y0: e.clientY, col: PAL[ci % PAL.length], tmp: null };
   });
   g.addEventListener('pointermove', e => {
     if (!drag) return;
     if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 6) drag.moved = true;
     if (!drag.moved) return;
-    const p = svgPt(e), a = JACKS[drag.key];
-    if (!drag.tmp) drag.tmp = el('path', { fill: 'none', stroke: drag.col, 'stroke-width': 1.9, opacity: .8, 'stroke-linecap': 'round', 'pointer-events': 'none' }, svg);
-    drag.tmp.setAttribute('d', cablePath(a, p));
+    if (drag.tmp) drag.tmp.remove();
+    drag.tmp = cableG(JACKS[drag.key], svgPt(e), drag.col, svg); drag.tmp.setAttribute('opacity', .85); drag.tmp.setAttribute('pointer-events', 'none');
   });
   g.addEventListener('pointerup', e => {
     if (!drag) return;
@@ -353,17 +457,26 @@ function bindJack(g, key) {
     if (d.tmp) d.tmp.remove();
     if (!d.moved) { const n = cables.length; cables = cables.filter(c => c.src !== d.key && c.dst !== d.key); if (cables.length !== n) renderCables(); return; }
     const t = document.elementFromPoint(e.clientX, e.clientY);
-    const jg = t && t.closest && t.closest('.jack');
+    let jg = t && t.closest && t.closest('.jack');
+    if (!jg) { // snap to the nearest jack within 7 mm
+      const p = svgPt(e); let best = null, bd = 7;
+      for (const k in JACKS) { const J = JACKS[k], dd = Math.hypot(J.x - p.x, J.y - p.y); if (dd < bd) { bd = dd; best = J.g; } }
+      jg = best;
+    }
     if (jg && jg.dataset.key) { ci++; connect(d.key, jg.dataset.key, d.col); }
   });
   g.addEventListener('pointercancel', () => { if (drag && drag.tmp) drag.tmp.remove(); drag = null; });
 }
-function loadPatch() { cables = []; ci = 0; DATA.patch.forEach(([m1, j1, m2, j2]) => connect(m1 + '.' + j1, m2 + '.' + j2)); }
+function loadPatch() {
+  cables = []; ci = 0;
+  for (const k in DEF) { PARAMS[k] = DEF[k]; draw(k); }
+  if (audioOn) send({ t: 'state', params: Object.assign({}, PARAMS), cables: [] });
+  DATA.patch.forEach(([m1, j1, m2, j2]) => connect(m1 + '.' + j1, m2 + '.' + j2));
+}
 // ------------------------------------------------------------------ audio
-let ctx = null, node = null, engine = null, sp = null;
+let ctx = null, node = null, engine = null, sp = null, audioOn = false;
 function send(d) { if (node) node.port.postMessage(d); else if (engine) engine.msg(d); }
 function fullState() { return { t: 'state', params: Object.assign({}, PARAMS), cables: cables.map(c => [c.src, c.dst]) }; }
-const status = document.getElementById('status');
 function onReport(r) {
   const S = CTL['sim.screen'], c = S.c, sc = r.scope;
   let i0 = 0; for (let i = 1; i < 1024; i++) if (sc[i - 1] <= 0 && sc[i] > 0) { i0 = i; break; }
@@ -371,12 +484,11 @@ function onReport(r) {
   for (let i = 0; i < N; i += 3) { const v = sc[i0 + i]; pts.push((c.x + c.w * i / N).toFixed(2) + ',' + (c.y + c.h / 2 - Math.max(-1.05, Math.min(1.05, v / 10)) * c.h / 2).toFixed(2)); }
   S.path.setAttribute('points', pts.join(' '));
   let mx = 0; for (let i = 0; i < sc.length; i++) mx = Math.max(mx, Math.abs(sc[i]));
-  S.txt.textContent = `±10 V   crête ${mx.toFixed(1)} V`;
+  S.txt.textContent = `±10 V · crête ${mx.toFixed(1)} V`;
   CTL['ad.led'].e.setAttribute('opacity', (0.15 + 0.85 * Math.min(1, r.led)).toFixed(2));
 }
-async function start() {
-  const b = document.getElementById('bStart');
-  if (ctx) { if (ctx.state === 'running') { await ctx.suspend(); b.textContent = '▶ Démarrer le son'; b.classList.remove('on'); } else { await ctx.resume(); b.textContent = '■ Couper le son'; b.classList.add('on'); } return; }
+async function startAudio() {
+  if (ctx) { if (ctx.state !== 'running') await ctx.resume(); audioOn = true; $('#pled').classList.add('on'); return; }
   ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
   try {
     await ctx.audioWorklet.addModule('dsp.js');
@@ -384,7 +496,6 @@ async function start() {
     node.port.onmessage = e => onReport(e.data);
     node.connect(ctx.destination);
     node.port.postMessage(fullState());
-    status.textContent = '';
   } catch (err) {
     node = null;
     engine = new OctavioEngine(ctx.sampleRate); engine.msg(fullState());
@@ -392,49 +503,71 @@ async function start() {
     sp = ctx.createScriptProcessor(2048, 0, 2);
     sp.onaudioprocess = e => engine.render(e.outputBuffer.getChannelData(0), e.outputBuffer.getChannelData(1), e.outputBuffer.length);
     sp.connect(ctx.destination);
-    status.textContent = '(mode de secours)';
   }
   await ctx.resume();
-  b.textContent = '■ Couper le son'; b.classList.add('on');
+  audioOn = true; $('#pled').classList.add('on');
 }
-document.getElementById('bStart').onclick = start;
-document.getElementById('bSeq').onclick = () => setParam('sim.seq', PARAMS['sim.seq'] ? 0 : 1);
-document.getElementById('bPatch').onclick = loadPatch;
-document.getElementById('bClear').onclick = () => { cables = []; renderCables(); };
-// ------------------------------------------------------------------ keyboard
-let base = 48; const keys = document.getElementById('keys'); const held = new Map();
-function buildKeys() {
-  keys.innerHTML = ''; const whites = [0, 2, 4, 5, 7, 9, 11], nW = 15, ww = 100 / nW;
-  let wi = 0;
-  for (let n = 0; n < 25; n++) {
-    const pc = n % 12, isW = whites.includes(pc), d = document.createElement('div');
-    d.className = 'k ' + (isW ? 'w' : 'b'); d.dataset.note = base + n;
-    if (isW) { d.style.left = (wi * ww) + '%'; d.style.width = ww + '%'; wi++; }
-    else { d.style.left = (wi * ww - ww * 0.32) + '%'; d.style.width = (ww * 0.64) + '%'; }
-    keys.appendChild(d);
+async function stopAudio() { if (ctx) await ctx.suspend(); audioOn = false; $('#pled').classList.remove('on'); }
+$('#startBtn').onclick = () => { $('#startOv').hidden = true; startAudio(); };
+$('#power').onclick = () => audioOn ? stopAudio() : startAudio();
+$('#bSeq').onclick = () => setParam('sim.seq', PARAMS['sim.seq'] ? 0 : 1);
+$('#bPatch').onclick = loadPatch;
+$('#bClear').onclick = () => { cables = []; renderCables(); };
+$('#cabOp').onclick = () => svg.classList.toggle('faded');
+$('#help').onclick = () => { $('#helpOv').hidden = false; };
+$('#helpClose').onclick = () => { $('#helpOv').hidden = true; };
+// ------------------------------------------------------------------ keyboard (M55)
+const kbd = $('#kbd'); let kbBase = 48, keyEls = {}; const kbPtr = new Map(), noteCnt = {};
+const elh = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+function buildKbd() {
+  kbd.innerHTML = ''; keyEls = {}; const w = kbd.clientWidth || 300; const nW = clamp(Math.floor(w / 36), 8, 36), kw = w / nW, WS = [0, 2, 4, 5, 7, 9, 11];
+  for (let i = 0; i < nW; i++) {
+    const s = WS[i % 7], n = kbBase + Math.floor(i / 7) * 12 + s; const e = elh('div', 'wk', s === 0 ? `<span>C${Math.floor(n / 12) - 1}</span>` : '');
+    e.style.left = i * kw + 'px'; e.style.width = kw + 'px'; e.dataset.n = n; kbd.appendChild(e); keyEls[n] = e;
+    if ([0, 2, 5, 7, 9].includes(s) && i < nW - 1) { const b = elh('div', 'bk'); b.style.left = (i + 1) * kw - kw * 0.31 + 'px'; b.style.width = kw * 0.62 + 'px'; b.dataset.n = n + 1; kbd.appendChild(b); keyEls[n + 1] = b; }
   }
+  $('#kOct').textContent = 'C' + (Math.floor(kbBase / 12) - 1);
+  for (const n in noteCnt) if (noteCnt[n] > 0 && keyEls[n]) keyEls[n].classList.add('on');
 }
-function keyAt(e) { const t = document.elementFromPoint(e.clientX, e.clientY); return t && t.classList && t.classList.contains('k') ? t : null; }
-function updKey() {
-  keys.querySelectorAll('.k').forEach(k => k.classList.remove('down'));
-  let last = null; for (const [, k] of held) { if (k) { k.classList.add('down'); last = k; } }
-  send({ t: 'key', note: last ? +last.dataset.note : null });
-}
-keys.addEventListener('pointerdown', e => { e.preventDefault(); keys.setPointerCapture(e.pointerId); held.set(e.pointerId, keyAt(e)); updKey(); });
-keys.addEventListener('pointermove', e => { if (!held.has(e.pointerId)) return; const k = keyAt(e); if (k !== held.get(e.pointerId)) { held.set(e.pointerId, k); updKey(); } });
-const rel = e => { held.delete(e.pointerId); updKey(); };
-keys.addEventListener('pointerup', rel); keys.addEventListener('pointercancel', rel);
-document.getElementById('oUp').onclick = () => { if (base < 72) { base += 12; buildKeys(); } };
-document.getElementById('oDn').onclick = () => { if (base > 24) { base -= 12; buildKeys(); } };
-buildKeys();
-// ------------------------------------------------------------------ sizing
+let hold = false, physTotal = 0; const phys = {}, latched = new Set();
+function releaseLatched() { for (const l of latched) rawOff(l); latched.clear(); }
+function setHold(on) { hold = on; $('#kHold').classList.toggle('on', on); $('#hled').classList.toggle('on', on); if (!hold) releaseLatched(); }
+$('#kHold').onclick = () => setHold(!hold);
+function showKbd(on) { $('#kbdWrap').hidden = !on; $('#kled').classList.toggle('on', on); if (on) buildKbd(); fit(); }
+$('#kbToggle').onclick = () => showKbd($('#kbdWrap').hidden);
+function noteOn(n) { if (hold && physTotal === 0 && latched.size) releaseLatched(); if (latched.has(n)) { latched.delete(n); rawOff(n); } phys[n] = (phys[n] || 0) + 1; physTotal++; rawOn(n); }
+function noteOff(n) { if (!phys[n]) return; phys[n]--; physTotal--; if (hold) latched.add(n); else rawOff(n); }
+function rawOn(n) { if (!audioOn) { $('#startOv').hidden = true; startAudio(); } noteCnt[n] = (noteCnt[n] || 0) + 1; if (noteCnt[n] === 1) { send({ t: 'note', on: 1, n }); keyEls[n] && keyEls[n].classList.add('on'); } }
+function rawOff(n) { if (!noteCnt[n]) return; noteCnt[n]--; if (noteCnt[n] === 0) { send({ t: 'note', on: 0, n }); keyEls[n] && keyEls[n].classList.remove('on'); } }
+function noteAt(e) { const t = document.elementFromPoint(e.clientX, e.clientY); const k = t && t.closest && t.closest('.wk,.bk'); return k && kbd.contains(k) ? +k.dataset.n : null; }
+kbd.addEventListener('pointerdown', e => { e.preventDefault(); try { kbd.setPointerCapture(e.pointerId); } catch (_) { } const n = noteAt(e); if (n != null) { kbPtr.set(e.pointerId, n); noteOn(n); } });
+kbd.addEventListener('pointermove', e => {
+  if (!kbPtr.has(e.pointerId)) return; const cur = kbPtr.get(e.pointerId), n = noteAt(e);
+  if (n !== cur) { if (cur != null) noteOff(cur); if (n != null) noteOn(n); kbPtr.set(e.pointerId, n); }
+});
+const kUp = e => { if (!kbPtr.has(e.pointerId)) return; const n = kbPtr.get(e.pointerId); if (n != null) noteOff(n); kbPtr.delete(e.pointerId); };
+kbd.addEventListener('pointerup', kUp); kbd.addEventListener('pointercancel', kUp);
+$('#kUp').onclick = () => { kbBase = Math.min(84, kbBase + 12); buildKbd(); }; $('#kDn').onclick = () => { kbBase = Math.max(24, kbBase - 12); buildKbd(); };
+const KEYMAP = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12, o: 13, l: 14, p: 15 }; const qwHeld = {};
+window.addEventListener('keydown', e => {
+  if (e.repeat || e.metaKey || e.ctrlKey) return; const k = e.key.toLowerCase();
+  if (k === 'z') { kbBase = Math.max(24, kbBase - 12); buildKbd(); return; } if (k === 'x') { kbBase = Math.min(84, kbBase + 12); buildKbd(); return; }
+  if (k in KEYMAP && !qwHeld[k]) { const n = kbBase + 12 + KEYMAP[k]; qwHeld[k] = n; noteOn(n); }
+});
+window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (qwHeld[k] != null) { noteOff(qwHeld[k]); delete qwHeld[k]; } });
+// ------------------------------------------------------------------ zoom / fit
+const wrap = $('#rackWrap'); let zoom = 1;
 function fit() {
-  const hAvail = Math.max(340, Math.min(window.innerHeight - 250, 900));
-  svg.style.height = hAvail + 'px'; svg.style.width = (hAvail * TW / TH) + 'px';
+  const h = Math.max(160, wrap.clientHeight - 20 - 28) * zoom;
+  svg.style.height = h + 'px'; svg.style.width = (h * TW / TH) + 'px';
 }
-window.addEventListener('resize', fit); fit();
+$('#zFit').onclick = () => { zoom = 1; fit(); };
+$('#zIn').onclick = () => { zoom = Math.min(3, zoom * 1.25); fit(); };
+$('#zOut').onclick = () => { zoom = Math.max(.4, zoom / 1.25); fit(); };
+window.addEventListener('resize', () => { fit(); buildKbd(); });
 Object.keys(PARAMS).forEach(draw);
-loadPatch();
+buildKbd(); fit(); loadPatch();
 </script>
 </body>
 </html>
