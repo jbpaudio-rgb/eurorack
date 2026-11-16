@@ -30,9 +30,11 @@
 4. Les pièces traversantes (jacks, pots, commutateur, barrette d'alimentation) ne sont pas dans cette liste : tu les soudes toi-même (étape 5).
 
 ## 3. Commander la façade
-1. Nouveau devis → glisser `octavio-vco-facade-gerber.zip`.
-2. *Base material* **Aluminum**, *Layers* 1, *Thickness* 1,6 mm, *Solder mask* **noir**, *Silkscreen* **blanc**, *Surface finish* **HASL sans plomb** (les deux bandes sur les côtés restent métal argenté).
-3. Moins cher : FR-4 noir avec sérigraphie blanche marche aussi (les bandes seront alors étamées).
+1. Nouveau devis → glisser `octavio-vco-facade-gerber.zip` (5 fichiers : une seule couche de cuivre, le masque, la sérigraphie, le contour et les trous).
+2. *Base material* **Aluminum**, *Layers* **1**, *Thickness* 1,6 mm, *Solder mask* **Black**, *Silkscreen* **White**, *Surface finish* **HASL lead free**.
+3. L'aperçu de JLC (« Gerber Viewer ») dessine souvent la carte avec ses couleurs par défaut (vert, cuivre doré) : c'est normal, la couleur réelle est celle choisie dans les options. Ce qui compte dans l'aperçu : le contour 60,7 × 128,5 mm, les 19 trous, le texte, et les deux bandes de cuivre sur les côtés.
+4. Les deux bandes des côtés sont du cuivre sans masque : avec la finition HASL elles sortent **argentées** (étain). Pour un vrai alu brut, il n'y a pas d'option : c'est la façon la plus proche.
+5. Moins cher : FR-4 noir avec sérigraphie blanche marche aussi (mêmes bandes étamées).
 
 ## 4. Acheter le reste
 Voir `octavio-vco-ACHATS.csv` : 9 jacks Thonkiconn, 5 pots 10k B axe D, 1 commutateur rotatif, 6 boutons Davies 1900H (axe D), 1 barrette blindée 2×5, 1 câble 10→16 broches, 2 vis M3.
