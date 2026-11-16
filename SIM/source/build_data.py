@@ -65,6 +65,23 @@ M.append(dict(id='cx', name='COMPLEX', w=80.9, **p, ctl=[
     K('index', 12.5, 67.0, 0.8, 0.3, 'INDEX'), K('shape', 51.0, 67.0, 0.8, 0.0, 'WAVESHAPE'), K('timbre', 70.4, 67.0, 0.8, 0.35, 'TIMBRE'),
     J('modcv', 10.1, 92.0, 'in'), J('indexcv', 30.3, 92.0, 'in'), J('modout', 20.2, 108.0, 'out'),
     J('voct', 50.6, 92.0, 'in'), J('timbrecv', 70.8, 92.0, 'in'), J('shapecv', 50.6, 108.0, 'in'), J('out', 70.8, 108.0, 'out')]))
+p = panel(W + 'stg/panel.json', W + 'out/STAGES/panel/octavio-stages-panel.kicad_pcb')
+SXs = [53.0 + 12.6 * i for i in range(8)]
+ctl = [K('time', 23.0, 27.0, 1.0, 0.45, 'TIME'), K('tcvatt', 12.0, 49.0, 0.8, 0.5, 'TIME CV'), K('analogk', 34.0, 49.0, 0.8, 0.5, 'ANALOG'),
+       dict(t='mbutton', id='startbtn', label='START', x=12.0, y=64.0, v=0), dict(t='cbutton', id='mode', label='MODE', x=34.0, y=64.0, v=0, n=3),
+       dict(t='pled', id='mode', val=0, x=26.0, y=69.5, c='amber'), dict(t='pled', id='mode', val=1, x=32.5, y=69.5, c='amber'), dict(t='pled', id='mode', val=2, x=39.0, y=69.5, c='amber'),
+       dict(t='param', id='end', v=7, label='LAST STAGE')]
+A0 = [0.0, 0.25, 0.58, 0.42, 0.0, 0.83, 0.58, 0.25]
+B0 = [0.6, 0.3, 0.45, 0.2, 0.7, 0.35, 0.5, 0.25]
+for i, x in enumerate(SXs):
+    n = i + 1
+    ctl += [K(f'a{n}', x, 18.5, 0.8, A0[i], f'A {n}'), K(f'b{n}', x, 33.5, 0.8, B0[i], f'B {n}'), K(f't{n}', x, 48.5, 0.8, 0.5, f'TIME {n}'),
+            dict(t='sbutton', id=f'sl{n}', idx=i, label=f'SLIDE {n}', x=x, y=61.5, v=1 if i in (3, 6) else 0),
+            dict(t='pled', id=f'sl{n}', val=1, x=x, y=68.5, c='amber'), dict(t='sled', idx=i, x=x, y=75.5),
+            J(f'sel{n}', x, 96.5, 'in'), J(f'g{n}', x, 109.5, 'out')]
+ctl += [J('clock', 9.0, 82.5, 'in'), J('start', 23.0, 82.5, 'in'), J('strobe', 37.0, 82.5, 'in'), J('tcv', 9.0, 96.5, 'in'), J('analog', 23.0, 96.5, 'in'),
+        J('end', 37.0, 96.5, 'out'), J('cva', 9.0, 109.5, 'out'), J('cvb', 23.0, 109.5, 'out'), J('gate', 37.0, 109.5, 'out')]
+M.append(dict(id='stg', name='STAGES', w=152.1, **p, ctl=ctl))
 # simulator utility panel (not a real module)
 SW = 50.5
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]
@@ -76,7 +93,7 @@ M.append(dict(id='sim', name='SIM', w=SW, holes=holes, logo=[SW / 2 - 8, 119.859
          K('tempo', 11.0, 60.0, 0.8, 0.45, 'TEMPO'), dict(t='button', id='seq', label='SEQ', x=SW / 2, y=60.0, v=1), K('volume', 39.5, 60.0, 0.8, 0.5, 'VOLUME'),
          J('cv', 12.6, 83.0, 'out'), J('gate', 37.9, 83.0, 'out'), J('audio', 12.6, 103.0, 'in'), J('scope', 37.9, 103.0, 'in')]))
 PATCH = [['sim', 'cv', 'vco', 'voct'], ['sim', 'gate', 'ad', 'trig'],
-         ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'], ['sim', 'cv', 'cx', 'voct'], ['cx', 'out', 'mix', 'in4'],
+         ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'], ['stg', 'cva', 'cx', 'voct'], ['stg', 'cvb', 'cx', 'timbrecv'], ['cx', 'out', 'mix', 'in4'],
          ['mix', 'out', 'vcf', 'in1'], ['ad', 'out', 'vcf', 'contour'], ['adsr', 'out', 'vca', 'cv1'],
          ['vcf', 'out', 'vca', 'in1'], ['sim', 'gate', 'adsr', 'gate'], ['vca', 'outp', 'sim', 'audio'], ['vca', 'outp', 'sim', 'scope']]
 logo = 'data:image/png;base64,' + base64.b64encode(open(W + 'logo_white.png', 'rb').read()).decode()

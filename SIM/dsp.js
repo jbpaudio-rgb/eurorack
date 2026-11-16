@@ -7,6 +7,8 @@ const OCT_TYPES = {
   vca: { ins: ['in1', 'in2', 'cv1', 'cv2', 'cv3'], outs: ['outp', 'outn'] },
   ad: { ins: ['trig', 'acv', 'dcv'], outs: ['out'] },
   adsr: { ins: ['gate'], outs: ['out', 'nout'] },
+  stg: { ins: ['clock', 'start', 'strobe', 'tcv', 'analog', 'sel1', 'sel2', 'sel3', 'sel4', 'sel5', 'sel6', 'sel7', 'sel8'],
+         outs: ['cva', 'cvb', 'gate', 'end', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'] },
   cx: { ins: ['modcv', 'indexcv', 'voct', 'timbrecv', 'shapecv'], outs: ['modout', 'out'] },
   sim: { ins: ['audio', 'scope'], outs: ['cv', 'gate'] },
 };
@@ -48,6 +50,7 @@ class OctavioEngine {
     else if (m.type === 'vcf') { s.y1 = s.y2 = s.y3 = s.y4 = s.hp = s.hpx = 0; }
     else if (m.type === 'ad') { s.env = 0; s.latch = 0; s.trHi = false; s.ledMax = 0; }
     else if (m.type === 'cx') { s.pm = Math.random(); s.pc = Math.random(); }
+    else if (m.type === 'stg') { s.stage = 0; s.pos = 0; s.run = true; s.held = false; s.pA = 0; s.pB = 0; s.inHi = new Array(13).fill(false); s.lastClk = -1; s.per = 0.5 * this.sr; s.n = 0; s.endUntil = 0; s.btn = 0; }
     else if (m.type === 'adsr') { s.env = 0; s.att = 0; s.g = false; s.ledMax = 0; }
     else if (m.type === 'sim') { s.seqPh = 0; s.step = 0; s.lastCv = 0; s.scope = new Float32Array(2048); }
   }
@@ -74,6 +77,10 @@ class OctavioEngine {
       if (t === 'mix') { const mm = p('master'), Rf = 10 + 100 * mm; return { l: [1, 2, 3, 4].map(k => potLoad(p('l' + k))), G: Rf / 10, slope: 4.7 / (Rf + 4.7) }; }
       if (t === 'vcf') { const md = p('mode'); return { a: md < 0.5 ? 1 - 2 * md : 0, c: md > 0.5 ? 2 * md - 1 : 0, fr: p('freq'), e: p('emph'), co: p('contour'), fc: p('fcv'), ec: p('ecv') }; }
       if (t === 'vca') return { cv: p('cvlevel'), r: p('response'), fx: p('fixed') };
+      if (t === 'stg') { const g = (k, d) => { const v = P[m.id + '.' + k]; return v === undefined ? d : v; };
+        const A = [], B = [], T = [], SL = [];
+        for (let i = 1; i <= 8; i++) { A.push(g('a' + i, 0)); B.push(g('b' + i, 0)); T.push(g('t' + i, .5)); SL.push(g('sl' + i, 0)); }
+        return { A, B, T, SL, time: g('time', .4), tatt: g('tcvatt', .5) * 2 - 1, an: g('analogk', 0), end: g('end', 7), mode: g('mode', 0), sb: g('startbtn', 0) }; }
       if (t === 'cx') { const g = (k, d) => { const v = P[m.id + '.' + k]; return v === undefined ? d : v; };
         return { mf: (g('mfreq', .45) - .5) * 6.72 + (g('range', 0) ? -6 : 0), mw: g('mwave', 2), ix: g('index', .3) * 9.47, fm: !g('mode', 0),
                  pt: (g('pitch', .5) - .5) * 6.72, cw: g('cwave', 1), sh: g('shape', 0) * 9.47, tb: g('timbre', .35) * 10 }; }
@@ -151,6 +158,45 @@ class OctavioEngine {
             O[0] = s.env; if (s.env > s.ledMax) s.ledMax = s.env;
             break;
           }
+          case 'stg': { // same logic as the RP2040 firmware (octavio_stages.ino)
+            const enter = n => { s.pA = k.A[s.stage]; s.pB = k.B[s.stage]; s.stage = n; s.pos = 0; };
+            const endSeq = () => { s.endUntil = s.n + 0.005 * sr; if (k.mode === 0) enter(0); else { s.run = false; s.pos = 1; } };
+            const startEv = up => { if (up) { s.held = true; if (k.mode === 0) s.run = !s.run; else { enter(0); s.run = true; } } else s.held = false; };
+            const aStage = Math.round(cl(k.an + I[4] / 8, 0, 1) * 7);
+            s.n++;
+            let clk = false;
+            for (let q = 0; q < 13; q++) {
+              const hi = s.inHi[q] ? I[q] > 0.8 : I[q] > 1.5;
+              if (hi !== s.inHi[q]) {
+                s.inHi[q] = hi;
+                if (q === 0 && hi) { if (s.lastClk >= 0) s.per = s.n - s.lastClk; s.lastClk = s.n; clk = true; }
+                else if (q === 1) startEv(hi);
+                else if (q === 2 && hi) { enter(aStage); if (k.mode !== 0) s.run = true; }
+                else if (q >= 5 && hi) { enter(q - 5); if (k.mode !== 0) s.run = true; }
+              }
+            }
+            if (k.sb !== s.btn) { s.btn = k.sb; startEv(!!k.sb); }
+            const ext = s.lastClk >= 0 && s.n - s.lastClk < 3 * sr;
+            const hold = k.mode === 2 && s.held && s.stage === aStage && s.run;
+            if (s.run) {
+              if (ext) { s.pos = Math.min(1, s.pos + 1 / s.per); if (clk && !hold) { if (s.stage === k.end) endSeq(); else enter((s.stage + 1) & 7); } }
+              else {
+                const tg = 0.01 * Math.pow(1000, k.time) * Math.pow(2, -k.tatt * I[3]);
+                const dur = cl(tg * Math.pow(4, k.T[s.stage] * 2 - 1), 0.001, 60);
+                s.pos += 1 / (dur * sr);
+                if (s.pos >= 1) { if (hold) s.pos = 1; else if (s.stage === k.end) endSeq(); else enter((s.stage + 1) & 7); }
+              }
+            }
+            const st = s.stage, p = Math.min(1, s.pos);
+            let a = k.A[st], b = k.B[st];
+            if (k.SL[st]) { a = s.pA + (a - s.pA) * p; b = s.pB + (b - s.pB) * p; }
+            O[0] = a * 8; O[1] = b * 8;
+            const nx = st === k.end ? (k.mode === 0 ? 0 : st) : (st + 1) & 7, act = s.run || hold;
+            O[2] = act && (s.pos < .5 || k.SL[nx] || hold) ? 10 : 0;
+            O[3] = s.n < s.endUntil ? 10 : 0;
+            for (let q = 0; q < 8; q++) O[4 + q] = act && q === st ? 10 : 0;
+            break;
+          }
           case 'cx': { // Easel-style : modulation osc (saw/square/tri, INDEX, FM/AM) -> complex osc (sine, TIMBRE folder, WAVESHAPE, AM)
             let f = cl(261.63 * Math.pow(2, k.mf + I[0]), 0.02, 18000), dt = f / sr;
             s.pm += dt; if (s.pm >= 1) s.pm -= 1;
@@ -208,8 +254,8 @@ class OctavioEngine {
           for (const m of list) {
             if (m.type === 'sim') r.scopes[m.id] = m.s.scope.slice(0);
             else if (m.type === 'ad') { r.leds[m.id] = m.s.ledMax / 9.3; m.s.ledMax = 0; }
-            else if (m.type === 'cx') { s.pm = Math.random(); s.pc = Math.random(); }
-    else if (m.type === 'adsr') { r.leds[m.id] = m.s.ledMax / 10; m.s.ledMax = 0; }
+            else if (m.type === 'adsr') { r.leds[m.id] = m.s.ledMax / 10; m.s.ledMax = 0; }
+            else if (m.type === 'stg') { r.stg = r.stg || {}; r.stg[m.id] = { stage: m.s.stage, run: m.s.run }; }
           }
           this.report(r);
         }

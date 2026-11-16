@@ -2,7 +2,7 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const PH = 128.5, MX = 1.2, MY = 4.5, HPMM = 5.08, ROWHP = 104, GAPY = 5;
 const ROWW = ROWHP * HPMM, TW = ROWW + 2 * MX, RH = PH + 2 * MY;
-const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 16, sim: 10 };
+const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 16, stg: 30, sim: 10 };
 const DESC = {
   vco: 'Oscillateur façon 921 : RANGE LO à 2′, 4 formes d’onde, FM, PWM, sync et sortie BLEND.',
   mix: 'Mixeur 4 entrées façon CP3, MASTER GAIN avec saturation douce, OUT et −OUT.',
@@ -11,16 +11,17 @@ const DESC = {
   ad: 'Enveloppe AD à cœur OTA, 0,8 ms à 8 s, CV sur attaque et decay, mode CYCLE (LFO).',
   adsr: 'Enveloppe ADSR façon Moog 911 : courbes RC, attaque ≈ 2 ms à 10 s, sustain 0 à 10 V, sorties OUT et −OUT.',
   cx: 'Oscillateur complexe façon Buchla Music Easel : oscillateur de modulation (FM / AM, INDEX) et oscillateur complexe avec TIMBRE (repliement) et WAVESHAPE.',
+  stg: 'Séquenceur 8 étapes façon Verbos Multistage (RP2040) : A, B et TIME par étape, SLIDE, LOOP / ONCE / ENV, entrées SELECT et sorties GATE par étape.',
   sim: 'Outil du simulateur : séquence, CV/GATE du clavier, sortie son et oscilloscope.',
 };
 const TYPE = {}; DATA.modules.forEach(m => TYPE[m.id] = m);
 const svg = $('#rack'), NS = 'http://www.w3.org/2000/svg';
 const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
 let L = null;                 // layout { rows:[[id..]], mods:{id:{type,n}} }
-let PARAMS = {}, CTL = {}, JACKS = {}, LAB = {}, POS = {};
+let PARAMS = {}, CTL = {}, JACKS = {}, LAB = {}, POS = {}, PLEDS = [], SLEDS = {};
 let cables = [], moveMode = false, nRows = 1, TH = RH;
 const DEFV = {}; DATA.modules.forEach(m => m.ctl.forEach(c => { if (c.v !== undefined) DEFV[m.id + '.' + c.id] = c.v; }));
-const defaultLayout = () => ({ rows: [['vco', 'cx', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim']], mods: { adsr: { type: 'adsr', n: 1 }, cx: { type: 'cx', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
+const defaultLayout = () => ({ rows: [['vco', 'cx', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim'], ['stg']], mods: { stg: { type: 'stg', n: 1 }, adsr: { type: 'adsr', n: 1 }, cx: { type: 'cx', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
 const DEFS_SVG = `
 <linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
 <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d4828"/><stop offset=".55" stop-color="#5c331b"/><stop offset="1" stop-color="#45260f"/></linearGradient>
@@ -48,7 +49,7 @@ function build() {
   if (!L.rows.length) L.rows.push([]);
   nRows = L.rows.length + (moveMode ? 1 : 0);
   TH = nRows * RH + (nRows - 1) * GAPY;
-  svg.innerHTML = ''; CTL = {}; JACKS = {}; LAB = {}; POS = {};
+  svg.innerHTML = ''; CTL = {}; JACKS = {}; LAB = {}; POS = {}; PLEDS = []; SLEDS = {};
   svg.setAttribute('viewBox', `0 0 ${TW} ${TH}`);
   el('defs', {}, svg).innerHTML = DEFS_SVG;
   for (let r = 0; r < nRows; r++) {
@@ -124,6 +125,25 @@ function drawPanel(id, mi, m, X0, Y0) {
       const led = el('circle', { r: 1.4, fill: 'url(#lamp)' }, cg);
       CTL[key] = { c, led, kind: 'button', def: c.v };
       cg.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
+    } else if (c.t === 'mbutton' || c.t === 'cbutton' || c.t === 'sbutton') {
+      const cg = el('g', { transform: `translate(${c.x},${c.y})`, class: 'ctl' }, g);
+      el('circle', { r: 3.3, fill: '#1c1c1c', stroke: '#777', 'stroke-width': .25 }, cg);
+      el('circle', { r: 2.6, fill: '#2c2c2c', stroke: '#555', 'stroke-width': .15 }, cg);
+      el('circle', { r: 4.6, fill: 'transparent' }, cg);
+      CTL[key] = { c, kind: c.t, def: c.v };
+      let t0 = 0;
+      cg.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); cg.setPointerCapture(e.pointerId); t0 = performance.now();
+        if (c.t === 'mbutton') setParam(key, 1); else if (c.t === 'cbutton') setParam(key, (PARAMS[key] + 1) % c.n); });
+      const up = () => { if (!t0) return; const held = performance.now() - t0; t0 = 0;
+        if (c.t === 'mbutton') setParam(key, 0);
+        else if (c.t === 'sbutton') { if (held >= 600) { setParam(id + '.end', c.idx); toast('Dernière étape : ' + (c.idx + 1)); } else setParam(key, PARAMS[key] ? 0 : 1); } };
+      cg.addEventListener('pointerup', up); cg.addEventListener('pointercancel', up);
+    } else if (c.t === 'pled') {
+      PLEDS.push({ key, val: c.val, e: el('circle', { cx: c.x, cy: c.y, r: 1.6, fill: c.c === 'amber' ? 'url(#lamp)' : 'url(#ledg)', stroke: '#444', 'stroke-width': .2, opacity: .18 }, g) });
+    } else if (c.t === 'sled') {
+      (SLEDS[id] = SLEDS[id] || [])[c.idx] = el('circle', { cx: c.x, cy: c.y, r: 1.6, fill: 'url(#ledg)', stroke: '#444', 'stroke-width': .2, opacity: .18 }, g);
+    } else if (c.t === 'param') {
+      CTL[key] = { c, kind: 'param', def: c.v };
     } else if (c.t === 'led') {
       CTL[key] = { c, kind: 'led', e: el('circle', { cx: c.x, cy: c.y, r: 1.6, fill: 'url(#ledg)', stroke: '#444', 'stroke-width': .2, opacity: .2 }, g) };
     } else if (c.t === 'scope') {
@@ -178,6 +198,12 @@ function fmt(key, v) {
     case 'adsr.attack': { const R = 320 + 1e6 * (Math.pow(100, v) - 1) / 99; return tm(R * 6e-6 * Math.log(6)); }
     case 'adsr.decay': case 'adsr.release': { const R = 320 + 1e6 * (Math.pow(100, v) - 1) / 99; return tm(R * 6e-6 * Math.log(10)) + ' (à 90 %)'; }
     case 'adsr.sustain': return (10 * v).toFixed(1) + ' V';
+    case 'stg.time': return tm(0.01 * Math.pow(1000, v)) + ' par étape';
+    case 'stg.tcvatt': return ((v * 2 - 1) * 100).toFixed(0) + ' %';
+    case 'stg.analogk': return 'étape ' + (Math.round(v * 7) + 1);
+    case 'stg.mode': return ['LOOP', 'ONCE', 'ENV'][v];
+    case 'stg.startbtn': return v ? 'appuyé' : 'relâché';
+    case 'stg.end': return 'étape ' + (v + 1);
     case 'cx.range': return v ? 'LO (LFO)' : 'HI (audio)';
     case 'cx.mwave': return ['SAW', 'SQUARE', 'TRIANGLE'][v];
     case 'cx.cwave': return ['SPIKE', 'SQUARE', 'TRIANGLE'][v];
@@ -189,6 +215,9 @@ function fmt(key, v) {
     case 'sim.tempo': return Math.round(50 + 190 * v) + ' BPM';
     case 'sim.seq': return v ? 'en marche' : 'arrêtée';
   }
+  if (/^stg\.[ab]\d$/.test(k)) return (v * 8).toFixed(2) + ' V';
+  if (/^stg\.t\d$/.test(k)) return '×' + Math.pow(4, v * 2 - 1).toFixed(2);
+  if (/^stg\.sl\d$/.test(k)) return v ? 'glissé' : 'marches';
   if (/\.(l\d|emph)$/.test(k)) return (v * 10).toFixed(1);
   return pc(v);
 }
@@ -196,6 +225,7 @@ const status = $('#status');
 function show(key) { if (LAB[key]) status.textContent = LAB[key] + '  ' + fmt(key, PARAMS[key]); }
 function draw(key) {
   const C = CTL[key], v = PARAMS[key];
+  for (const L_ of PLEDS) if (L_.key === key && v !== undefined) L_.e.setAttribute('opacity', v === L_.val ? 1 : .18);
   if (!C || v === undefined) return;
   if (C.kind === 'knob') C.rot.setAttribute('transform', `rotate(${-135 + 270 * v})`);
   else if (C.kind === 'rotary') C.rot.setAttribute('transform', `rotate(${C.c.angles[v]})`);
@@ -205,6 +235,7 @@ function draw(key) {
   }
   else if (C.kind === 'button') C.led.setAttribute('opacity', v ? 1 : .15);
   if (key === 'sim.seq') $('#sled').classList.toggle('on', !!v);
+  for (const L_ of PLEDS) if (L_.key === key) L_.e.setAttribute('opacity', v === L_.val ? 1 : .18);
 }
 function setParam(key, v) { PARAMS[key] = v; draw(key); show(key); send({ t: 'p', k: key, v }); }
 function svgPt(e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
@@ -353,7 +384,7 @@ function bindPanelDrag(g, id) {
 function setMove(on) { moveMode = on; svg.classList.toggle('move', on); $('#mvled').classList.toggle('on', on); build(); if (on) toast('Glisse un module pour le déplacer'); }
 $('#bMove').onclick = () => setMove(!moveMode);
 const lib = $('#lib'), libCards = $('#libCards');
-['vco', 'cx', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim'].forEach(t => {
+['vco', 'cx', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'stg', 'sim'].forEach(t => {
   const b = document.createElement('button'); b.className = 'mc';
   b.innerHTML = `<span class="t"><b>${TYPE[t].name}</b><u>${HP[t]} HP</u></span><p>${DESC[t]}</p>`;
   b.onclick = () => { lib.hidden = true; addModule(t); };
@@ -383,6 +414,11 @@ function onReport(r) {
     S.path.setAttribute('points', pts.join(' '));
     let mx = 0; for (let i = 0; i < sc.length; i++) mx = Math.max(mx, Math.abs(sc[i]));
     S.txt.textContent = `±10 V · crête ${mx.toFixed(1)} V`;
+  }
+  if (r.stg) for (const id in r.stg) {
+    const st = r.stg[id], Ls = SLEDS[id]; if (!Ls) continue;
+    const blink = (performance.now() / 250 | 0) & 1, end = PARAMS[id + '.end'];
+    Ls.forEach((e_, i) => e_.setAttribute('opacity', i === st.stage ? 1 : (i === end && blink ? .55 : .15)));
   }
   for (const id in r.leds) { const C = CTL[id + '.led']; if (C) C.e.setAttribute('opacity', (0.15 + 0.85 * Math.min(1, r.leds[id])).toFixed(2)); }
 }
