@@ -5,7 +5,7 @@ Quatre LFO sur une **Raspberry Pi Pico (RP2040)**, en version la moins chère po
 ## Façade
 Par canal (colonnes 1 à 4) :
 - **FREQ** : vitesse en mode FREE, rapport du CLOCK en mode CLK
-- **WAVE** : bouton à trois zones, **SINE** (gauche), **SAW** (haut), **SQUARE** (droite)
+- **WAVE** : fondu continu **SINE** (gauche) → **SAW** (haut) → **SQUARE** (droite)
 - **LED** rouge qui suit l'onde
 - Inverseur **CLK / FREE**
 - Sortie **OUT** ±5 V

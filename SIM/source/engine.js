@@ -176,11 +176,11 @@ class OctavioEngine {
             const frac = s.per ? cl((s.t - s.last) / s.per, 0, 1) : 0, cpos = (s.n % 48) + frac;
             const RAT = [1 / 16, 1 / 8, 1 / 4, 1 / 3, 1 / 2, 1, 2, 3, 4, 8, 16];
             for (let c = 0; c < 4; c++) {
-              const wv = k.W[c], z = wv < 1 / 3 ? 0 : wv < 2 / 3 ? 1 : 2;
+              const x2 = Math.min(2, Math.max(0, k.W[c] * 2));
               let p;
               if (k.C[c] && s.per) { const x = cpos * RAT[Math.round(k.F[c] * 10)]; p = x - Math.floor(x); s.ph[c] = p; }
               else { s.ph[c] += 0.02 * Math.pow(2, k.F[c] * 10.3) / sr; if (s.ph[c] >= 1) s.ph[c] -= Math.floor(s.ph[c]); p = s.ph[c]; }
-              const v = z === 0 ? Math.sin(2 * Math.PI * p) : z === 1 ? 2 * p - 1 : (p < 0.5 ? 1 : -1);
+              const sn = Math.sin(2 * Math.PI * p), sw = 2 * p - 1, sq = p < 0.5 ? 1 : -1, v = x2 < 1 ? sn + x2 * (sw - sn) : sw + (x2 - 1) * (sq - sw);
               s.y1[c] += k.a * (v - s.y1[c]); s.y2[c] += k.a * (s.y1[c] - s.y2[c]);
               O[c] = 4.9 * s.y2[c];
               const b = 0.5 * (v + 1); s.led[c] = b * b;

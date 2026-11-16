@@ -2,7 +2,7 @@
 // Board : Raspberry Pi Pico, Arduino core "Raspberry Pi Pico/RP2040" by Earle Philhower (arduino-pico).
 // Arduino IDE : Tools > Board > Raspberry Pi Pico ; upload over USB (hold BOOTSEL the first time).
 //
-// Per channel : FREQ knob, WAVE knob (SINE / SAW / SQUARE, three zones like a switch), FREE / CLOCKED toggle,
+// Per channel : FREQ knob, WAVE knob (morphs SINE -> SAW -> SQUARE), FREE / CLOCKED toggle,
 //               LED that follows the wave, output +/-5 V.
 // FREE    : FREQ = 0.02 Hz .. 25 Hz (exponential).
 // CLOCKED : FREQ picks a ratio of the CLOCK input : /16 /8 /4 /3 /2 x1 x2 x3 x4 x8 x16, phase locked to the clock.
@@ -30,7 +30,6 @@ const uint32_t TICK_US = 250;                          // 4 kHz update
 // ---------------- state ----------------
 const float RATIOS[11] = {1.0f / 16, 1.0f / 8, 1.0f / 4, 1.0f / 3, 1.0f / 2, 1, 2, 3, 4, 8, 16};
 float potF[4] = {0.5f, 0.5f, 0.5f, 0.5f}, potW[4] = {0, 0, 0, 0};
-int wave[4] = {0, 0, 0, 0};                    // 0 = SINE, 1 = SAW, 2 = SQUARE
 int ratioIdx[4] = {5, 5, 5, 5};
 float phase[4] = {0, 0, 0, 0};
 volatile uint32_t clkCount = 0, lastClkUs = 0, clkPeriodUs = 0;
@@ -50,17 +49,6 @@ void isrRst() { rstFlag = true; }
 
 void setMux(int ch) { for (int b = 0; b < 3; b++) digitalWrite(PIN_MUX_S[b], (ch >> b) & 1); }
 
-// three zones with a little hysteresis, so the knob behaves like a switch
-int waveZone(float v, int cur) {
-  const float edge[2] = {1.0f / 3, 2.0f / 3}, h = 0.03f;
-  int z = v < edge[0] ? 0 : (v < edge[1] ? 1 : 2);
-  if (z != cur) {
-    if (z > cur && v < edge[z - 1] + h) return cur;
-    if (z < cur && v > edge[z] - h) return cur;
-  }
-  return z;
-}
-
 int ratioZone(float v, int cur) {
   float x = v * 10.0f;                           // 11 positions
   int z = (int)lroundf(x);
@@ -68,10 +56,12 @@ int ratioZone(float v, int cur) {
   return z < 0 ? 0 : (z > 10 ? 10 : z);
 }
 
-float shape(int w, float p) {
-  if (w == 0) return sinf(6.2831853f * p);
-  if (w == 1) return 2.0f * p - 1.0f;            // rising saw
-  return p < 0.5f ? 1.0f : -1.0f;
+// WAVE knob : 0 = SINE, 0.5 = SAW (rising), 1 = SQUARE, crossfaded in between
+float shape(float w, float p) {
+  float sine = sinf(6.2831853f * p), saw = 2.0f * p - 1.0f, sqr = p < 0.5f ? 1.0f : -1.0f;
+  float x = clampf(w * 2.0f, 0.0f, 2.0f);
+  if (x < 1.0f) return sine + x * (saw - sine);
+  return saw + (x - 1.0f) * (sqr - saw);
 }
 
 void writeOut(int ch, float v) {
@@ -123,7 +113,6 @@ void loop() {
   digitalWrite(PIN_LED_CLK, (int32_t)(clkLedUntil - now) > 0 ? HIGH : LOW);
 
   for (int i = 0; i < 4; i++) {
-    wave[i] = waveZone(potW[i], wave[i]);
     float p;
     if (clocked(i) && per) {
       ratioIdx[i] = ratioZone(potF[i], ratioIdx[i]);
@@ -136,7 +125,7 @@ void loop() {
       if (phase[i] >= 1.0f) phase[i] -= floorf(phase[i]);
       p = phase[i];
     }
-    float v = shape(wave[i], p);
+    float v = shape(potW[i], p);
     writeOut(i, v);
     float b = 0.5f * (v + 1.0f);
     analogWrite(PIN_LED[i], (int)(b * b * (PWM_RANGE - 1)));

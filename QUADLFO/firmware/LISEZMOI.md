@@ -14,7 +14,7 @@
 ## Utilisation
 - **FREQ**, inverseur sur **FREE** : de 0,02 Hz (50 s par cycle) à 25 Hz.
 - **FREQ**, inverseur sur **CLK** : le bouton choisit un rapport du CLOCK, en 11 crans : /16, /8, /4, /3, /2, ×1, ×2, ×3, ×4, ×8, ×16. Le LFO reste calé sur l'horloge (même phase à chaque fois). Sans horloge branchée, le canal reste en FREE.
-- **WAVE** : trois zones comme un sélecteur : à gauche **SINE**, au centre **SAW** (rampe montante), à droite **SQUARE**.
+- **WAVE** : passe en douceur de **SINE** (à gauche) à **SAW** (en haut, rampe montante) puis à **SQUARE** (à droite) ; entre deux, mélange des deux formes voisines.
 - **RESET** : un front remet toutes les phases au début et recommence le compte des horloges (les divisions repartent ensemble).
 - **LED** de chaque canal : suit l'onde. **LED CLOCK** : clignote à chaque impulsion.
 - Sorties ±4,9 V.

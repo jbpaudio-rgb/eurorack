@@ -12,7 +12,7 @@ const DESC = {
   adsr: 'Enveloppe ADSR façon Moog 911 : courbes RC, attaque ≈ 2 ms à 10 s, sustain 0 à 10 V, sorties OUT et −OUT.',
   cx: 'Oscillateur complexe façon Buchla 259 : oscillateur de modulation, MOD INDEX vers AMPL / PITCH / TIMBRE, PHASE LOCK, oscillateur principal et HARMONICS (TIMBRE, SYMMETRY, ORDER).',
   stg: 'Séquenceur 8 étapes façon Verbos Multistage (RP2040) : A, B et TIME par étape, SLIDE, LOOP / ONCE / ENV, entrées SELECT et sorties GATE par étape.',
-  lfo: 'QUAD LFO (RP2040) : 4 LFO SINE / SAW / SQUARE, FREE (0,02 à 25 Hz) ou CLOCKED (/16 à ×16 du CLOCK), entrée RESET.',
+  lfo: 'QUAD LFO (RP2040) : 4 LFO avec fondu SINE → SAW → SQUARE, FREE (0,02 à 25 Hz) ou CLOCKED (/16 à ×16 du CLOCK), entrée RESET.',
   sim: 'Outil du simulateur : séquence, CV/GATE du clavier, sortie son et oscilloscope.',
 };
 const TYPE = {}; DATA.modules.forEach(m => TYPE[m.id] = m);
@@ -216,7 +216,7 @@ function fmt(key, v) {
     case 'lfo.f1': case 'lfo.f2': case 'lfo.f3': case 'lfo.f4': {
       if (PARAMS[id + '.s' + key.slice(-1)] === 0) return ['/16', '/8', '/4', '/3', '/2', '×1', '×2', '×3', '×4', '×8', '×16'][Math.round(v * 10)] + ' du CLOCK';
       const f = 0.02 * Math.pow(2, v * 10.3); return f < 1 ? (1 / f).toFixed(1) + ' s par cycle' : f.toFixed(2) + ' Hz'; }
-    case 'lfo.w1': case 'lfo.w2': case 'lfo.w3': case 'lfo.w4': return ['SINE', 'SAW', 'SQUARE'][v < 1 / 3 ? 0 : v < 2 / 3 ? 1 : 2];
+    case 'lfo.w1': case 'lfo.w2': case 'lfo.w3': case 'lfo.w4': { const W3 = ['SINE', 'SAW', 'SQUARE'], p = v * 2, i = Math.min(1, Math.floor(p)), f = p - i; return f < .02 ? W3[i] : f > .98 ? W3[i + 1] : W3[i] + ' → ' + W3[i + 1] + ' ' + Math.round(f * 100) + ' %'; }
     case 'lfo.s1': case 'lfo.s2': case 'lfo.s3': case 'lfo.s4': return v ? 'FREE' : 'CLOCKED';
     case 'sim.tempo': return Math.round(50 + 190 * v) + ' BPM';
     case 'sim.seq': return v ? 'en marche' : 'arrêtée';
