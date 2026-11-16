@@ -1,0 +1,16 @@
+Comment,Designator,Footprint,LCSC Part #,Notes
+10u 25V X5R/X7R 1206,"C1,C2",C_1206_3216Metric,,X5R/X7R 1206 - SMT bottom - laisser JLC choisir (Basic de preference)
+100n,"C3,C4",C_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+22p,"C5,C6",C_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+SS14,"D1,D2",D_SMA,,SS14 (40 V 1 A Schottky) - SMT bottom - laisser JLC choisir (Basic de preference)
+Eurorack 2x5,J1,IDC-Header_2x05_P2.54mm_Vertical,,Shrouded header 2x5 2.54 mm - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+IN 1,J2,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+IN 2,J3,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+IN 3,J4,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+IN 4,J5,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+OUT,J6,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+-OUT,J7,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+100k 1% 0805,"R1,R2,R3,R4,R5,R6,R7",R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k 1% 0805,"R8,R9",R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100k B,"RV1,RV2,RV3,RV4",Pot_Alpha_9mm_Vertical,C9900018037,"POT-R09V-100K (9 mm vertical, B100k) - THT (wave soldering)"
+TL072CDR,U1,SOIC-8_3.9x4.9mm_P1.27mm,,TL072CDR - SMT bottom - laisser JLC choisir (Basic de preference)
