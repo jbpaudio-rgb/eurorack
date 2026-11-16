@@ -56,15 +56,21 @@ M.append(dict(id='adsr', name='ADSR', w=40.3, **p, ctl=[
     dict(t='led', id='led', x=10.1, y=96.5),
     J('gate', 30.2, 96.5, 'in'), J('out', 10.1, 109.5, 'out'), J('nout', 30.2, 109.5, 'out')]))
 p = panel(W + 'cx/panel.json', W + 'out/COMPLEX/panel/octavio-complex-panel.kicad_pcb')
-M.append(dict(id='cx', name='COMPLEX', w=80.9, **p, ctl=[
-    K('mfreq', 20.2, 28.0, 1.0, 0.45, 'MOD FREQUENCY'), K('pitch', 60.7, 28.0, 1.0, 0.5, 'PITCH'),
-    dict(t='toggle', id='range', label='RANGE', x=11.5, y=49.0, v=0, vert=1, opts=['HI', 'LO']),
-    dict(t='toggle', id='mwave', label='MOD WAVE', x=29.0, y=49.0, v=2, vert=1, opts=['SAW', 'SQUARE', 'TRIANGLE']),
-    dict(t='toggle', id='cwave', label='WAVE', x=60.7, y=49.0, v=1, vert=1, opts=['SPIKE', 'SQUARE', 'TRIANGLE']),
-    dict(t='toggle', id='mode', label='MODE', x=29.0, y=67.0, v=0, vert=1, opts=['FM', 'AM']),
-    K('index', 12.5, 67.0, 0.8, 0.3, 'INDEX'), K('shape', 51.0, 67.0, 0.8, 0.0, 'WAVESHAPE'), K('timbre', 70.4, 67.0, 0.8, 0.35, 'TIMBRE'),
-    J('modcv', 10.1, 92.0, 'in'), J('indexcv', 30.3, 92.0, 'in'), J('modout', 20.2, 108.0, 'out'),
-    J('voct', 50.6, 92.0, 'in'), J('timbrecv', 70.8, 92.0, 'in'), J('shapecv', 50.6, 108.0, 'in'), J('out', 70.8, 108.0, 'out')]))
+M.append(dict(id='cx', name='COMPLEX', w=162.3, **p, ctl=[
+    K('mfreq', 21.0, 27.0, 1.0, 0.35, 'MOD FREQUENCY'), K('index', 61.0, 27.0, 1.0, 0.65, 'MOD INDEX'), K('pfreq', 98.0, 27.0, 1.0, 0.45, 'FREQUENCY'), K('timbre', 139.0, 27.0, 1.0, 0.3, 'TIMBRE'),
+    dict(t='toggle', id='range', label='RANGE', x=8.0, y=50.0, v=0, vert=1, opts=['AUDIO', 'LFO']),
+    dict(t='toggle', id='mwave', label='WAVE', x=21.0, y=50.0, v=0, vert=1, opts=['TRIANGLE', 'SQUARE', 'SAW']),
+    K('mcv', 34.0, 50.0, 0.8, 0.5, 'MOD CV'), K('mfine', 8.0, 69.0, 0.8, 0.5, 'MOD FINE'), K('mfm', 34.0, 69.0, 0.8, 0.0, 'MOD FM'),
+    dict(t='toggle', id='ampl', label='AMPL', x=50.0, y=50.0, v=1, vert=1, opts=['ON', 'OFF']),
+    dict(t='toggle', id='pitch', label='PITCH', x=61.0, y=50.0, v=0, vert=1, opts=['ON', 'OFF']),
+    dict(t='toggle', id='timbresw', label='TIMBRE MOD', x=72.0, y=50.0, v=1, vert=1, opts=['ON', 'OFF']),
+    K('plock', 61.0, 69.0, 0.8, 0.0, 'PHASE LOCK'),
+    K('pfine', 85.0, 50.0, 0.8, 0.5, 'FINE'), K('pcv', 98.0, 50.0, 0.8, 0.5, 'CV'), K('pfm', 111.0, 50.0, 0.8, 0.0, 'FM'),
+    K('sym', 125.0, 50.0, 0.8, 0.5, 'SYMMETRY'), K('tcv', 139.0, 50.0, 0.8, 0.0, 'TIMBRE CV'), K('order', 153.0, 50.0, 0.8, 0.0, 'ORDER'),
+    J('mvoct', 8.0, 90.0, 'in'), J('mcv', 21.0, 90.0, 'in'), J('mfm', 34.0, 90.0, 'in'), J('tri', 14.5, 106.0, 'out'), J('signal', 27.5, 106.0, 'out'),
+    J('indexcv', 50.0, 90.0, 'in'), J('plock', 72.0, 90.0, 'in'),
+    J('pvoct', 85.0, 90.0, 'in'), J('pcv', 98.0, 90.0, 'in'), J('pfm', 111.0, 90.0, 'in'), J('sine', 91.5, 106.0, 'out'), J('square', 104.5, 106.0, 'out'),
+    J('symcv', 125.0, 90.0, 'in'), J('timbrecv', 139.0, 90.0, 'in'), J('ordercv', 153.0, 90.0, 'in'), J('final', 139.0, 106.0, 'out')]))
 p = panel(W + 'stg/panel.json', W + 'out/STAGES/panel/octavio-stages-panel.kicad_pcb')
 SXs = [53.0 + 12.6 * i for i in range(8)]
 ctl = [K('time', 23.0, 27.0, 1.0, 0.45, 'TIME'), K('tcvatt', 12.0, 49.0, 0.8, 0.5, 'TIME CV'), K('analogk', 34.0, 49.0, 0.8, 0.5, 'ANALOG'),
@@ -93,7 +99,7 @@ M.append(dict(id='sim', name='SIM', w=SW, holes=holes, logo=[SW / 2 - 8, 119.859
          K('tempo', 11.0, 60.0, 0.8, 0.45, 'TEMPO'), dict(t='button', id='seq', label='SEQ', x=SW / 2, y=60.0, v=1), K('volume', 39.5, 60.0, 0.8, 0.5, 'VOLUME'),
          J('cv', 12.6, 83.0, 'out'), J('gate', 37.9, 83.0, 'out'), J('audio', 12.6, 103.0, 'in'), J('scope', 37.9, 103.0, 'in')]))
 PATCH = [['sim', 'cv', 'vco', 'voct'], ['sim', 'gate', 'ad', 'trig'],
-         ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'], ['stg', 'cva', 'cx', 'voct'], ['stg', 'cvb', 'cx', 'timbrecv'], ['cx', 'out', 'mix', 'in4'],
+         ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'], ['stg', 'cva', 'cx', 'pvoct'], ['stg', 'cvb', 'cx', 'timbrecv'], ['cx', 'final', 'mix', 'in4'],
          ['mix', 'out', 'vcf', 'in1'], ['ad', 'out', 'vcf', 'contour'], ['adsr', 'out', 'vca', 'cv1'],
          ['vcf', 'out', 'vca', 'in1'], ['sim', 'gate', 'adsr', 'gate'], ['vca', 'outp', 'sim', 'audio'], ['vca', 'outp', 'sim', 'scope']]
 logo = 'data:image/png;base64,' + base64.b64encode(open(W + 'logo_white.png', 'rb').read()).decode()

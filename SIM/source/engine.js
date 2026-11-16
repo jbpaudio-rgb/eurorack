@@ -9,7 +9,7 @@ const OCT_TYPES = {
   adsr: { ins: ['gate'], outs: ['out', 'nout'] },
   stg: { ins: ['clock', 'start', 'strobe', 'tcv', 'analog', 'sel1', 'sel2', 'sel3', 'sel4', 'sel5', 'sel6', 'sel7', 'sel8'],
          outs: ['cva', 'cvb', 'gate', 'end', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'] },
-  cx: { ins: ['modcv', 'indexcv', 'voct', 'timbrecv', 'shapecv'], outs: ['modout', 'out'] },
+  cx: { ins: ['mvoct', 'mcv', 'mfm', 'indexcv', 'plock', 'pvoct', 'pcv', 'pfm', 'symcv', 'timbrecv', 'ordercv'], outs: ['tri', 'signal', 'sine', 'square', 'final'] },
   sim: { ins: ['audio', 'scope'], outs: ['cv', 'gate'] },
 };
 class OctavioEngine {
@@ -49,7 +49,7 @@ class OctavioEngine {
     if (m.type === 'vco') { s.ph = Math.random(); s.syncHi = false; }
     else if (m.type === 'vcf') { s.y1 = s.y2 = s.y3 = s.y4 = s.hp = s.hpx = 0; }
     else if (m.type === 'ad') { s.env = 0; s.latch = 0; s.trHi = false; s.ledMax = 0; }
-    else if (m.type === 'cx') { s.pm = Math.random(); s.pc = Math.random(); }
+    else if (m.type === 'cx') { s.pm = Math.random(); s.pc = Math.random(); s.plPrev = 0; }
     else if (m.type === 'stg') { s.stage = 0; s.pos = 0; s.run = true; s.held = false; s.pA = 0; s.pB = 0; s.inHi = new Array(13).fill(false); s.lastClk = -1; s.per = 0.5 * this.sr; s.n = 0; s.endUntil = 0; s.btn = 0; }
     else if (m.type === 'adsr') { s.env = 0; s.att = 0; s.g = false; s.ledMax = 0; }
     else if (m.type === 'sim') { s.seqPh = 0; s.step = 0; s.lastCv = 0; s.scope = new Float32Array(2048); }
@@ -82,8 +82,10 @@ class OctavioEngine {
         for (let i = 1; i <= 8; i++) { A.push(g('a' + i, 0)); B.push(g('b' + i, 0)); T.push(g('t' + i, .5)); SL.push(g('sl' + i, 0)); }
         return { A, B, T, SL, time: g('time', .4), tatt: g('tcvatt', .5) * 2 - 1, an: g('analogk', 0), end: g('end', 7), mode: g('mode', 0), sb: g('startbtn', 0) }; }
       if (t === 'cx') { const g = (k, d) => { const v = P[m.id + '.' + k]; return v === undefined ? d : v; };
-        return { mf: (g('mfreq', .45) - .5) * 6.72 + (g('range', 0) ? -6 : 0), mw: g('mwave', 2), ix: g('index', .3) * 9.47, fm: !g('mode', 0),
-                 pt: (g('pitch', .5) - .5) * 6.72, cw: g('cwave', 1), sh: g('shape', 0) * 9.47, tb: g('timbre', .35) * 10 }; }
+        return { mf: (g('mfreq', .35) - .5) * 8 + (g('mfine', .5) - .5) * 1.16 + (g('range', 0) ? -7 : 0), mcv: g('mcv', .5) * 2 - 1, mfm: g('mfm', 0), mw: g('mwave', 0),
+                 ix: g('index', .65) * 2 - 1, am: !g('ampl', 1), pm: !g('pitch', 0), tm: !g('timbresw', 1), pl: g('plock', 0),
+                 pf: (g('pfreq', .45) - .5) * 8 + (g('pfine', .5) - .5) * 1.16, pcv: g('pcv', .5) * 2 - 1, pfm: g('pfm', 0),
+                 tb: g('timbre', .3) * 10, tcv: g('tcv', 0), sy: g('sym', .5) * 10, or: g('order', 0) * 10 }; }
       if (t === 'adsr') { // RC through switch (~320 ohm) + 1M log pot into 10 uF X7R (~6 uF at 10 V)
         const tc = x => { const R = 320 + 1e6 * (Math.pow(100, x) - 1) / 99; return 1 - Math.exp(-1 / (sr * R * 6e-6)); };
         return { ka: tc(p('attack')), kd: tc(p('decay')), kr: tc(p('release')), S: 10 * p('sustain') }; }
@@ -197,30 +199,32 @@ class OctavioEngine {
             for (let q = 0; q < 8; q++) O[4 + q] = act && q === st ? 10 : 0;
             break;
           }
-          case 'cx': { // Easel-style : modulation osc (saw/square/tri, INDEX, FM/AM) -> complex osc (sine, TIMBRE folder, WAVESHAPE, AM)
-            let f = cl(261.63 * Math.pow(2, k.mf + I[0]), 0.02, 18000), dt = f / sr;
+          case 'cx': { // after the Buchla 259 : modulation osc, MOD INDEX -> AMPL / PITCH / TIMBRE, principal osc, HARMONICS (fold, saw, M, ORDER)
+            let f = cl(440 * Math.pow(2, k.mf + I[0] + k.mcv * I[1] + k.mfm * I[2]), 0.01, 18000), dt = f / sr;
             s.pm += dt; if (s.pm >= 1) s.pm -= 1;
             let ph = s.pm;
             const msaw = (2 * ph - 1 - blep(ph, dt)) * 5, mtri = (2 * Math.abs(2 * ph - 1) - 1) * 5;
             let msq = ph < .5 ? 1 : -1; msq += blep(ph, dt); msq -= blep((ph + .5) % 1, dt); msq *= 5;
-            const mw = k.mw === 0 ? msaw : k.mw === 1 ? msq : mtri;
-            const ixv = cl(k.ix + I[1], 0, 10.5), MI = -0.5 * ixv / 9.47 * mw;
-            const FMI = k.fm ? MI : 0, AMI = k.fm ? 0 : MI;
-            f = cl(261.63 * Math.pow(2, k.pt + I[2] + FMI), 0.02, 18000); dt = f / sr;
-            s.pc += dt; if (s.pc >= 1) s.pc -= 1;
+            const mw = k.mw === 0 ? mtri : k.mw === 1 ? msq : msaw;
+            const MIN = -(k.ix * mw + cl(I[3], 0, 10) / 10 * mw);
+            f = cl(440 * Math.pow(2, k.pf + I[5] + k.pcv * I[6] + k.pfm * I[7] + (k.pm ? MIN / 2 : 0)), 0.01, 18000); dt = f / sr;
+            s.pc += dt;
+            const plv = I[4] * k.pl;                                   // PHASE LOCK : injection into the reset threshold
+            if (k.pl > 0 && plv > 0.5 && s.plPrev <= 0.5 && s.pc > 1 - 0.35 * k.pl) s.pc = 1;
+            s.plPrev = plv;
+            if (s.pc >= 1) s.pc -= 1;
             ph = s.pc;
-            const tri = (2 * Math.abs(2 * ph - 1) - 1) * 5, sine = 5 * tanh(1.55 * tri / 5) / tanh(1.55);
+            const tri = (2 * Math.abs(2 * ph - 1) - 1) * 5, S = 5 * tanh(1.55 * tri / 5) / tanh(1.55);
+            const saw = (2 * ph - 1 - blep(ph, dt)) * 5;
             let sq = ph < .5 ? 1 : -1; sq += blep(ph, dt); sq -= blep((ph + .5) % 1, dt); sq *= 5;
-            const spk = ph > .95 ? -5 : 5;
-            const tbv = cl(k.tb + I[3], 0, 10.5);
-            const x = cl(-(sine / 2) * (1 + 3 * tbv / 10), -10.5, 10.5);
             const dz = (v, T) => v > T ? v - T : v < -T ? v + T : 0;
-            const fold = -2 * (x - 2 * dz(x, 2.6) + 2 * dz(x, 7.8));
-            const xs = k.cw === 0 ? spk : k.cw === 1 ? sq : tri;
-            const sv = cl(k.sh + I[4], 0, 10.5) / 9.4;
-            const wav = -(fold + sv * (xs - fold));
-            const amv = cl(4.93 - 2 * AMI, 0, 10.5);
-            O[0] = mw; O[1] = -wav * amv / 4.93;
+            const tbv = cl(k.tb + k.tcv * I[9] + (k.tm ? MIN : 0), 0, 10.5), syv = cl(k.sy + I[8], 0, 10.5), orv = cl(k.or + I[10], 0, 10.5);
+            const x = cl(-(S / 2) * (1 + 3 * tbv / 10) - (2.5 - syv / 2), -10.5, 10.5);
+            const F = -2 * (x - 2 * dz(x, 2.6) + 2 * dz(x, 7.8));
+            const xm = -0.7 * S, M = 2 * (xm - 2 * dz(xm, 2.5));
+            const X = saw + syv / 10 * (M - saw), Y = S + tbv / 10 * (X - S), Z = F + orv / 10 * (Y - F);
+            const amv = cl(4.93 - (k.am ? MIN : 0), 0, 10.5);
+            O[0] = mtri; O[1] = mw; O[2] = S; O[3] = sq; O[4] = Z * amv / 4.93;
             break;
           }
           case 'adsr': { // Moog 911-style : attack toward +12 V until 10 V, decay toward SUSTAIN, release toward 0
