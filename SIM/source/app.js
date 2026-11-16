@@ -2,7 +2,7 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const PH = 128.5, MX = 1.2, MY = 4.5, HPMM = 5.08, ROWHP = 104, GAPY = 5;
 const ROWW = ROWHP * HPMM, TW = ROWW + 2 * MX, RH = PH + 2 * MY;
-const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 32, stg: 30, sim: 10 };
+const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 30, stg: 30, sim: 10 };
 const DESC = {
   vco: 'Oscillateur façon 921 : RANGE LO à 2′, 4 formes d’onde, FM, PWM, sync et sortie BLEND.',
   mix: 'Mixeur 4 entrées façon CP3, MASTER GAIN avec saturation douce, OUT et −OUT.',
