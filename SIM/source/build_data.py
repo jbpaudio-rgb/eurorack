@@ -49,6 +49,12 @@ M.append(dict(id='ad', name='AD', w=30.0, **p, ctl=[
     dict(t='toggle', id='cycle', label='ONE / CYCLE', x=15.0, y=65.0, v=0),
     dict(t='led', id='led', x=15.0, y=109.0),
     J('acv', 8.2, 93.0, 'in'), J('dcv', 21.8, 93.0, 'in'), J('trig', 8.2, 109.0, 'in'), J('out', 21.8, 109.0, 'out')]))
+p = panel(W + 'adsr/panel.json', W + 'out/ADSR/panel/octavio-adsr-panel.kicad_pcb')
+M.append(dict(id='adsr', name='ADSR', w=40.3, **p, ctl=[
+    K('attack', 26.0, 20.0, 1.0, 0.12, 'ATTACK'), K('decay', 26.0, 37.5, 1.0, 0.5, 'DECAY'),
+    K('sustain', 26.0, 55.0, 1.0, 0.6, 'SUSTAIN'), K('release', 26.0, 72.5, 1.0, 0.45, 'RELEASE'),
+    dict(t='led', id='led', x=20.15, y=90.0),
+    J('gate', 7.6, 104.0, 'in'), J('out', 20.15, 104.0, 'out'), J('nout', 32.7, 104.0, 'out')]))
 # simulator utility panel (not a real module)
 SW = 50.5
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]
@@ -61,8 +67,8 @@ M.append(dict(id='sim', name='SIM', w=SW, holes=holes, logo=[SW / 2 - 8, 119.859
          J('cv', 12.6, 83.0, 'out'), J('gate', 37.9, 83.0, 'out'), J('audio', 12.6, 103.0, 'in'), J('scope', 37.9, 103.0, 'in')]))
 PATCH = [['sim', 'cv', 'vco', 'voct'], ['sim', 'gate', 'ad', 'trig'],
          ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'],
-         ['mix', 'out', 'vcf', 'in1'], ['ad', 'out', 'vcf', 'contour'], ['ad', 'out', 'vca', 'cv1'],
-         ['vcf', 'out', 'vca', 'in1'], ['vca', 'outp', 'sim', 'audio'], ['vca', 'outp', 'sim', 'scope']]
+         ['mix', 'out', 'vcf', 'in1'], ['ad', 'out', 'vcf', 'contour'], ['adsr', 'out', 'vca', 'cv1'],
+         ['vcf', 'out', 'vca', 'in1'], ['sim', 'gate', 'adsr', 'gate'], ['vca', 'outp', 'sim', 'audio'], ['vca', 'outp', 'sim', 'scope']]
 logo = 'data:image/png;base64,' + base64.b64encode(open(W + 'logo_white.png', 'rb').read()).decode()
 json.dump(dict(modules=M, patch=PATCH, logo=logo), open(W + 'sim/data.json', 'w'))
 print([ (m['id'], len(m['lines']), len(m['text'])) for m in M])

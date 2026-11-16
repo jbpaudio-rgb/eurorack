@@ -6,6 +6,7 @@ const OCT_TYPES = {
   vcf: { ins: ['in1', 'in2', 'contour', 'fcv', 'ecv'], outs: ['out'] },
   vca: { ins: ['in1', 'in2', 'cv1', 'cv2', 'cv3'], outs: ['outp', 'outn'] },
   ad: { ins: ['trig', 'acv', 'dcv'], outs: ['out'] },
+  adsr: { ins: ['gate'], outs: ['out', 'nout'] },
   sim: { ins: ['audio', 'scope'], outs: ['cv', 'gate'] },
 };
 class OctavioEngine {
@@ -45,6 +46,7 @@ class OctavioEngine {
     if (m.type === 'vco') { s.ph = Math.random(); s.syncHi = false; }
     else if (m.type === 'vcf') { s.y1 = s.y2 = s.y3 = s.y4 = s.hp = s.hpx = 0; }
     else if (m.type === 'ad') { s.env = 0; s.latch = 0; s.trHi = false; s.ledMax = 0; }
+    else if (m.type === 'adsr') { s.env = 0; s.att = 0; s.g = false; s.ledMax = 0; }
     else if (m.type === 'sim') { s.seqPh = 0; s.step = 0; s.lastCv = 0; s.scope = new Float32Array(2048); }
   }
   resolve() {
@@ -70,6 +72,9 @@ class OctavioEngine {
       if (t === 'mix') { const mm = p('master'), Rf = 10 + 100 * mm; return { l: [1, 2, 3, 4].map(k => potLoad(p('l' + k))), G: Rf / 10, slope: 4.7 / (Rf + 4.7) }; }
       if (t === 'vcf') { const md = p('mode'); return { a: md < 0.5 ? 1 - 2 * md : 0, c: md > 0.5 ? 2 * md - 1 : 0, fr: p('freq'), e: p('emph'), co: p('contour'), fc: p('fcv'), ec: p('ecv') }; }
       if (t === 'vca') return { cv: p('cvlevel'), r: p('response'), fx: p('fixed') };
+      if (t === 'adsr') { // RC through switch (~320 ohm) + 1M log pot into 10 uF X7R (~6 uF at 10 V)
+        const tc = x => { const R = 320 + 1e6 * (Math.pow(100, x) - 1) / 99; return 1 - Math.exp(-1 / (sr * R * 6e-6)); };
+        return { ka: tc(p('attack')), kd: tc(p('decay')), kr: tc(p('release')), S: 10 * p('sustain') }; }
       if (t === 'ad') return { a: p('attack'), d: p('decay'), acv: p('acv'), dcv: p('dcv'), cyc: p('cycle') };
       if (t === 'sim') { const bpm = 50 + 190 * p('tempo'), on = P[m.id + '.seq']; return { on: on === undefined ? 1 : on, v: p('volume'), step: 60 / bpm / 2 }; }
       return {};
@@ -141,6 +146,15 @@ class OctavioEngine {
             O[0] = s.env; if (s.env > s.ledMax) s.ledMax = s.env;
             break;
           }
+          case 'adsr': { // Moog 911-style : attack toward +12 V until 10 V, decay toward SUSTAIN, release toward 0
+            const gi = I[0];
+            if (!s.g && gi > 3.1) { s.g = true; s.att = 1; } else if (s.g && gi < 2.6) { s.g = false; s.att = 0; }
+            if (s.att) { s.env += (12 - s.env) * k.ka; if (s.env >= 10) { s.env = 10; s.att = 0; } }
+            else if (s.g) s.env += (k.S - s.env) * k.kd;
+            else s.env -= s.env * k.kr;
+            O[0] = s.env; O[1] = -s.env; if (s.env > s.ledMax) s.ledMax = s.env;
+            break;
+          }
           case 'sim': { // sequencer / keyboard, speakers, scope
             let cv, gate;
             if (this.key !== null) { cv = (this.key - 60) / 12; gate = 5; s.lastCv = cv; }
@@ -163,6 +177,7 @@ class OctavioEngine {
           for (const m of list) {
             if (m.type === 'sim') r.scopes[m.id] = m.s.scope.slice(0);
             else if (m.type === 'ad') { r.leds[m.id] = m.s.ledMax / 9.3; m.s.ledMax = 0; }
+            else if (m.type === 'adsr') { r.leds[m.id] = m.s.ledMax / 10; m.s.ledMax = 0; }
           }
           this.report(r);
         }

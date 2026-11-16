@@ -2,13 +2,14 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const PH = 128.5, MX = 1.2, MY = 4.5, HPMM = 5.08, ROWHP = 104, GAPY = 5;
 const ROWW = ROWHP * HPMM, TW = ROWW + 2 * MX, RH = PH + 2 * MY;
-const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, sim: 10 };
+const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, sim: 10 };
 const DESC = {
   vco: 'Oscillateur façon 921 : RANGE LO à 2′, 4 formes d’onde, FM, PWM, sync et sortie BLEND.',
   mix: 'Mixeur 4 entrées façon CP3, MASTER GAIN avec saturation douce, OUT et −OUT.',
   vcf: 'Filtre en échelle 4 pôles, passage LP → BP → HP, emphasis jusqu’à l’auto-oscillation, entrée CONTOUR.',
   vca: 'VCA façon 902 : entrées différentielles, réponse LIN ↔ EXP, 3 entrées CV.',
   ad: 'Enveloppe AD à cœur OTA, 0,8 ms à 8 s, CV sur attaque et decay, mode CYCLE (LFO).',
+  adsr: 'Enveloppe ADSR façon Moog 911 : courbes RC, attaque ≈ 2 ms à 10 s, sustain 0 à 10 V, sorties OUT et −OUT.',
   sim: 'Outil du simulateur : séquence, CV/GATE du clavier, sortie son et oscilloscope.',
 };
 const TYPE = {}; DATA.modules.forEach(m => TYPE[m.id] = m);
@@ -18,7 +19,7 @@ let L = null;                 // layout { rows:[[id..]], mods:{id:{type,n}} }
 let PARAMS = {}, CTL = {}, JACKS = {}, LAB = {}, POS = {};
 let cables = [], moveMode = false, nRows = 1, TH = RH;
 const DEFV = {}; DATA.modules.forEach(m => m.ctl.forEach(c => { if (c.v !== undefined) DEFV[m.id + '.' + c.id] = c.v; }));
-const defaultLayout = () => ({ rows: [['vco', 'mix', 'vcf', 'vca', 'ad', 'sim']], mods: { vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
+const defaultLayout = () => ({ rows: [['vco', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim']], mods: { adsr: { type: 'adsr', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
 const DEFS_SVG = `
 <linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
 <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d4828"/><stop offset=".55" stop-color="#5c331b"/><stop offset="1" stop-color="#45260f"/></linearGradient>
@@ -173,6 +174,9 @@ function fmt(key, v) {
     case 'vca.response': return v < .02 ? 'LIN' : v > .98 ? 'EXP' : 'LIN ' + Math.round((1 - v) * 100) + ' % · EXP ' + Math.round(v * 100) + ' %';
     case 'vca.fixed': return (6 * v).toFixed(2) + ' V';
     case 'ad.attack': case 'ad.decay': return tm(0.0008 * Math.pow(10, 4 * v));
+    case 'adsr.attack': { const R = 320 + 1e6 * (Math.pow(100, v) - 1) / 99; return tm(R * 6e-6 * Math.log(6)); }
+    case 'adsr.decay': case 'adsr.release': { const R = 320 + 1e6 * (Math.pow(100, v) - 1) / 99; return tm(R * 6e-6 * Math.log(10)) + ' (à 90 %)'; }
+    case 'adsr.sustain': return (10 * v).toFixed(1) + ' V';
     case 'ad.cycle': return v ? 'CYCLE (LFO)' : 'ONE';
     case 'sim.tempo': return Math.round(50 + 190 * v) + ' BPM';
     case 'sim.seq': return v ? 'en marche' : 'arrêtée';
@@ -338,7 +342,7 @@ function bindPanelDrag(g, id) {
 function setMove(on) { moveMode = on; svg.classList.toggle('move', on); $('#mvled').classList.toggle('on', on); build(); if (on) toast('Glisse un module pour le déplacer'); }
 $('#bMove').onclick = () => setMove(!moveMode);
 const lib = $('#lib'), libCards = $('#libCards');
-['vco', 'mix', 'vcf', 'vca', 'ad', 'sim'].forEach(t => {
+['vco', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim'].forEach(t => {
   const b = document.createElement('button'); b.className = 'mc';
   b.innerHTML = `<span class="t"><b>${TYPE[t].name}</b><u>${HP[t]} HP</u></span><p>${DESC[t]}</p>`;
   b.onclick = () => { lib.hidden = true; addModule(t); };
