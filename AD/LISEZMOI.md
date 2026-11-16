@@ -6,9 +6,9 @@ Même style que le VCA : façade alu noire, lettrage blanc, bandes argent, logo 
 - **AD** entre les trous du haut
 - **ATTACK** (gros bouton, gradué 0–10)
 - **DECAY** (gros bouton, gradué 0–10)
+- Inverseur **ONE / CYCLE** juste sous DECAY : CYCLE relance l'attaque à la fin du decay → l'AD devient un LFO
 - **ATTACK CV / DECAY CV** : petit atténuateur juste au-dessus de chaque entrée CV
 - **TRIG** (entrée), **LED** (suit l'enveloppe), **OUT**
-- Inverseur **ONE / CYCLE** : CYCLE relance l'attaque à la fin du decay → l'AD devient un LFO
 
 ## Circuit
 - Cœur : OTA **LM13700** monté en « slew » : il charge le condensateur de temps C13 (100 nF C0G) vers une cible de 10 V pendant l'attaque, puis vers 0 V pendant le decay, à un courant égal à IABC.
