@@ -7,7 +7,7 @@ Modules Eurorack inspirés du Moog modulaire (façades alu noir, lettrage blanc,
 | VCA | VCA différentiel façon Moog 902, 6 HP (rev 0.7) : CV LEVEL, RESPONSE LIN↔EXP, FIXED CONTROL VOLTAGE, 2 entrées / 2 sorties, 3 entrées CV | schéma + façade prêts ; carte placée, à router |
 | AD | Enveloppe Attack/Decay contrôlée en tension, 6 HP (rev 0.1) : ATTACK, DECAY, CV attack et CV decay avec atténuateurs, TRIG, OUT, LED, mode ONE/CYCLE | schéma + façade prêts ; carte placée, à router |
 | VCF | Filtre ladder façon Moog 4 pôles, 8 HP (rev 0.2) : bouton LP→BP→HP, FREQUENCY, EMPHASIS, CONTOUR + FREQ CV + EMPH CV avec atténuateurs, IN 1, IN 2, OUT | schéma + façade prêts ; carte placée, à router |
-| VCO | Oscillateur façon Moog 921, 8 HP (rev 0.1) : FREQUENCY, FINE, WIDTH, 1V/OCT, SYNC, FM et PWM avec atténuateurs, sorties SINE / TRIANGLE / SAW / PULSE | schéma + façade prêts ; carte placée, à router |
+| VCO | Oscillateur façon Moog 921, 8 HP (rev 0.2) : RANGE LO–32’–16’–8’–4’–2’, FREQUENCY ±6 demi-tons, WIDTH, 1V/OCT, SYNC, FM et PWM avec atténuateurs, sorties SINE / TRIANGLE / SAW / PULSE | schéma + façade prêts ; carte placée, à router |
 
 Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), jacks Thonkiconn, pots 9 mm, façades PCB aluminium 1,6 mm (vernis noir, sérigraphie blanche, HASL sans plomb), montage JLCPCB.
 
