@@ -23,7 +23,7 @@ M.append(dict(id='vco', name='VCO', w=60.6, **p, ctl=[
     K('fine', 13.5, 44.5, 1.0, 0.5, 'FREQUENCY'), K('width', 47.1, 44.5, 1.0, 0.5, 'WIDTH'),
     K('fm', 10.1, 66.0, 0.8, 0.0, 'FM'), K('pwm', 30.3, 66.0, 0.8, 0.0, 'PWM'), K('blend', 50.5, 66.0, 0.8, 0.33, 'BLEND'),
     J('fm', 10.1, 81.5, 'in'), J('pwm', 30.3, 81.5, 'in'), J('blend', 50.5, 81.5, 'out'),
-    J('voct', 10.1, 96.0, 'in'), J('sync', 10.1, 109.5, 'in'), J('sine', 30.3, 96.0, 'out'), J('tri', 50.5, 96.0, 'out'),
+    J('voct', 10.1, 95.8, 'in'), J('sync', 10.1, 109.5, 'in'), J('sine', 30.3, 95.8, 'out'), J('tri', 50.5, 95.8, 'out'),
     J('saw', 30.3, 109.5, 'out'), J('pulse', 50.5, 109.5, 'out')]))
 p = panel(W + 'mix/panel.json', W + 'out/MIX/panel/octavio-mix-panel.kicad_pcb')
 M.append(dict(id='mix', name='MIX', w=40.3, **p, ctl=[
@@ -53,8 +53,8 @@ p = panel(W + 'adsr/panel.json', W + 'out/ADSR/panel/octavio-adsr-panel.kicad_pc
 M.append(dict(id='adsr', name='ADSR', w=40.3, **p, ctl=[
     K('attack', 20.15, 19.4, 1.0, 0.12, 'ATTACK'), K('decay', 20.15, 39.2, 1.0, 0.5, 'DECAY'),
     K('sustain', 20.15, 59.0, 1.0, 0.6, 'SUSTAIN'), K('release', 20.15, 78.8, 1.0, 0.45, 'RELEASE'),
-    dict(t='led', id='led', x=10.1, y=96.5),
-    J('gate', 30.2, 96.5, 'in'), J('out', 10.1, 109.5, 'out'), J('nout', 30.2, 109.5, 'out')]))
+    dict(t='led', id='led', x=10.1, y=95.9),
+    J('gate', 30.2, 95.9, 'in'), J('out', 10.1, 109.5, 'out'), J('nout', 30.2, 109.5, 'out')]))
 p = panel(W + 'cx/panel.json', W + 'out/COMPLEX/panel/octavio-complex-panel.kicad_pcb')
 M.append(dict(id='cx', name='COMPLEX', w=152.1, **p, ctl=[
     K('mfreq', 23.1, 27.0, 1.0, 0.35, 'MOD FREQUENCY'), K('index', 57.0, 27.0, 1.0, 0.65, 'MOD INDEX'), K('pfreq', 91.0, 27.0, 1.0, 0.45, 'FREQUENCY'), K('timbre', 132.0, 27.0, 1.0, 0.3, 'TIMBRE'),
@@ -84,9 +84,9 @@ for i, x in enumerate(SXs):
     ctl += [K(f'a{n}', x, 18.5, 0.8, A0[i], f'A {n}'), K(f'b{n}', x, 33.5, 0.8, B0[i], f'B {n}'), K(f't{n}', x, 48.5, 0.8, 0.5, f'TIME {n}'),
             dict(t='sbutton', id=f'sl{n}', idx=i, label=f'SLIDE {n}', x=x, y=61.5, v=1 if i in (3, 6) else 0),
             dict(t='pled', id=f'sl{n}', val=1, x=x, y=68.5, c='amber'), dict(t='sled', idx=i, x=x, y=75.5),
-            J(f'sel{n}', x, 96.5, 'in'), J(f'g{n}', x, 109.5, 'out')]
-ctl += [J('clock', 9.0, 82.5, 'in'), J('start', 23.0, 82.5, 'in'), J('strobe', 37.0, 82.5, 'in'), J('tcv', 9.0, 96.5, 'in'), J('analog', 23.0, 96.5, 'in'),
-        J('end', 37.0, 96.5, 'out'), J('cva', 9.0, 109.5, 'out'), J('cvb', 23.0, 109.5, 'out'), J('gate', 37.0, 109.5, 'out')]
+            J(f'sel{n}', x, 95.9, 'in'), J(f'g{n}', x, 109.5, 'out')]
+ctl += [J('clock', 9.0, 82.3, 'in'), J('start', 23.0, 82.3, 'in'), J('strobe', 37.0, 82.3, 'in'), J('tcv', 9.0, 95.9, 'in'), J('analog', 23.0, 95.9, 'in'),
+        J('end', 37.0, 95.9, 'out'), J('cva', 9.0, 109.5, 'out'), J('cvb', 23.0, 109.5, 'out'), J('gate', 37.0, 109.5, 'out')]
 M.append(dict(id='stg', name='STAGES', w=152.1, **p, ctl=ctl))
 p = panel(W + 'lfo/panel.json', W + 'out/QUADLFO/panel/octavio-quadlfo-panel.kicad_pcb')
 LX = [9.33 + 14.0 * i for i in range(4)]
