@@ -100,6 +100,15 @@ for i, x in enumerate(LX):
             J(f'o{n}', x, 90.0, 'out')]
 ctl += [J('clock', 16.33, 106.0, 'in'), J('reset', 44.33, 106.0, 'in'), dict(t='led', id='lc', x=30.33, y=106.0)]
 M.append(dict(id='lfo', name='LFOs', w=60.66, **p, ctl=ctl))
+p = panel(W + 'nt/panel.json', W + 'out/NOISETOOLS/panel/octavio-noisetools-panel.kicad_pcb')
+ctl = [K('rate', 12.6, 24.0, 1.0, 0.55, 'PULSE RATE'), K('slew', 37.9, 24.0, 1.0, 0.3, 'SLEW RATE'),
+       dict(t='toggle', id='mode', label='CLK / RND', x=12.6, y=45.0, v=0, vert=1, opts=['CLK', 'RND']),
+       dict(t='toggle', id='shmode', label='S&H / T&H', x=37.9, y=45.0, v=0, vert=1, opts=['S&H', 'T&H']),
+       dict(t='led', id='lp', x=9.0, y=57.0), dict(t='led', id='ls', x=25.25, y=57.0), dict(t='led', id='ll', x=41.5, y=57.0),
+       J('pulse', 9.0, 76.0, 'out'), J('white', 25.25, 76.0, 'out'), J('pink', 41.5, 76.0, 'out'),
+       J('shin', 9.0, 93.0, 'in'), J('trig', 25.25, 93.0, 'in'), J('sh', 41.5, 93.0, 'out'),
+       J('slin', 9.0, 109.5, 'in'), J('slew', 41.5, 109.5, 'out')]
+M.append(dict(id='nt', name='NOISE TOOLS', w=50.5, **p, ctl=ctl))
 # simulator utility panel (not a real module)
 SW = 50.5
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]

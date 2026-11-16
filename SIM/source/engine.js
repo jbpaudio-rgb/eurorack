@@ -11,6 +11,7 @@ const OCT_TYPES = {
          outs: ['cva', 'cvb', 'gate', 'end', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'] },
   cx: { ins: ['mvoct', 'mcv', 'mfm', 'indexcv', 'plock', 'pvoct', 'pcv', 'pfm', 'symcv', 'timbrecv', 'ordercv'], outs: ['tri', 'signal', 'sine', 'square', 'final'] },
   lfo: { ins: ['clock', 'reset'], outs: ['o1', 'o2', 'o3', 'o4'] },
+  nt: { ins: ['shin', 'trig', 'slin'], outs: ['pulse', 'white', 'pink', 'sh', 'slew'] },
   sim: { ins: ['audio', 'scope'], outs: ['cv', 'gate'] },
 };
 class OctavioEngine {
@@ -38,7 +39,7 @@ class OctavioEngine {
       let m = this.mods.get(id);
       if (!m || m.type !== type) {
         const T = OCT_TYPES[type];
-        m = { id, type, i: new Float64Array(T.ins.length), o: new Float64Array(T.outs.length), s: {} };
+        m = { id, type, i: new Float64Array(T.ins.length), o: new Float64Array(T.outs.length), pat: new Uint8Array(T.ins.length), s: {} };
         this.init(m);
       }
       nm.set(id, m);
@@ -52,18 +53,20 @@ class OctavioEngine {
     else if (m.type === 'ad') { s.env = 0; s.latch = 0; s.trHi = false; s.ledMax = 0; }
     else if (m.type === 'cx') { s.pm = Math.random(); s.pc = Math.random(); s.plPrev = 0; }
     else if (m.type === 'stg') { s.stage = 0; s.pos = 0; s.run = true; s.held = false; s.pA = 0; s.pB = 0; s.inHi = new Array(13).fill(false); s.lastClk = -1; s.per = 0.5 * this.sr; s.n = 0; s.endUntil = 0; s.btn = 0; }
+    else if (m.type === 'nt') { s.tri = 0; s.sq = 1; s.bit = 1; s.b = [0, 0, 0, 0, 0, 0, 0]; s.th = false; s.hold = 0; s.sl = 0; s.lp = 0; s.lsh = 0; s.lsl = 0; s.g2 = null; }
     else if (m.type === 'lfo') { s.ph = [0, 0, 0, 0]; s.y1 = [0, 0, 0, 0]; s.y2 = [0, 0, 0, 0]; s.led = [0, 0, 0, 0]; s.ledc = 0; s.t = 0; s.n = 0; s.last = -1; s.per = 0; s.ch = false; s.rh = false; }
     else if (m.type === 'adsr') { s.env = 0; s.att = 0; s.g = false; s.ledMax = 0; }
     else if (m.type === 'sim') { s.seqPh = 0; s.step = 0; s.lastCv = 0; s.scope = new Float32Array(2048); }
   }
   resolve() {
     this.cabs = [];
+    for (const m of this.mods.values()) m.pat.fill(0);
     for (const [a, b] of this.rawCab) {
       const [am, ap] = a.split('.'), [bm, bp] = b.split('.');
       const A = this.mods.get(am), B = this.mods.get(bm);
       if (!A || !B) continue;
       const oi = OCT_TYPES[A.type].outs.indexOf(ap), ii = OCT_TYPES[B.type].ins.indexOf(bp);
-      if (oi >= 0 && ii >= 0) this.cabs.push([A.o, oi, B.i, ii]);
+      if (oi >= 0 && ii >= 0) { this.cabs.push([A.o, oi, B.i, ii]); B.pat[ii] = 1; }
     }
   }
   render(L, R, n) {
@@ -88,6 +91,9 @@ class OctavioEngine {
                  ix: g('index', .65) * 2 - 1, am: !g('ampl', 1), pm: !g('pitch', 0), tm: !g('timbresw', 1), pl: g('plock', 0),
                  pf: (g('pfreq', .45) - .5) * 8 + (g('pfine', .5) - .5) * 1.16, pcv: g('pcv', .5) * 2 - 1, pfm: g('pfm', 0),
                  tb: g('timbre', .3) * 10, tcv: g('tcv', 0), sy: g('sym', .5) * 10, or: g('order', 0) * 10 }; }
+      if (t === 'nt') { const g = (q, d) => { const v = P[m.id + '.' + q]; return v === undefined ? d : v; };
+        const A = x => (Math.pow(10, 2 * x) - 1) / 99;
+        return { f: 106 * (A(g('rate', .55)) + 0.0045), rnd: g('mode', 0) === 1, th: g('shmode', 0) === 1, slr: 11 / ((1e3 + 1e6 * A(g('slew', .3))) * 1e-6) / sr }; }
       if (t === 'lfo') { const g = (q, d) => { const v = P[m.id + '.' + q]; return v === undefined ? d : v; };
         return { F: [1, 2, 3, 4].map(i => g('f' + i, .4)), W: [1, 2, 3, 4].map(i => g('w' + i, 0)), C: [1, 2, 3, 4].map(i => g('s' + i, 1) === 0), a: 1 - Math.exp(-2 * Math.PI * 159 / sr) }; }
       if (t === 'adsr') { // RC through switch (~320 ohm) + 1M log pot into 10 uF X7R (~6 uF at 10 V)
@@ -163,6 +169,26 @@ class OctavioEngine {
               if (s.env < 0) s.env = 0;
             }
             O[0] = s.env; if (s.env > s.ledMax) s.ledMax = s.env;
+            break;
+          }
+          case 'nt': { // NOISE TOOLS : avalanche noise, pinking filter, tri/square clock + CD4013 random gate, JFET S&H, linear slew
+            let wn; if (s.g2 !== null) { wn = s.g2; s.g2 = null; } else {
+              let u, v, q; do { this.seed = (this.seed * 16807) % 2147483647; u = this.seed / 1073741823.5 - 1; this.seed = (this.seed * 16807) % 2147483647; v = this.seed / 1073741823.5 - 1; q = u * u + v * v; } while (q >= 1 || q === 0);
+              const r = Math.sqrt(-2 * Math.log(q) / q); wn = u * r; s.g2 = v * r; }
+            const W = cl(1.7 * wn, -5.5, 5.5), b = s.b;   // 10 V peak to peak
+            b[0] = 0.99886 * b[0] + W * 0.0555179; b[1] = 0.99332 * b[1] + W * 0.0750759; b[2] = 0.96900 * b[2] + W * 0.1538520;
+            b[3] = 0.86650 * b[3] + W * 0.3104856; b[4] = 0.55000 * b[4] + W * 0.5329522; b[5] = -0.7616 * b[5] - W * 0.0168980;
+            const pk = (b[0] + b[1] + b[2] + b[3] + b[4] + b[5] + b[6] + W * 0.5362) * 0.24; b[6] = W * 0.115926;
+            s.tri -= s.sq * 4 * 5.5 * k.f / sr;                     // triangle +/-5.5 V, square flips at the peaks
+            if (s.tri <= -5.5 && s.sq > 0) { s.sq = -1; } else if (s.tri >= 5.5 && s.sq < 0) { s.sq = 1; s.bit = W > 0 ? 1 : 0; }
+            const clkHi = s.sq > 0, pulse = (clkHi && (!k.rnd || s.bit)) ? 10.5 : 0;
+            const trig = m.pat[1] ? I[1] : pulse, hi = trig > 1.57, shin = m.pat[0] ? I[0] : W;
+            if (k.th ? hi : (hi && !s.th)) s.hold = cl(shin, -11, 11);
+            s.th = hi;
+            const sin_ = m.pat[2] ? I[2] : s.hold, d = sin_ - s.sl;
+            s.sl += d > k.slr ? k.slr : d < -k.slr ? -k.slr : d;
+            O[0] = pulse; O[1] = W; O[2] = pk; O[3] = s.hold; O[4] = s.sl;
+            if (pulse > s.lp) s.lp = pulse; if (s.hold > s.lsh) s.lsh = s.hold; if (s.sl > s.lsl) s.lsl = s.sl;
             break;
           }
           case 'lfo': { // same logic as the RP2040 firmware (octavio_quadlfo.ino), PWM + 2 RC poles at 159 Hz
@@ -286,6 +312,7 @@ class OctavioEngine {
             if (m.type === 'sim') r.scopes[m.id] = m.s.scope.slice(0);
             else if (m.type === 'ad') { r.leds[m.id] = m.s.ledMax / 9.3; m.s.ledMax = 0; }
             else if (m.type === 'adsr') { r.leds[m.id] = m.s.ledMax / 10; m.s.ledMax = 0; }
+            else if (m.type === 'nt') { r.leds[m.id + '.lp'] = m.s.lp / 10.5; r.leds[m.id + '.ls'] = m.s.lsh / 5; r.leds[m.id + '.ll'] = m.s.lsl / 5; m.s.lp = m.s.lsh = m.s.lsl = 0; }
             else if (m.type === 'lfo') { for (let c = 0; c < 4; c++) r.leds[m.id + '.l' + (c + 1)] = m.s.led[c]; r.leds[m.id + '.lc'] = m.s.t < m.s.ledc ? 1 : 0; }
             else if (m.type === 'stg') { r.stg = r.stg || {}; r.stg[m.id] = { stage: m.s.stage, run: m.s.run }; }
           }

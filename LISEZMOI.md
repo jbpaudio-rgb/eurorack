@@ -13,6 +13,7 @@ Modules Eurorack inspirés du Moog modulaire (façades alu noir, lettrage blanc,
 | COMPLEX | Générateur d'onde complexe façon Buchla 259, 30 HP (rev 0.3) : osc. de modulation (FREQ, FINE, AUDIO/LFO, tri/carré/saw, CV, FM), MOD INDEX → AMPL / PITCH / TIMBRE, PHASE LOCK, COMPLEX OSCILLATOR (SINE, SQUARE), HARMONICS (TIMBRE, SYMMETRY, ORDER) → FINAL | schéma + façade prêts ; carte placée, à router |
 | STAGES | Séquenceur 8 étapes façon Verbos Multistage, 30 HP (rev 0.1), Raspberry Pi Pico : A, B, TIME, SLIDE par étape, LOOP / ONCE / ENV, CLOCK, START, STROBE, ANALOG, SEL et GATE par étape, CV A, CV B, GATE, END ; programme Arduino | schéma + façade + programme prêts ; carte placée, à router |
 | QUADLFO | LFOs : quatre LFO, 12 HP (rev 0.1), Raspberry Pi Pico, version la moins chère (sortie PWM filtrée, sans DAC) : FREQ et WAVE (fondu SINE → SAW → SQUARE) par canal, CLK / FREE, CLOCK (/16 à ×16), RESET, LED par canal | schéma + façade + programme Arduino prêts ; carte placée, à router |
+| NOISETOOLS | NOISE TOOLS façon Intellijel, 10 HP (rev 0.1), analogique : PULSE (RATE, CLK / RND), bruit WHITE et PINK, S&H / T&H (entrée = bruit blanc, TRIG = PULSE par défaut), SLEW (entrée = S&H par défaut), 3 LED | schéma + façade prêts ; carte placée, à router |
 
 Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), jacks Thonkiconn, pots 9 mm, façades PCB aluminium 1,6 mm (vernis noir, sérigraphie blanche, HASL sans plomb), montage JLCPCB.
 
