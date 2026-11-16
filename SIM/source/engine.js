@@ -10,6 +10,7 @@ const OCT_TYPES = {
   stg: { ins: ['clock', 'start', 'strobe', 'tcv', 'analog', 'sel1', 'sel2', 'sel3', 'sel4', 'sel5', 'sel6', 'sel7', 'sel8'],
          outs: ['cva', 'cvb', 'gate', 'end', 'g1', 'g2', 'g3', 'g4', 'g5', 'g6', 'g7', 'g8'] },
   cx: { ins: ['mvoct', 'mcv', 'mfm', 'indexcv', 'plock', 'pvoct', 'pcv', 'pfm', 'symcv', 'timbrecv', 'ordercv'], outs: ['tri', 'signal', 'sine', 'square', 'final'] },
+  lfo: { ins: ['clock', 'reset'], outs: ['o1', 'o2', 'o3', 'o4'] },
   sim: { ins: ['audio', 'scope'], outs: ['cv', 'gate'] },
 };
 class OctavioEngine {
@@ -51,6 +52,7 @@ class OctavioEngine {
     else if (m.type === 'ad') { s.env = 0; s.latch = 0; s.trHi = false; s.ledMax = 0; }
     else if (m.type === 'cx') { s.pm = Math.random(); s.pc = Math.random(); s.plPrev = 0; }
     else if (m.type === 'stg') { s.stage = 0; s.pos = 0; s.run = true; s.held = false; s.pA = 0; s.pB = 0; s.inHi = new Array(13).fill(false); s.lastClk = -1; s.per = 0.5 * this.sr; s.n = 0; s.endUntil = 0; s.btn = 0; }
+    else if (m.type === 'lfo') { s.ph = [0, 0, 0, 0]; s.y1 = [0, 0, 0, 0]; s.y2 = [0, 0, 0, 0]; s.led = [0, 0, 0, 0]; s.ledc = 0; s.t = 0; s.n = 0; s.last = -1; s.per = 0; s.ch = false; s.rh = false; }
     else if (m.type === 'adsr') { s.env = 0; s.att = 0; s.g = false; s.ledMax = 0; }
     else if (m.type === 'sim') { s.seqPh = 0; s.step = 0; s.lastCv = 0; s.scope = new Float32Array(2048); }
   }
@@ -86,6 +88,8 @@ class OctavioEngine {
                  ix: g('index', .65) * 2 - 1, am: !g('ampl', 1), pm: !g('pitch', 0), tm: !g('timbresw', 1), pl: g('plock', 0),
                  pf: (g('pfreq', .45) - .5) * 8 + (g('pfine', .5) - .5) * 1.16, pcv: g('pcv', .5) * 2 - 1, pfm: g('pfm', 0),
                  tb: g('timbre', .3) * 10, tcv: g('tcv', 0), sy: g('sym', .5) * 10, or: g('order', 0) * 10 }; }
+      if (t === 'lfo') { const g = (q, d) => { const v = P[m.id + '.' + q]; return v === undefined ? d : v; };
+        return { F: [1, 2, 3, 4].map(i => g('f' + i, .4)), W: [1, 2, 3, 4].map(i => g('w' + i, 0)), C: [1, 2, 3, 4].map(i => g('s' + i, 1) === 0), a: 1 - Math.exp(-2 * Math.PI * 159 / sr) }; }
       if (t === 'adsr') { // RC through switch (~320 ohm) + 1M log pot into 10 uF X7R (~6 uF at 10 V)
         const tc = x => { const R = 320 + 1e6 * (Math.pow(100, x) - 1) / 99; return 1 - Math.exp(-1 / (sr * R * 6e-6)); };
         return { ka: tc(p('attack')), kd: tc(p('decay')), kr: tc(p('release')), S: 10 * p('sustain') }; }
@@ -159,6 +163,28 @@ class OctavioEngine {
               if (s.env < 0) s.env = 0;
             }
             O[0] = s.env; if (s.env > s.ledMax) s.ledMax = s.env;
+            break;
+          }
+          case 'lfo': { // same logic as the RP2040 firmware (octavio_quadlfo.ino), PWM + 2 RC poles at 159 Hz
+            s.t++;
+            const ch = I[0] > 1.5 ? true : I[0] < 0.8 ? false : s.ch;
+            if (ch && !s.ch) { if (s.last >= 0 && s.t - s.last > 0.002 * sr) s.per = s.t - s.last; s.last = s.t; s.n++; s.ledc = s.t + 0.03 * sr; }
+            s.ch = ch;
+            const rh = I[1] > 1.5 ? true : I[1] < 0.8 ? false : s.rh;
+            if (rh && !s.rh) { s.n = 0; s.last = s.t; s.ph = [0, 0, 0, 0]; }
+            s.rh = rh;
+            const frac = s.per ? cl((s.t - s.last) / s.per, 0, 1) : 0, cpos = (s.n % 48) + frac;
+            const RAT = [1 / 16, 1 / 8, 1 / 4, 1 / 3, 1 / 2, 1, 2, 3, 4, 8, 16];
+            for (let c = 0; c < 4; c++) {
+              const wv = k.W[c], z = wv < 1 / 3 ? 0 : wv < 2 / 3 ? 1 : 2;
+              let p;
+              if (k.C[c] && s.per) { const x = cpos * RAT[Math.round(k.F[c] * 10)]; p = x - Math.floor(x); s.ph[c] = p; }
+              else { s.ph[c] += 0.02 * Math.pow(2, k.F[c] * 10.3) / sr; if (s.ph[c] >= 1) s.ph[c] -= Math.floor(s.ph[c]); p = s.ph[c]; }
+              const v = z === 0 ? Math.sin(2 * Math.PI * p) : z === 1 ? 2 * p - 1 : (p < 0.5 ? 1 : -1);
+              s.y1[c] += k.a * (v - s.y1[c]); s.y2[c] += k.a * (s.y1[c] - s.y2[c]);
+              O[c] = 4.9 * s.y2[c];
+              const b = 0.5 * (v + 1); s.led[c] = b * b;
+            }
             break;
           }
           case 'stg': { // same logic as the RP2040 firmware (octavio_stages.ino)
@@ -260,6 +286,7 @@ class OctavioEngine {
             if (m.type === 'sim') r.scopes[m.id] = m.s.scope.slice(0);
             else if (m.type === 'ad') { r.leds[m.id] = m.s.ledMax / 9.3; m.s.ledMax = 0; }
             else if (m.type === 'adsr') { r.leds[m.id] = m.s.ledMax / 10; m.s.ledMax = 0; }
+            else if (m.type === 'lfo') { for (let c = 0; c < 4; c++) r.leds[m.id + '.l' + (c + 1)] = m.s.led[c]; r.leds[m.id + '.lc'] = m.s.t < m.s.ledc ? 1 : 0; }
             else if (m.type === 'stg') { r.stg = r.stg || {}; r.stg[m.id] = { stage: m.s.stage, run: m.s.run }; }
           }
           this.report(r);

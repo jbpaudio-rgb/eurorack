@@ -2,7 +2,7 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const PH = 128.5, MX = 1.2, MY = 4.5, HPMM = 5.08, ROWHP = 104, GAPY = 5;
 const ROWW = ROWHP * HPMM, TW = ROWW + 2 * MX, RH = PH + 2 * MY;
-const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 30, stg: 30, sim: 10 };
+const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 30, stg: 30, lfo: 12, sim: 10 };
 const DESC = {
   vco: 'Oscillateur façon 921 : RANGE LO à 2′, 4 formes d’onde, FM, PWM, sync et sortie BLEND.',
   mix: 'Mixeur 4 entrées façon CP3, MASTER GAIN avec saturation douce, OUT et −OUT.',
@@ -12,6 +12,7 @@ const DESC = {
   adsr: 'Enveloppe ADSR façon Moog 911 : courbes RC, attaque ≈ 2 ms à 10 s, sustain 0 à 10 V, sorties OUT et −OUT.',
   cx: 'Oscillateur complexe façon Buchla 259 : oscillateur de modulation, MOD INDEX vers AMPL / PITCH / TIMBRE, PHASE LOCK, oscillateur principal et HARMONICS (TIMBRE, SYMMETRY, ORDER).',
   stg: 'Séquenceur 8 étapes façon Verbos Multistage (RP2040) : A, B et TIME par étape, SLIDE, LOOP / ONCE / ENV, entrées SELECT et sorties GATE par étape.',
+  lfo: 'QUAD LFO (RP2040) : 4 LFO SINE / SAW / SQUARE, FREE (0,02 à 25 Hz) ou CLOCKED (/16 à ×16 du CLOCK), entrée RESET.',
   sim: 'Outil du simulateur : séquence, CV/GATE du clavier, sortie son et oscilloscope.',
 };
 const TYPE = {}; DATA.modules.forEach(m => TYPE[m.id] = m);
@@ -21,7 +22,7 @@ let L = null;                 // layout { rows:[[id..]], mods:{id:{type,n}} }
 let PARAMS = {}, CTL = {}, JACKS = {}, LAB = {}, POS = {}, PLEDS = [], SLEDS = {};
 let cables = [], moveMode = false, nRows = 1, TH = RH;
 const DEFV = {}; DATA.modules.forEach(m => m.ctl.forEach(c => { if (c.v !== undefined) DEFV[m.id + '.' + c.id] = c.v; }));
-const defaultLayout = () => ({ rows: [['vco', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim'], ['cx', 'stg']], mods: { stg: { type: 'stg', n: 1 }, adsr: { type: 'adsr', n: 1 }, cx: { type: 'cx', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
+const defaultLayout = () => ({ rows: [['vco', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim'], ['cx', 'stg', 'lfo']], mods: { lfo: { type: 'lfo', n: 1 }, stg: { type: 'stg', n: 1 }, adsr: { type: 'adsr', n: 1 }, cx: { type: 'cx', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
 const DEFS_SVG = `
 <linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
 <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d4828"/><stop offset=".55" stop-color="#5c331b"/><stop offset="1" stop-color="#45260f"/></linearGradient>
@@ -212,6 +213,11 @@ function fmt(key, v) {
     case 'cx.index': case 'cx.mcv': case 'cx.pcv': return ((v * 2 - 1) * 100).toFixed(0) + ' %';
     case 'cx.timbre': case 'cx.sym': case 'cx.order': return (v * 10).toFixed(1);
     case 'ad.cycle': return v ? 'CYCLE (LFO)' : 'ONE';
+    case 'lfo.f1': case 'lfo.f2': case 'lfo.f3': case 'lfo.f4': {
+      if (PARAMS[id + '.s' + key.slice(-1)] === 0) return ['/16', '/8', '/4', '/3', '/2', '×1', '×2', '×3', '×4', '×8', '×16'][Math.round(v * 10)] + ' du CLOCK';
+      const f = 0.02 * Math.pow(2, v * 10.3); return f < 1 ? (1 / f).toFixed(1) + ' s par cycle' : f.toFixed(2) + ' Hz'; }
+    case 'lfo.w1': case 'lfo.w2': case 'lfo.w3': case 'lfo.w4': return ['SINE', 'SAW', 'SQUARE'][v < 1 / 3 ? 0 : v < 2 / 3 ? 1 : 2];
+    case 'lfo.s1': case 'lfo.s2': case 'lfo.s3': case 'lfo.s4': return v ? 'FREE' : 'CLOCKED';
     case 'sim.tempo': return Math.round(50 + 190 * v) + ' BPM';
     case 'sim.seq': return v ? 'en marche' : 'arrêtée';
   }
@@ -420,7 +426,7 @@ function onReport(r) {
     const blink = (performance.now() / 250 | 0) & 1, end = PARAMS[id + '.end'];
     Ls.forEach((e_, i) => e_.setAttribute('opacity', i === st.stage ? 1 : (i === end && blink ? .55 : .15)));
   }
-  for (const id in r.leds) { const C = CTL[id + '.led']; if (C) C.e.setAttribute('opacity', (0.15 + 0.85 * Math.min(1, r.leds[id])).toFixed(2)); }
+  for (const id in r.leds) { const C = CTL[id.includes('.') ? id : id + '.led']; if (C) C.e.setAttribute('opacity', (0.15 + 0.85 * Math.min(1, r.leds[id])).toFixed(2)); }
 }
 async function startAudio() {
   if (ctx) { if (ctx.state !== 'running') await ctx.resume(); audioOn = true; $('#pled').classList.add('on'); return; }

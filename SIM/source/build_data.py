@@ -88,6 +88,18 @@ for i, x in enumerate(SXs):
 ctl += [J('clock', 9.0, 82.5, 'in'), J('start', 23.0, 82.5, 'in'), J('strobe', 37.0, 82.5, 'in'), J('tcv', 9.0, 96.5, 'in'), J('analog', 23.0, 96.5, 'in'),
         J('end', 37.0, 96.5, 'out'), J('cva', 9.0, 109.5, 'out'), J('cvb', 23.0, 109.5, 'out'), J('gate', 37.0, 109.5, 'out')]
 M.append(dict(id='stg', name='STAGES', w=152.1, **p, ctl=ctl))
+p = panel(W + 'lfo/panel.json', W + 'out/QUADLFO/panel/octavio-quadlfo-panel.kicad_pcb')
+LX = [9.33 + 14.0 * i for i in range(4)]
+F0 = [0.3, 0.45, 0.6, 0.2]; W0 = [0.0, 0.5, 0.9, 0.0]
+ctl = []
+for i, x in enumerate(LX):
+    n = i + 1
+    ctl += [K(f'f{n}', x, 22.5, 0.8, F0[i], f'FREQ {n}'), K(f'w{n}', x, 42.5, 0.8, W0[i], f'WAVE {n}'),
+            dict(t='led', id=f'l{n}', x=x, y=54.5),
+            dict(t='toggle', id=f's{n}', label=f'CLOCKED / FREE {n}', x=x, y=67.5, v=1, vert=1, opts=['CLOCKED', 'FREE']),
+            J(f'o{n}', x, 90.0, 'out')]
+ctl += [J('clock', 16.33, 106.0, 'in'), J('reset', 44.33, 106.0, 'in'), dict(t='led', id='lc', x=30.33, y=106.0)]
+M.append(dict(id='lfo', name='QUAD LFO', w=60.66, **p, ctl=ctl))
 # simulator utility panel (not a real module)
 SW = 50.5
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]
@@ -99,7 +111,7 @@ M.append(dict(id='sim', name='SIM', w=SW, holes=holes, logo=[SW / 2 - 8, 119.859
          K('tempo', 11.0, 60.0, 0.8, 0.45, 'TEMPO'), dict(t='button', id='seq', label='SEQ', x=SW / 2, y=60.0, v=1), K('volume', 39.5, 60.0, 0.8, 0.5, 'VOLUME'),
          J('cv', 12.6, 83.0, 'out'), J('gate', 37.9, 83.0, 'out'), J('audio', 12.6, 103.0, 'in'), J('scope', 37.9, 103.0, 'in')]))
 PATCH = [['sim', 'cv', 'vco', 'voct'], ['sim', 'gate', 'ad', 'trig'],
-         ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'], ['stg', 'cva', 'cx', 'pvoct'], ['stg', 'cvb', 'cx', 'timbrecv'], ['cx', 'final', 'mix', 'in4'],
+         ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'], ['stg', 'cva', 'cx', 'pvoct'], ['stg', 'cvb', 'cx', 'timbrecv'], ['cx', 'final', 'mix', 'in4'], ['lfo', 'o1', 'cx', 'symcv'],
          ['mix', 'out', 'vcf', 'in1'], ['ad', 'out', 'vcf', 'contour'], ['adsr', 'out', 'vca', 'cv1'],
          ['vcf', 'out', 'vca', 'in1'], ['sim', 'gate', 'adsr', 'gate'], ['vca', 'outp', 'sim', 'audio'], ['vca', 'outp', 'sim', 'scope']]
 logo = 'data:image/png;base64,' + base64.b64encode(open(W + 'logo_white.png', 'rb').read()).decode()
