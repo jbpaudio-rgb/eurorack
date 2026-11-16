@@ -1,0 +1,9 @@
+# KiCad
+*-backups/
+*.kicad_prl
+*.lck
+fp-info-cache
+_autosave-*
+~*
+# fabrication outputs
+production/
