@@ -124,19 +124,45 @@ ctl = [J('a', 10.01, MY[0], 'in'), J('a2', 10.01, MY[1], 'out'), J('a3', 10.01, 
        J('b', 10.01, MY[4], 'in'), J('b2', 10.01, MY[5], 'out'), J('b3', 10.01, MY[6], 'out'), J('b4', 10.01, MY[7], 'out')]
 M.append(dict(id='mult', name='MULT', w=20.02, **p, ctl=ctl))
 # simulator utility panel (not a real module)
-SW = 50.5
-holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 7 * 5.08, 125.5, 3.2, [5.2, 3.2]]]
+SW = 40.3   # 8 HP
+holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 5 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 5 * 5.08, 125.5, 3.2, [5.2, 3.2]]]
 M.append(dict(id='sim', name='SIM', w=SW, holes=holes, logo=[SW / 2 - 8, 119.859, 16.0, 2.882],
-    text=[['SIM', SW / 2, 3.4, 2.6], ['SCOPE', SW / 2, 9.4, 1.06], ['TEMPO', 11.0, 52.0, 1.06], ['SEQ', SW / 2, 52.0, 1.06], ['VOLUME', 39.5, 52.0, 1.06],
-          ['CV', 12.6, 76.4, 0.94], ['GATE', 37.9, 76.4, 0.94], ['AUDIO', 12.6, 96.4, 0.94], ['SCOPE', 37.9, 96.4, 0.94]],
+    text=[['SIM', SW / 2, 3.4, 2.6], ['SCOPE', SW / 2, 9.4, 1.06], ['TEMPO', 8.6, 52.0, 0.94], ['SEQ', SW / 2, 52.0, 0.94], ['VOLUME', 31.7, 52.0, 0.94],
+          ['CV', 10.1, 76.4, 0.94], ['GATE', 30.2, 76.4, 0.94], ['AUDIO', 10.1, 96.4, 0.94], ['SCOPE', 30.2, 96.4, 0.94]],
     lines=[[1.2, 70.5, SW - 1.2, 70.5, 0.3], [1.2, 90.5, SW - 1.2, 90.5, 0.3], [SW / 2, 70.5, SW / 2, 113.5, 0.3]],
-    ctl=[dict(t='scope', x=4.0, y=12.0, w=SW - 8.0, h=34.0),
-         K('tempo', 11.0, 60.0, 0.8, 0.45, 'TEMPO'), dict(t='button', id='seq', label='SEQ', x=SW / 2, y=60.0, v=1), K('volume', 39.5, 60.0, 0.8, 0.5, 'VOLUME'),
-         J('cv', 12.6, 83.0, 'out'), J('gate', 37.9, 83.0, 'out'), J('audio', 12.6, 103.0, 'in'), J('scope', 37.9, 103.0, 'in')]))
-PATCH = [['sim', 'cv', 'vco', 'voct'], ['sim', 'gate', 'ad', 'trig'],
-         ['vco', 'saw', 'mix', 'in1'], ['vco', 'pulse', 'mix', 'in2'], ['vco', 'blend', 'mix', 'in3'], ['stg', 'cva', 'cx', 'pvoct'], ['stg', 'cvb', 'cx', 'timbrecv'], ['cx', 'final', 'mix', 'in4'], ['lfo', 'o1', 'cx', 'symcv'],
-         ['mix', 'out', 'vcf', 'in1'], ['ad', 'out', 'vcf', 'contour'], ['adsr', 'out', 'vca', 'cv1'],
-         ['vcf', 'out', 'vca', 'in1'], ['sim', 'gate', 'adsr', 'gate'], ['vca', 'outp', 'sim', 'audio'], ['vca', 'outp', 'sim', 'scope']]
+    ctl=[dict(t='scope', x=3.0, y=12.0, w=SW - 6.0, h=34.0),
+         K('tempo', 8.6, 60.0, 0.8, 0.45, 'TEMPO'), dict(t='button', id='seq', label='SEQ', x=SW / 2, y=60.0, v=1), K('volume', 31.7, 60.0, 0.8, 0.5, 'VOLUME'),
+         J('cv', 10.1, 83.0, 'out'), J('gate', 30.2, 83.0, 'out'), J('audio', 10.1, 103.0, 'in'), J('scope', 30.2, 103.0, 'in')]))
+# ---- default rack : two rows of 104 HP, every module, 3 VCO, 2 AD, 1 ADSR
+LAYOUT = [['vco', 'vco2', 'vco3', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'att', 'mult', 'sim', 'mix2'],
+          ['cx', 'stg', 'lfo', 'nt', 'vcf2', 'vca2', 'ad2']]
+PATCH = [
+    # voice 1 : keyboard / SIM sequence -> 3 VCO (8', detuned 8', sub 16') -> MIX -> VCF -> VCA (ADSR)
+    ['sim', 'cv', 'vco', 'voct'], ['sim', 'cv', 'vco2', 'voct'], ['sim', 'cv', 'vco3', 'voct'],
+    ['vco', 'saw', 'mix', 'in1'], ['vco2', 'pulse', 'mix', 'in2'], ['vco3', 'sine', 'mix', 'in3'],
+    ['mix', 'out', 'vcf', 'in1'], ['sim', 'gate', 'ad', 'trig'], ['ad', 'out', 'vcf', 'contour'],
+    ['vcf', 'out', 'vca', 'in1'], ['sim', 'gate', 'adsr', 'gate'], ['adsr', 'out', 'vca', 'cv1'],
+    # voice 2 : STAGES -> COMPLEX -> VCF 2 -> VCA 2, AD 2 shared through the MULT
+    ['stg', 'cva', 'cx', 'pvoct'], ['stg', 'cvb', 'cx', 'timbrecv'], ['cx', 'final', 'vcf2', 'in1'],
+    ['stg', 'gate', 'ad2', 'trig'], ['ad2', 'out', 'mult', 'a'], ['mult', 'a2', 'vca2', 'cv1'], ['mult', 'a3', 'vcf2', 'contour'],
+    ['vcf2', 'out', 'vca2', 'in1'],
+    # modulation : LFOs clocked by STAGES, NOISE TOOLS random, ATT / INV scaling
+    ['stg', 'gate', 'lfo', 'clock'], ['lfo', 'o1', 'cx', 'symcv'], ['lfo', 'o2', 'vcf', 'fcv'],
+    ['lfo', 'o4', 'mult', 'b'], ['mult', 'b2', 'vco', 'pwm'], ['mult', 'b3', 'vco2', 'pwm'],
+    ['lfo', 'o3', 'att', 'in2'], ['att', 'o2', 'vcf', 'ecv'],
+    ['nt', 'slew', 'vcf2', 'fcv'], ['nt', 'sh', 'att', 'in1'], ['att', 'o1', 'cx', 'ordercv'],
+    # master : MIX 2 -> speaker + scope
+    ['vca', 'outp', 'mix2', 'in1'], ['vca2', 'outp', 'mix2', 'in2'], ['nt', 'pink', 'mix2', 'in3'],
+    ['mix2', 'out', 'sim', 'audio'], ['mix2', 'out', 'sim', 'scope']]
+PARAMS = {'vco.range': 3, 'vco2.range': 3, 'vco2.fine': 0.53, 'vco2.width': 0.3, 'vco3.range': 2, 'vco.pwm': 0.3, 'vco2.pwm': 0.25,
+          'mix.l1': 0.55, 'mix.l2': 0.45, 'mix.l3': 0.6, 'mix.l4': 0.0,
+          'vcf.freq': 0.38, 'vcf.emph': 0.5, 'vcf.contour': 0.55, 'vcf.fcv': 0.25, 'vcf.ecv': 0.2,
+          'vcf2.freq': 0.45, 'vcf2.emph': 0.35, 'vcf2.contour': 0.5, 'vcf2.fcv': 0.3, 'vcf2.mode': 0.25,
+          'vca2.cvlevel': 0.7, 'ad2.attack': 0.05, 'ad2.decay': 0.45,
+          'mix2.l1': 0.6, 'mix2.l2': 0.5, 'mix2.l3': 0.06, 'mix2.l4': 0.0,
+          'lfo.s1': 0, 'lfo.s2': 0, 'lfo.s3': 0, 'lfo.s4': 0, 'lfo.f1': 0.5, 'lfo.f2': 0.2, 'lfo.f3': 0.7, 'lfo.f4': 0.1,
+          'lfo.w1': 0.0, 'lfo.w2': 0.25, 'lfo.w3': 0.5, 'lfo.w4': 0.0,
+          'att.s1': 1, 'att.a1': 0.8, 'att.s2': 0, 'att.a2': 0.65, 'nt.rate': 0.45, 'nt.slew': 0.55}
 logo = 'data:image/png;base64,' + base64.b64encode(open(W + 'logo_white.png', 'rb').read()).decode()
-json.dump(dict(modules=M, patch=PATCH, logo=logo), open(W + 'sim/data.json', 'w'))
+json.dump(dict(modules=M, patch=PATCH, layout=LAYOUT, params=PARAMS, logo=logo), open(W + 'sim/data.json', 'w'))
 print([ (m['id'], len(m['lines']), len(m['text'])) for m in M])

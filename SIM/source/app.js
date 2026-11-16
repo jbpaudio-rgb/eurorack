@@ -2,7 +2,7 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const PH = 128.5, MX = 1.2, MY = 4.5, HPMM = 5.08, ROWHP = 104, GAPY = 5;
 const ROWW = ROWHP * HPMM, TW = ROWW + 2 * MX, RH = PH + 2 * MY;
-const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 30, stg: 30, lfo: 12, nt: 10, att: 8, mult: 4, sim: 10 };
+const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 30, stg: 30, lfo: 12, nt: 10, att: 8, mult: 4, sim: 8 };
 const DESC = {
   vco: 'Oscillateur façon 921 : RANGE LO à 2′, 4 formes d’onde, FM, PWM, sync et sortie BLEND.',
   mix: 'Mixeur 4 entrées façon CP3, MASTER GAIN avec saturation douce, OUT et −OUT.',
@@ -25,7 +25,7 @@ let L = null;                 // layout { rows:[[id..]], mods:{id:{type,n}} }
 let PARAMS = {}, CTL = {}, JACKS = {}, LAB = {}, POS = {}, PLEDS = [], SLEDS = {};
 let cables = [], moveMode = false, nRows = 1, TH = RH;
 const DEFV = {}; DATA.modules.forEach(m => m.ctl.forEach(c => { if (c.v !== undefined) DEFV[m.id + '.' + c.id] = c.v; }));
-const defaultLayout = () => ({ rows: [['vco', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'sim', 'att', 'mult'], ['cx', 'stg', 'lfo', 'nt']], mods: { att: { type: 'att', n: 1 }, mult: { type: 'mult', n: 1 }, nt: { type: 'nt', n: 1 }, lfo: { type: 'lfo', n: 1 }, stg: { type: 'stg', n: 1 }, adsr: { type: 'adsr', n: 1 }, cx: { type: 'cx', n: 1 }, vco: { type: 'vco', n: 1 }, mix: { type: 'mix', n: 1 }, vcf: { type: 'vcf', n: 1 }, vca: { type: 'vca', n: 1 }, ad: { type: 'ad', n: 1 }, sim: { type: 'sim', n: 1 } } });
+const defaultLayout = () => { const mods = {}; DATA.layout.flat().forEach(id => { const t = id.replace(/\d+$/, ''), n = +(id.slice(t.length) || 1); mods[id] = { type: t, n }; }); return { rows: DATA.layout.map(r => r.slice()), mods }; };
 const DEFS_SVG = `
 <linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
 <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d4828"/><stop offset=".55" stop-color="#5c331b"/><stop offset="1" stop-color="#45260f"/></linearGradient>
@@ -408,7 +408,9 @@ const lib = $('#lib'), libCards = $('#libCards');
 $('#addMod').onclick = () => { lib.hidden = false; };
 $('#libClose').onclick = () => { lib.hidden = true; };
 function loadPatch() {
-  L = defaultLayout(); PARAMS = Object.assign({}, DEFV); cables = []; ci = 0;
+  L = defaultLayout(); PARAMS = {}; cables = []; ci = 0;
+  for (const id in L.mods) TYPE[L.mods[id].type].ctl.forEach(c => { if (c.v !== undefined) PARAMS[id + '.' + c.id] = c.v; });
+  Object.assign(PARAMS, DATA.params);
   build();
   DATA.patch.forEach(([m1, j1, m2, j2]) => connect(m1 + '.' + j1, m2 + '.' + j2, null, true));
   send(fullState());
