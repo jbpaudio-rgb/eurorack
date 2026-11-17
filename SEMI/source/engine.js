@@ -21,7 +21,7 @@ class SemiEngine {
     this.nrm = ins.map(n => { const v = SEMI_DEF.normals[n]; return v === undefined ? null : v; });
     this.resolve([]);
     this.s = {
-      vco: [0, 1, 2].map(() => ({ ph: Math.random(), syncHi: false })), drift: [0, 0], dph: 0,
+      vco: [0, 1, 2].map(() => ({ ph: Math.random(), syncHi: false, dr: 0, lp: [0, 0, 0, 0] })), drift: [0, 0], dph: 0,
       vcf: { y1: 0, y2: 0, y3: 0, y4: 0, hp: 0, hpx: 0 }, svf: { a: 0, b: 0 },
       env: [0, 1].map(() => ({ env: 0, att: 0, g: false, led: 0 })),
       lfo: [0, 1].map(() => ({ ph: 0, tr: 0, led: 0 })),
@@ -63,6 +63,7 @@ class SemiEngine {
       base: (p(id + '.coarse') - .5) * 6 + (p(id + '.fine') - .5) + (p(id + '.range') ? -7 : 0),
       w: p(id + '.width'), fm: p(id + '.fm') * p(id + '.fm'), pwm: p(id + '.pwm'),
       vo: o[id + '.sine'], iv: i[id + '.voct'], ifm: i[id + '.fm'], ipw: i[id + '.pwm'] }; });
+    const CURV = 0.45, CURN = 1 / (1 - Math.exp(-0.45)), kVlp = 1 - Math.exp(-2 * Math.PI * 11000 / sr);
     const sync2 = p('vco2.sync') === 1, kbd3 = p('vco3.kbd') === 0, stab = p('vco3.stab'), isy = i['vco2.sync'];
     const ml = [1, 2, 3, 4, 5].map(k => { const v = p('mix.l' + k); return v * v; });
     const md = p('vcf.mode'), fa = md < 0.5 ? 1 - 2 * md : 0, fc_ = md > 0.5 ? 2 * md - 1 : 0;
@@ -139,29 +140,32 @@ class SemiEngine {
       for (let q = 0; q < 3; q++) {
         const k = V[q], s = S.vco[q];
         let voct = I[k.iv]; if (q === 2 && !kbd3 && !pat[k.iv]) voct = 0;
-        let ex = k.base + voct + I[k.ifm] * k.fm; if (q === 2) ex += stab * 0.035 * S.drift[1];
+        s.dr += 0.00004 * (this.gauss() - s.dr * 0.02);              // every core drifts a little (~±2 cents), like the real 921
+        let ex = k.base + voct + I[k.ifm] * k.fm + 0.0016 * s.dr; if (q === 2) ex += stab * 0.035 * S.drift[1];
         const fr = cl(261.63 * Math.pow(2, ex), 0.02, 20000), dt = fr / sr;
         if (q === 1) { const sv = (sync2 || pat[isy]) ? I[isy] : 0; if (sv > 1 && !s.syncHi) { s.ph = 0; s.syncHi = true; } else if (sv < 0.5) s.syncHi = false; }
         s.ph += dt; if (s.ph >= 1) s.ph -= 1;
-        const ph = s.ph, saw = (2 * ph - 1 - blep(ph, dt)) * 5, tri = (2 * Math.abs(2 * ph - 1) - 1) * 5;
+        const ph = s.ph, cv_ = (1 - Math.exp(-CURV * ph)) * CURN;    // timing cap charge is slightly exponential : rounder ramp, even harmonics
+        const saw = (2 * cv_ - 1 - blep(ph, dt)) * 5, tri = (2 * Math.abs(2 * ph - 1) - 1) * 5;
         const duty = cl(0.05 + 0.9 * k.w + I[k.ipw] * k.pwm * 0.09, 0.02, 0.98);
         let pul = ph < duty ? 1 : -1; pul += blep(ph, dt); pul -= blep((ph + 1 - duty) % 1, dt);
-        O[k.vo] = 5 * tanh(1.55 * tri / 5) / tanh(1.55); O[k.vo + 1] = tri; O[k.vo + 2] = saw; O[k.vo + 3] = 5 * pul;
+        const W4 = [5 * tanh(1.55 * tri / 5) / tanh(1.55), tri, saw, 5 * pul];
+        for (let w = 0; w < 4; w++) { s.lp[w] += kVlp * (W4[w] - s.lp[w]); O[k.vo + w] = s.lp[w]; }   // reset time + output op-amp : ~11 kHz roll-off
       }
       // ---- RING MOD (MC1496)
       O[o['ring.out']] = cl(1.0636 * cl(I[i['ring.x']] * rx, -10.4, 10.4) * tanh(I[i['ring.y']] * ry * 0.5656), -11, 11);
       // ---- AUDIO MIXER : 5 slide pots into a summing amp, soft rails
       const mx = I[i['mix.in1']] * ml[0] + I[i['mix.in2']] * ml[1] + I[i['mix.in3']] * ml[2] + I[i['mix.in4']] * ml[3] + I[i['mix.in5']] * ml[4];
-      O[o['mix.out']] = 10.5 * tanh(mx / 10.5);
+      O[o['mix.out']] = 7.5 * tanh(mx / 7.5 + 0.04) - 7.5 * tanh(0.04);
       // ---- LADDER FILTER (same model as the VCF module)
       { const f = S.vcf;
-        let fc = 20 * Math.pow(2, 10 * fFr + I[i['vcf.kbd']] * fK + I[i['vcf.env']] * fEnv * 0.8 + I[i['vcf.mod']] * fMod * 0.5); fc = cl(fc, 5, Math.min(20000, 0.45 * sr));
-        const g = 1 - Math.exp(-2 * Math.PI * fc * g2), kk = 4.3 * fE;
-        const xin = I[i['vcf.in']] * 0.18 + (this.rnd() - 0.5) * 1e-4; let u = 0;
+        let fc = 20 * Math.pow(2, 10 * fFr + I[i['vcf.kbd']] * fK + I[i['vcf.env']] * fEnv * 0.8 + I[i['vcf.mod']] * fMod * 0.5); fc = 16000 * tanh(cl(fc, 5, 40000) / 16000);
+        const g = 1 - Math.exp(-2 * Math.PI * fc * g2), kk = 4.3 * fE / (1 + (fc / 9000) * (fc / 9000));
+        const xin = I[i['vcf.in']] * 0.18 * (1 + 0.35 * kk / 4.3) + (this.rnd() - 0.5) * 1e-4; let u = 0;
         for (let r = 0; r < 2; r++) { u = tanh(xin - kk * f.y4); const t1 = tanh(f.y1), t2 = tanh(f.y2), t3 = tanh(f.y3);
           f.y1 += g * (u - t1); f.y2 += g * (t1 - t2); f.y3 += g * (t2 - t3); f.y4 += g * (t3 - tanh(f.y4)); }
         const q1 = tanh(f.y1), q2 = tanh(f.y2), LP = f.y4, BP = 2 * q1 - 2 * q2, HP = u - 2 * q1 + q2;
-        const fo = -(BP + fa * (LP - BP) + fc_ * (HP - BP)) / 0.18;
+        const fo = -(BP + fa * (LP - BP) + fc_ * (HP - BP)) / 0.18 / (1 + 0.12 * kk / 4.3);
         f.hp = 0.9993 * (f.hp + fo - f.hpx); f.hpx = fo; O[o['vcf.out']] = f.hp; }
       // ---- STATE VARIABLE FILTER 12 dB (TPT, soft-clipped integrators), LP -> BP -> HP -> NOTCH
       { const f = S.svf;
