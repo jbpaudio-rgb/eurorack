@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ocTavio SEMI – prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{ color-scheme:dark;
+  --bg:#100f0e; --bar:#1a1815; --ink:#ece5d3; --dim:#968d7c; --line:#2f2b27; --lamp:#ffae3d;
+  --f-disp:'Big Shoulders Display','Arial Narrow',Impact,sans-serif; --f-ui:'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif; --f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+*{box-sizing:border-box} [hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);overscroll-behavior:none}
+body{color:var(--ink);font-family:var(--f-ui);display:flex;flex-direction:column;overflow:hidden;padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+button{font-family:var(--f-ui);font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#211f1b;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 10px;min-height:34px;cursor:pointer}
+button:active{background:#2c2924} button:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block:8px}
+.brand{font-family:var(--f-disp);font-weight:800;font-size:28px;line-height:.9;letter-spacing:.02em;margin-right:4px}
+.brand small{display:block;font-family:var(--f-ui);font-weight:500;font-size:10.5px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-top:3px}
+.grp{display:flex;gap:6px;align-items:center}
+.lb{display:flex;align-items:center;gap:8px}
+.led{width:10px;height:10px;border-radius:50%;background:#3a2414;box-shadow:inset 0 0 0 1px #000;flex:none}
+.led.on{background:var(--lamp);box-shadow:0 0 8px 2px #ffae3d88}
+#scope{height:34px;width:120px;background:#0b0a09;border:1px solid var(--line);border-radius:4px}
+#status{font-family:var(--f-mono);font-size:11px;color:var(--lamp);margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46ch}
+#wrap{flex:1;min-height:0;overflow:auto;position:relative;background:#0a0908;border-radius:6px;-webkit-overflow-scrolling:touch}
+.cab{position:relative;display:inline-block;margin:10px;padding:16px;border-radius:9px;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.10) 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,rgba(255,214,170,.05) 0 1px,transparent 1px 19px),linear-gradient(180deg,#7d4828,#5c331b 55%,#45260f);
+  box-shadow:0 8px 20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,220,180,.18)}
+#panel{display:block;touch-action:pan-x pan-y}
+.sl,.sw{cursor:ns-resize;touch-action:none} .sw{cursor:pointer}
+.jack{cursor:crosshair;touch-action:none}
+#panel.faded #cables{opacity:.3}
+#panel:not(.norm) #normals{display:none}
+#kbdWrap{display:flex;gap:8px;padding-block:8px calc(8px + env(safe-area-inset-bottom,0px));height:112px;flex:none}
+.octs{display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center}
+.octs button{width:44px;padding:0} .octs span{font-family:var(--f-mono);font-size:11px;color:var(--lamp)}
+#kHold{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:58px;padding:0;flex:none}
+#kHold.on{border-color:var(--lamp);color:var(--lamp)}
+#kbd{flex:1;position:relative;touch-action:none;background:#0b0a09;border-radius:4px;overflow:hidden;border-top:7px solid #5c331b;min-width:0}
+.wk{position:absolute;top:0;bottom:0;background:linear-gradient(#f4f0e4,#d9d2bf);border-right:1px solid #857c6d;border-radius:0 0 4px 4px}
+.wk span{position:absolute;bottom:5px;left:0;right:0;text-align:center;font:500 9px var(--f-mono);color:#6d6457;pointer-events:none}
+.wk.on{background:linear-gradient(#ffdca0,#e8b25e)}
+.bk{position:absolute;top:0;height:60%;z-index:2;background:linear-gradient(#2c2925,#0c0b0a);border-radius:0 0 3px 3px;box-shadow:0 2px 3px #000}
+.bk.on{background:linear-gradient(#b06d20,#5c330a)}
+.ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(5,4,3,.72);padding:16px}
+.card{background:var(--bar);border:1px solid var(--line);border-radius:8px;padding:22px;max-width:480px;width:100%;box-shadow:0 20px 50px #000;max-height:100%;overflow:auto}
+.card h2{font-family:var(--f-disp);font-weight:800;font-size:34px;line-height:1;margin:0 0 6px;text-wrap:balance}
+.card p{font-size:15px;line-height:1.4;color:#cfc6b3;margin:8px 0}
+.card ul{margin:10px 0 16px;padding-left:18px;font-size:15px;line-height:1.45;color:#cfc6b3}
+.card .go{width:100%;min-height:48px;font-size:17px;background:var(--lamp);color:#1a1209;border-color:var(--lamp)}
+@media (max-width:640px){ .brand small{display:none} #status{order:9;margin-left:0;max-width:100%;flex-basis:100%} button{font-size:13px;padding:6px 8px} #scope{display:none} }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">ocTavio SEMI<small>semi-modulaire · prototype</small></div>
+  <div class="grp">
+    <button id="power" class="lb"><span class="led" id="pled"></span>Son</button>
+    <button id="bSeq" class="lb"><span class="led on" id="sled"></span>Séquence</button>
+    <canvas id="scope" width="240" height="68"></canvas>
+  </div>
+  <div class="grp">
+    <button id="bNorm" class="lb"><span class="led" id="nled"></span>Normalisations</button>
+    <button id="bClear">Tout débrancher</button>
+    <button id="bReset">Réglages de départ</button>
+  </div>
+  <div class="grp">
+    <button id="zFit">Ajuster</button>
+    <button id="zOut" aria-label="Dézoomer">−</button>
+    <button id="zIn" aria-label="Zoomer">+</button>
+    <button id="cabOp">Câbles</button>
+    <button id="kbToggle" class="lb"><span class="led on" id="kled"></span>Clavier</button>
+    <button id="help" aria-label="Aide">?</button>
+  </div>
+  <div id="status">Glisse un slider pour lire sa valeur</div>
+</header>
+
+<div id="wrap"><div class="cab"><svg id="panel" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
+
+<div id="kbdWrap">
+  <div class="octs"><button id="kUp" aria-label="Octave plus haut">▲</button><span id="kOct">C3</span><button id="kDn" aria-label="Octave plus bas">▼</button></div>
+  <button id="kHold"><span class="led" id="hled"></span>Hold</button>
+  <div id="kbd" aria-label="Clavier"></div>
+</div>
+
+<div class="ov" id="startOv">
+  <div class="card">
+    <h2>ocTavio SEMI</h2>
+    <p>Prototype du grand semi-modulaire : 3 oscillateurs, filtre ladder 24 dB, filtre à variable d’état 12 dB, VCA, 2 enveloppes, 2 LFO, bruit · S&amp;H · lag, ring mod, réverbe à ressort. 62 sliders de 60 mm, jacks 3,5 mm aux niveaux Eurorack.</p>
+    <ul>
+      <li>Il sonne sans aucun câble : tout est pré-câblé (normalisations). Un câble branché dans une entrée coupe son câblage interne.</li>
+      <li>Sliders : glisse vers le haut ou le bas, double-touche pour revenir au réglage de départ. Inverseurs : touche.</li>
+      <li>Glisse d’une prise à une autre pour tirer un câble, touche une prise branchée pour la débrancher.</li>
+      <li>« Normalisations » montre en pointillé ce qui est câblé à l’intérieur.</li>
+    </ul>
+    <button class="go" id="startBtn">Allumer</button>
+  </div>
+</div>
+<div class="ov" id="helpOv" hidden>
+  <div class="card">
+    <h2>Le panneau</h2>
+    <ul>
+      <li><b>Rangée du haut :</b> 3 oscillateurs (façon 921), ring mod, bruit / S&amp;H / lag.</li>
+      <li><b>Milieu :</b> mixeur 5 entrées → filtre ladder et filtre à variable d’état en parallèle → amplificateur → réverbe → sortie.</li>
+      <li><b>Bas :</b> clavier (CV, GATE, TRIG, entrées CV IN / GATE IN pour un séquenceur Eurorack), 2 enveloppes FAST / SLOW, 2 LFO, 2 atténuateurs / inverseurs (entrée vide = +5 V), multiple.</li>
+      <li><b>Prises :</b> étiquette blanche = sortie, étiquette noire = entrée. 1 V/oct, audio ±5 V, enveloppes 0 à 10 V, comme les modules ocTavio Eurorack.</li>
+      <li><b>Son :</b> les mêmes modèles de comportement que le simulateur Eurorack ; ça montre le caractère et les plages, pas une vérification composant par composant.</li>
+    </ul>
+    <button class="go" id="helpClose">Compris</button>
+  </div>
+</div>
+<script>
+// ocTavio SEMI - definition of the big semi-modular panel (single source for the engine and the panel).
+// Three tiers, sections left to right. Sliders = 60 mm travel, jacks = Thonkiconn 3.5 mm, Eurorack levels.
+// sl : sliders [id, label, default 0..1, scale ('bi' = -5..+5, 'oct' = -3..+3, or position names)]   sw : toggles [id, label, [positions], default index]
+// in / out : jacks [id, label]            normals : input -> output it receives when nothing is plugged (or a fixed voltage)
+const SEMI_DEF = {
+  tiers: [
+    { title: 'SOURCES', secs: [
+      { id: 'vco1', title: 'OSCILLATOR 1', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .5, 'bi'], ['width', 'WIDTH', .5], ['fm', 'FM', 0], ['pwm', 'PWM', 0]],
+        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0]],
+        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },
+      { id: 'vco2', title: 'OSCILLATOR 2', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .52, 'bi'], ['width', 'WIDTH', .3], ['fm', 'FM', 0], ['pwm', 'PWM', 0]],
+        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0], ['sync', 'SYNC', ['OFF', 'ON'], 0]],
+        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM'], ['sync', 'SYNC']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },
+      { id: 'vco3', title: 'OSCILLATOR 3', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .5, 'bi'], ['width', 'WIDTH', .5], ['fm', 'FM', 0], ['pwm', 'PWM', 0], ['stab', 'STABILITY', .2]],
+        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0], ['kbd', 'KBD', ['ON', 'OFF'], 0]],
+        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },
+      { id: 'ring', title: 'RING MOD', sl: [['xl', 'X LEVEL', .7], ['yl', 'Y LEVEL', .7]],
+        in: [['x', 'X'], ['y', 'Y']], out: [['out', 'RING']] },
+      { id: 'sh', title: 'NOISE · S&H · LAG', sl: [['color', 'COLOR', 0], ['rate', 'CLOCK', .5], ['rise', 'RISE', .3], ['fall', 'FALL', .3]],
+        in: [['shin', 'S&H IN'], ['clk', 'CLOCK'], ['lagin', 'LAG IN']], out: [['noise', 'NOISE'], ['clock', 'CLOCK'], ['sh', 'S&H'], ['lag', 'LAG']] },
+    ] },
+    { title: 'FILTERS & AMPLIFIER', secs: [
+      { id: 'mix', title: 'AUDIO MIXER', sl: [['l1', 'OSC 1', .8], ['l2', 'OSC 2', .6], ['l3', 'OSC 3', 0], ['l4', 'NOISE', 0], ['l5', 'RING', 0]],
+        in: [['in1', 'OSC 1'], ['in2', 'OSC 2'], ['in3', 'OSC 3'], ['in4', 'NOISE'], ['in5', 'RING']], out: [['out', 'MIX']] },
+      { id: 'vcf', title: 'LADDER FILTER  24 dB', sl: [['freq', 'FREQUENCY', .42], ['emph', 'EMPHASIS', .35], ['mode', 'MODE', 0, ['LP', 'BP', 'HP']], ['kbd', 'KBD', 1], ['env', 'ENV', .45], ['mod', 'MOD', 0]],
+        in: [['in', 'IN'], ['kbd', 'KBD'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },
+      { id: 'svf', title: 'STATE VARIABLE  12 dB', sl: [['freq', 'FREQUENCY', .55], ['reso', 'RESONANCE', .3], ['mode', 'MODE', 0, ['LP', 'BP', 'HP', 'N']], ['env', 'ENV', .3], ['mod', 'MOD', 0]],
+        in: [['in', 'IN'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },
+      { id: 'vca', title: 'AMPLIFIER', sl: [['l1', 'LADDER', .8], ['l2', 'STATE VAR.', 0], ['cv', 'ENV', 1], ['initial', 'INITIAL', 0], ['response', 'RESP.', .3, ['LIN', 'EXP']]],
+        in: [['in1', 'LADDER'], ['in2', 'ST. VAR.'], ['cv', 'CV']], out: [['out', 'OUT']] },
+      { id: 'rev', title: 'SPRING REVERB', sl: [['drive', 'DRIVE', .5], ['tone', 'TONE', .5], ['mix', 'MIX', .25]],
+        in: [['in', 'IN']], out: [['out', 'OUT']] },
+      { id: 'out', title: 'OUTPUT', sl: [['vol', 'VOLUME', .7]],
+        in: [['in', 'IN']], out: [['main', 'MAIN'], ['phones', 'PHONES']] },
+    ] },
+    { title: 'CONTROL', secs: [
+      { id: 'kb', title: 'KEYBOARD', sl: [['glide', 'GLIDE', 0]],
+        in: [['cvin', 'CV IN'], ['gatein', 'GATE IN']], out: [['cv', 'CV'], ['gate', 'GATE'], ['trig', 'TRIG']] },
+      { id: 'env1', title: 'ENVELOPE 1', sl: [['a', 'ATTACK', .05], ['d', 'DECAY', .45], ['s', 'SUSTAIN', .3], ['r', 'RELEASE', .35]],
+        sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,
+        in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '−OUT']] },
+      { id: 'env2', title: 'ENVELOPE 2', sl: [['a', 'ATTACK', .03], ['d', 'DECAY', .4], ['s', 'SUSTAIN', .7], ['r', 'RELEASE', .35]],
+        sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,
+        in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '−OUT']] },
+      { id: 'lfo1', title: 'LFO 1', sl: [['rate', 'RATE', .45], ['wave', 'WAVE', .34, ['~up', '~tri', '~dn', '~sq']]], led: 1,
+        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['trig', 'TRIG']] },
+      { id: 'lfo2', title: 'LFO 2', sl: [['rate', 'RATE', .3], ['wave', 'WAVE', .34, ['~up', '~tri', '~dn', '~sq']]], led: 1,
+        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['trig', 'TRIG']] },
+      { id: 'att', title: 'ATTENUVERTERS', sl: [['a1', '1', .5, 'bi'], ['a2', '2', .5, 'bi']],
+        in: [['in1', 'IN 1'], ['in2', 'IN 2']], out: [['o1', 'OUT 1'], ['o2', 'OUT 2']] },
+      { id: 'mult', title: 'MULTIPLE', sl: [],
+        in: [['in', 'IN']], out: [['o1', ''], ['o2', ''], ['o3', '']] },
+    ] },
+  ],
+  // pre-patched connections (switching jacks : plugging a cable into the input breaks the normal)
+  normals: {
+    'vco1.voct': 'kb.cv', 'vco2.voct': 'kb.cv', 'vco3.voct': 'kb.cv',
+    'vco1.fm': 'lfo1.out', 'vco2.fm': 'lfo1.out', 'vco3.fm': 'lfo1.out',
+    'vco1.pwm': 'lfo2.out', 'vco2.pwm': 'lfo2.out', 'vco3.pwm': 'lfo2.out',
+    'vco2.sync': 'vco1.pulse',
+    'ring.x': 'vco1.saw', 'ring.y': 'vco2.saw',
+    'sh.shin': 'sh.noise', 'sh.clk': 'sh.clock', 'sh.lagin': 'sh.sh',
+    'mix.in1': 'vco1.saw', 'mix.in2': 'vco2.pulse', 'mix.in3': 'vco3.saw', 'mix.in4': 'sh.noise', 'mix.in5': 'ring.out',
+    'vcf.in': 'mix.out', 'vcf.kbd': 'kb.cv', 'vcf.env': 'env1.out', 'vcf.mod': 'sh.sh',
+    'svf.in': 'mix.out', 'svf.env': 'env1.out', 'svf.mod': 'lfo2.out',
+    'vca.in1': 'vcf.out', 'vca.in2': 'svf.out', 'vca.cv': 'env2.out',
+    'rev.in': 'vca.out', 'out.in': 'rev.out',
+    'env1.gate': 'kb.gate', 'env2.gate': 'kb.gate',
+    'att.in1': 5, 'att.in2': 5,
+  },
+};
+
+// ocTavio SEMI - behavioural models, one sample at a time, voltages in volts (Eurorack levels).
+// Same models as the ocTavio Eurorack simulator (SIM/source/engine.js) where the circuit is the same
+// (921 VCO, ladder, 902 VCA, 911 ADSR, S&H / LAG, MC1496 ring, spring reverb) + the new state-variable filter and LFOs.
+class SemiEngine {
+  constructor(sr) {
+    this.sr = sr; this.P = {}; this.held = []; this.key = null; this.seed = 7; this.cnt = 0;
+    const outs = [], ins = [];
+    for (const t of SEMI_DEF.tiers) for (const s of t.secs) {
+      for (const [j] of s.out) outs.push(s.id + '.' + j);
+      for (const [j] of s.in) ins.push(s.id + '.' + j);
+      for (const [k, , v] of s.sl) this.P[s.id + '.' + k] = v;
+      for (const [k, , , v] of (s.sw || [])) this.P[s.id + '.' + k] = v;
+    }
+    this.P['kb.seq'] = 1;
+    this.outs = outs; this.ins = ins;
+    this.O = new Float64Array(outs.length); this.I = new Float64Array(ins.length);
+    this.o = {}; outs.forEach((n, i) => this.o[n] = i);
+    this.i = {}; ins.forEach((n, i) => this.i[n] = i);
+    this.pat = new Uint8Array(ins.length);
+    this.cab = [];                       // [outIndex, inIndex]
+    this.nrm = ins.map(n => { const v = SEMI_DEF.normals[n]; return v === undefined ? null : v; });
+    this.resolve([]);
+    this.s = {
+      vco: [0, 1, 2].map(() => ({ ph: Math.random(), syncHi: false })), drift: [0, 0], dph: 0,
+      vcf: { y1: 0, y2: 0, y3: 0, y4: 0, hp: 0, hpx: 0 }, svf: { a: 0, b: 0 },
+      env: [0, 1].map(() => ({ env: 0, att: 0, g: false, led: 0 })),
+      lfo: [0, 1].map(() => ({ ph: 0, tr: 0, led: 0 })),
+      sh: { tri: 0, sq: 1, th: false, hold: 0, lag: 0, b: [0, 0, 0, 0, 0, 0, 0], g2: null },
+      rev: null, kb: { cv: 0, cvT: 0, gHi: false, tr: 0, seqPh: 0, step: 0, lastCv: -1 },
+      scope: new Float32Array(1024),
+    };
+    const sp = [0.0371, 0.0433, 0.0517].map((d, k) => ({ buf: new Float32Array(Math.ceil(d * sr) + 2), w: 0, len: Math.round(d * sr), ap: new Float32Array(24), lp: 0, mod: k * 2.1 }));
+    this.s.rev = { sp, hp: 0, hpx: 0, lpIn: 0, tone: 0, t: 0 };
+  }
+  msg(d) {
+    if (d.t === 'p') this.P[d.k] = d.v;
+    else if (d.t === 'cables') this.resolve(d.list);
+    else if (d.t === 'state') { Object.assign(this.P, d.params || {}); this.resolve(d.cables || []); }
+    else if (d.t === 'note') {
+      const i = this.held.indexOf(d.n); if (i >= 0) this.held.splice(i, 1);
+      if (d.on) this.held.push(d.n);
+      this.key = this.held.length ? this.held[this.held.length - 1] : null;
+    }
+  }
+  resolve(list) {
+    this.cab = []; this.pat.fill(0);
+    for (const [a, b] of list) { const oi = this.o[a], ii = this.i[b]; if (oi !== undefined && ii !== undefined) { this.cab.push([oi, ii]); this.pat[ii] = 1; } }
+    // normalled inputs that are not plugged : [inIndex, outIndex] or a fixed voltage
+    this.nOut = []; this.nCst = [];
+    this.nrm.forEach((v, ii) => { if (v === null || this.pat[ii]) return; if (typeof v === 'number') this.nCst.push([ii, v]); else this.nOut.push([ii, this.o[v]]); });
+  }
+  rnd() { this.seed = (this.seed * 16807) % 2147483647; return this.seed / 2147483647; }
+  gauss() { let u, v, q; do { u = 2 * this.rnd() - 1; v = 2 * this.rnd() - 1; q = u * u + v * v; } while (q >= 1 || q === 0); return u * Math.sqrt(-2 * Math.log(q) / q); }
+  render(L, R, n) {
+    const sr = this.sr, P = this.P, tanh = Math.tanh, S = this.s, O = this.O, I = this.I, o = this.o, i = this.i, pat = this.pat;
+    const cl = (x, a, b) => x < a ? a : (x > b ? b : x);
+    const blep = (t, dt) => { if (t < dt) { t /= dt; return t + t - t * t - 1; } if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; } return 0; };
+    const p = k => P[k];
+    const A = x => (Math.pow(10, 2 * x) - 1) / 99;           // audio-taper slide pot
+    const SEQ = [0, 12, 0, 7, 3, 0, 10, 7, 0, 12, 3, 5, 7, 0, 15, 10];
+    // ---- per-block constants (slider positions)
+    const V = [1, 2, 3].map(n => { const id = 'vco' + n; return {
+      base: (p(id + '.coarse') - .5) * 6 + (p(id + '.fine') - .5) + (p(id + '.range') ? -7 : 0),
+      w: p(id + '.width'), fm: p(id + '.fm') * p(id + '.fm'), pwm: p(id + '.pwm'),
+      vo: o[id + '.sine'], iv: i[id + '.voct'], ifm: i[id + '.fm'], ipw: i[id + '.pwm'] }; });
+    const sync2 = p('vco2.sync') === 1, kbd3 = p('vco3.kbd') === 0, stab = p('vco3.stab'), isy = i['vco2.sync'];
+    const ml = [1, 2, 3, 4, 5].map(k => { const v = p('mix.l' + k); return v * v; });
+    const md = p('vcf.mode'), fa = md < 0.5 ? 1 - 2 * md : 0, fc_ = md > 0.5 ? 2 * md - 1 : 0;
+    const fFr = p('vcf.freq'), fE = p('vcf.emph'), fK = p('vcf.kbd'), fEnv = p('vcf.env'), fMod = p('vcf.mod');
+    const sFr = p('svf.freq'), sK = 2 - 1.96 * p('svf.reso'), sEnv = p('svf.env'), sMod = p('svf.mod'), sm = p('svf.mode') * 3;
+    const sw = [0, 0, 0, 0]; { const seg = Math.min(2, Math.floor(sm)), f = sm - seg; sw[seg] = 1 - f; sw[seg + 1] = f; }   // LP BP HP NOTCH weights
+    const va1 = p('vca.l1') ** 2, va2 = p('vca.l2') ** 2, vcv = p('vca.cv'), vfx = p('vca.initial'), vr = p('vca.response');
+    const tc = (x, C) => { const Rr = 320 + 1e6 * (Math.pow(100, x) - 1) / 99; return 1 - Math.exp(-1 / (sr * Rr * C)); };
+    const E = [1, 2].map(n => { const id = 'env' + n, C = p(id + '.speed') ? 150e-6 : 6e-6;
+      return { ka: tc(p(id + '.a'), C), kd: tc(p(id + '.d'), C), kr: tc(p(id + '.r'), C), S: 10 * p(id + '.s'), ig: i[id + '.gate'], oo: o[id + '.out'] }; });
+    const LF = [1, 2].map(n => { const id = 'lfo' + n; return { r: p(id + '.rate'), w: p(id + '.wave') * 3, ic: i[id + '.rcv'], oo: o[id + '.out'] }; });
+    const shf = 106 * (A(p('sh.rate')) + 0.0045), C2 = 2.2e-6, kRise = 1 / ((1e3 + 1e6 * A(p('sh.rise'))) * C2 * sr), kFall = 1 / ((1e3 + 1e6 * A(p('sh.fall'))) * C2 * sr), col = p('sh.color');
+    const rx = p('ring.xl'), ry = p('ring.yl');
+    const fcR = 1500 + 9000 * p('rev.tone') * p('rev.tone');
+    const R_ = { gd: (4.7 + 100 * A(p('rev.drive'))) / 22, kt: 1 - Math.exp(-2 * Math.PI * fcR / sr), mw: (2 * p('rev.mix') - 1) * 12,
+      kd: 1 - Math.exp(-2 * Math.PI * 4200 / sr), kh: Math.exp(-2 * Math.PI * 120 / sr), ki: 1 - Math.exp(-2 * Math.PI * 5000 / sr) };
+    const vol = p('out.vol'), gl = p('kb.glide'), kgl = gl < 0.005 ? 1 : 1 - Math.exp(-1 / (sr * 0.002 * Math.pow(1000, gl)));
+    const seqOn = p('kb.seq'), step = 60 / 120 / 2, a1 = p('att.a1') * 2 - 1, a2 = p('att.a2') * 2 - 1;
+    const g2 = 1 / (2 * sr), cab = this.cab, nc = cab.length, nO = this.nOut, nCs = this.nCst, nI = I.length;
+    for (let t = 0; t < n; t++) {
+      // ---- inputs : user cables add up, unplugged inputs get their normal (previous sample)
+      for (let k = 0; k < nI; k++) I[k] = 0;
+      for (let k = 0; k < nc; k++) I[cab[k][1]] += O[cab[k][0]];
+      for (let k = 0; k < nO.length; k++) I[nO[k][0]] = O[nO[k][1]];
+      for (let k = 0; k < nCs.length; k++) I[nCs[k][0]] = nCs[k][1];
+      // ---- KEYBOARD : on-screen keys / demo sequence, CV IN and GATE IN override, glide, trig
+      const kb = S.kb; let kcv, kg;
+      if (this.key !== null) { kcv = (this.key - 60) / 12; kg = 5; kb.lastCv = kcv; }
+      else if (seqOn) { kb.seqPh += 1 / sr; if (kb.seqPh >= step) { kb.seqPh -= step; kb.step = (kb.step + 1) % SEQ.length; }
+        kcv = -1 + SEQ[kb.step] / 12; kg = kb.seqPh < step * 0.5 ? 5 : 0; kb.lastCv = kcv; }
+      else { kcv = kb.lastCv; kg = 0; }
+      if (pat[i['kb.cvin']]) kcv = I[i['kb.cvin']];
+      if (pat[i['kb.gatein']]) kg = Math.max(kg, I[i['kb.gatein']] > 1.5 ? 5 : 0);
+      kb.cv += (kcv - kb.cv) * kgl;
+      const gHi = kg > 2.5; if (gHi && !kb.gHi) kb.tr = 0.002 * sr; kb.gHi = gHi;
+      O[o['kb.cv']] = kb.cv; O[o['kb.gate']] = kg; O[o['kb.trig']] = kb.tr > 0 ? 10 : 0; if (kb.tr > 0) kb.tr--;
+      // ---- LFO 1 / 2 : RAMP UP -> TRI -> RAMP DOWN -> SQUARE, TRIG at the start of each cycle
+      for (let q = 0; q < 2; q++) {
+        const l = S.lfo[q], k = LF[q];
+        l.ph += 0.02 * Math.pow(2, k.r * 11.3 + I[k.ic]) / sr; let tr = false;
+        if (l.ph >= 1) { l.ph -= Math.floor(l.ph); tr = true; }
+        const ph = l.ph, up = 2 * ph - 1, tri = 1 - 2 * Math.abs(2 * ph - 1) , dn = -up, sq = ph < .5 ? 1 : -1;
+        const seg = Math.min(2, Math.floor(k.w)), f = k.w - seg, W = [up, tri, dn, sq];
+        const v = W[seg] + f * (W[seg + 1] - W[seg]);
+        if (tr) l.tr = 0.005 * sr;
+        O[k.oo] = 5 * v; O[k.oo + 1] = l.tr > 0 ? 10 : 0; if (l.tr > 0) l.tr--;
+        const b = 0.5 * (v + 1); if (b * b > l.led) l.led = b * b;
+      }
+      // ---- NOISE / S&H / LAG
+      const sh = S.sh; let wn; if (sh.g2 !== null) { wn = sh.g2; sh.g2 = null; } else { wn = this.gauss(); sh.g2 = this.gauss(); }
+      const W = cl(1.7 * wn, -5.5, 5.5), b = sh.b;
+      b[0] = 0.99886 * b[0] + W * 0.0555179; b[1] = 0.99332 * b[1] + W * 0.0750759; b[2] = 0.96900 * b[2] + W * 0.1538520;
+      b[3] = 0.86650 * b[3] + W * 0.3104856; b[4] = 0.55000 * b[4] + W * 0.5329522; b[5] = -0.7616 * b[5] - W * 0.0168980;
+      const pk = (b[0] + b[1] + b[2] + b[3] + b[4] + b[5] + b[6] + W * 0.5362) * 0.24; b[6] = W * 0.115926;
+      O[o['sh.noise']] = W + col * (1.25 * pk - W);
+      sh.tri -= sh.sq * 4 * 5.5 * shf / sr;
+      if (sh.tri <= -5.5 && sh.sq > 0) sh.sq = -1; else if (sh.tri >= 5.5 && sh.sq < 0) sh.sq = 1;
+      O[o['sh.clock']] = sh.sq > 0 ? 11 : 0;
+      const hi = I[i['sh.clk']] > 1.57; if (hi && !sh.th) sh.hold = cl(I[i['sh.shin']], -11, 11); sh.th = hi;
+      O[o['sh.sh']] = sh.hold;
+      const tg = I[i['sh.lagin']];
+      if (tg > sh.lag) { sh.lag += (10.4 - sh.lag) * kRise; if (sh.lag > tg) sh.lag = tg; } else { sh.lag += (-10.4 - sh.lag) * kFall; if (sh.lag < tg) sh.lag = tg; }
+      O[o['sh.lag']] = sh.lag;
+      // ---- ENVELOPES (911 style RC, FAST / SLOW = timing capacitor x25)
+      for (let q = 0; q < 2; q++) {
+        const e = S.env[q], k = E[q], gi = I[k.ig];
+        if (!e.g && gi > 3.1) { e.g = true; e.att = 1; } else if (e.g && gi < 2.6) { e.g = false; e.att = 0; }
+        if (e.att) { e.env += (12 - e.env) * k.ka; if (e.env >= 10) { e.env = 10; e.att = 0; } }
+        else if (e.g) e.env += (k.S - e.env) * k.kd; else e.env -= e.env * k.kr;
+        O[k.oo] = e.env; O[k.oo + 1] = -e.env; if (e.env > e.led) e.led = e.env;
+      }
+      // ---- 3 VCO (921 core). VCO 3 : STABILITY = slow drift, KBD OFF = ignores the keyboard
+      S.dph += 1 / sr; const nz = this.gauss(); S.drift[0] += 0.00002 * (nz - S.drift[0] * 0.05); S.drift[1] = 0.6 * Math.sin(S.dph * 0.41) + 0.4 * Math.sin(S.dph * 0.173 + 1) + S.drift[0];
+      for (let q = 0; q < 3; q++) {
+        const k = V[q], s = S.vco[q];
+        let voct = I[k.iv]; if (q === 2 && !kbd3 && !pat[k.iv]) voct = 0;
+        let ex = k.base + voct + I[k.ifm] * k.fm; if (q === 2) ex += stab * 0.035 * S.drift[1];
+        const fr = cl(261.63 * Math.pow(2, ex), 0.02, 20000), dt = fr / sr;
+        if (q === 1) { const sv = (sync2 || pat[isy]) ? I[isy] : 0; if (sv > 1 && !s.syncHi) { s.ph = 0; s.syncHi = true; } else if (sv < 0.5) s.syncHi = false; }
+        s.ph += dt; if (s.ph >= 1) s.ph -= 1;
+        const ph = s.ph, saw = (2 * ph - 1 - blep(ph, dt)) * 5, tri = (2 * Math.abs(2 * ph - 1) - 1) * 5;
+        const duty = cl(0.05 + 0.9 * k.w + I[k.ipw] * k.pwm * 0.09, 0.02, 0.98);
+        let pul = ph < duty ? 1 : -1; pul += blep(ph, dt); pul -= blep((ph + 1 - duty) % 1, dt);
+        O[k.vo] = 5 * tanh(1.55 * tri / 5) / tanh(1.55); O[k.vo + 1] = tri; O[k.vo + 2] = saw; O[k.vo + 3] = 5 * pul;
+      }
+      // ---- RING MOD (MC1496)
+      O[o['ring.out']] = cl(1.0636 * cl(I[i['ring.x']] * rx, -10.4, 10.4) * tanh(I[i['ring.y']] * ry * 0.5656), -11, 11);
+      // ---- AUDIO MIXER : 5 slide pots into a summing amp, soft rails
+      const mx = I[i['mix.in1']] * ml[0] + I[i['mix.in2']] * ml[1] + I[i['mix.in3']] * ml[2] + I[i['mix.in4']] * ml[3] + I[i['mix.in5']] * ml[4];
+      O[o['mix.out']] = 10.5 * tanh(mx / 10.5);
+      // ---- LADDER FILTER (same model as the VCF module)
+      { const f = S.vcf;
+        let fc = 20 * Math.pow(2, 10 * fFr + I[i['vcf.kbd']] * fK + I[i['vcf.env']] * fEnv * 0.8 + I[i['vcf.mod']] * fMod * 0.5); fc = cl(fc, 5, Math.min(20000, 0.45 * sr));
+        const g = 1 - Math.exp(-2 * Math.PI * fc * g2), kk = 4.3 * fE;
+        const xin = I[i['vcf.in']] * 0.18 + (this.rnd() - 0.5) * 1e-4; let u = 0;
+        for (let r = 0; r < 2; r++) { u = tanh(xin - kk * f.y4); const t1 = tanh(f.y1), t2 = tanh(f.y2), t3 = tanh(f.y3);
+          f.y1 += g * (u - t1); f.y2 += g * (t1 - t2); f.y3 += g * (t2 - t3); f.y4 += g * (t3 - tanh(f.y4)); }
+        const q1 = tanh(f.y1), q2 = tanh(f.y2), LP = f.y4, BP = 2 * q1 - 2 * q2, HP = u - 2 * q1 + q2;
+        const fo = -(BP + fa * (LP - BP) + fc_ * (HP - BP)) / 0.18;
+        f.hp = 0.9993 * (f.hp + fo - f.hpx); f.hpx = fo; O[o['vcf.out']] = f.hp; }
+      // ---- STATE VARIABLE FILTER 12 dB (TPT, soft-clipped integrators), LP -> BP -> HP -> NOTCH
+      { const f = S.svf;
+        let fc = 20 * Math.pow(2, 10 * sFr + I[i['svf.env']] * sEnv * 0.8 + I[i['svf.mod']] * sMod * 0.5); fc = cl(fc, 10, 0.42 * sr);
+        const g = Math.tan(Math.PI * fc / sr), a1_ = 1 / (1 + g * (g + sK)), a2_ = g * a1_, a3_ = g * a2_;
+        const x = I[i['svf.in']] * 0.2, v3 = x - f.b, v1 = a1_ * f.a + a2_ * v3, v2 = f.b + a2_ * f.a + a3_ * v3;
+        f.a = 2.2 * tanh((2 * v1 - f.a) / 2.2); f.b = 2 * v2 - f.b;
+        const lp = v2, bp = v1, hp = x - sK * v1 - v2, nt = lp + hp;
+        O[o['svf.out']] = 10.5 * tanh((sw[0] * lp + sw[1] * bp + sw[2] * hp + sw[3] * nt) / 0.2 / 10.5); }
+      // ---- AMPLIFIER (902 : LIN <-> EXP, soft clip), 2 inputs with level sliders
+      { const Vc = Math.max(0, 6 * vfx + 0.6 * vcv * I[i['vca.cv']]);
+        let ga = (1 - vr) * Vc / 3 + vr * 2 * Math.pow(10, 13 * (Vc - 6) / 20); if (ga > 2) ga = 2 + 0.6 * tanh((ga - 2) / 0.6);
+        let ya = ga * 12.6 * tanh((I[i['vca.in1']] * va1 + I[i['vca.in2']] * va2) / 12.6); O[o['vca.out']] = 9 * tanh(ya / 9); }
+      // ---- SPRING REVERB (same model as the SPRING REVERB module, MIX on a slider)
+      { const r = S.rev, dry = -I[i['rev.in']], drv = cl(-dry * R_.gd, -10.8, 10.8);
+        r.lpIn += R_.ki * (drv - r.lpIn); const x = 0.3 * tanh(r.lpIn / 6) * 6; let wet = 0; r.t++;
+        for (let q = 0; q < 3; q++) {
+          const sp = r.sp[q], Lb = sp.buf.length;
+          let rr = sp.w - sp.len - 1.5 - 1.5 * Math.sin(r.t * 0.00021 + sp.mod); while (rr < 0) rr += Lb;
+          const i0 = Math.floor(rr), fr = rr - i0, y = sp.buf[i0 % Lb] * (1 - fr) + sp.buf[(i0 + 1) % Lb] * fr;
+          sp.lp += R_.kd * (y - sp.lp); let v = x + 0.9 * sp.lp; const ap = sp.ap;
+          for (let a = 0; a < 24; a++) { const oo = -0.62 * v + ap[a]; ap[a] = v + 0.62 * oo; v = oo; }
+          sp.buf[sp.w] = v; sp.w = (sp.w + 1) % Lb; wet += y;
+        }
+        const hp = wet - r.hpx + R_.kh * r.hp; r.hpx = wet; r.hp = hp; r.tone += R_.kt * (hp * 1.6 - r.tone);
+        const wb = cl(r.tone, -11, 11), fw = 1 / (1 + Math.exp(cl(-0.47 * R_.mw, -10.5, 10.5) * 0.0215 / 0.02585));
+        O[o['rev.out']] = cl(-1.0045 * 0.0517 * (fw * tanh(wb * 0.002132 / 0.0517) + (1 - fw) * tanh(dry * 0.002132 / 0.0517)) / 0.002132, -11, 11); }
+      // ---- ATTENUVERTERS (empty input = +5 V) and MULTIPLE
+      O[o['att.o1']] = cl(I[i['att.in1']] * a1, -11, 11); O[o['att.o2']] = cl(I[i['att.in2']] * a2, -11, 11);
+      O[o['mult.o1']] = O[o['mult.o2']] = O[o['mult.o3']] = I[i['mult.in']];
+      // ---- OUTPUT : VOLUME, MAIN (Eurorack level) and PHONES
+      const main = cl(I[i['out.in']] * vol * 1.4, -10, 10); O[o['out.main']] = main; O[o['out.phones']] = main;
+      const y = tanh(main * 0.2); L[t] = y; if (R) R[t] = y;
+      S.scope[this.cnt % 1024] = main;
+      if (++this.cnt >= 2048) {
+        this.cnt = 0;
+        if (this.report) {
+          const leds = { env1: S.env[0].led / 10, env2: S.env[1].led / 10, lfo1: S.lfo[0].led, lfo2: S.lfo[1].led };
+          S.env[0].led = S.env[1].led = S.lfo[0].led = S.lfo[1].led = 0;
+          this.report({ leds, scope: S.scope.slice(0) });
+        }
+      }
+    }
+  }
+}
+
+const WORKLET_SRC = "// ocTavio SEMI - definition of the big semi-modular panel (single source for the engine and the panel).\n// Three tiers, sections left to right. Sliders = 60 mm travel, jacks = Thonkiconn 3.5 mm, Eurorack levels.\n// sl : sliders [id, label, default 0..1, scale ('bi' = -5..+5, 'oct' = -3..+3, or position names)]   sw : toggles [id, label, [positions], default index]\n// in / out : jacks [id, label]            normals : input -> output it receives when nothing is plugged (or a fixed voltage)\nconst SEMI_DEF = {\n  tiers: [\n    { title: 'SOURCES', secs: [\n      { id: 'vco1', title: 'OSCILLATOR 1', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .5, 'bi'], ['width', 'WIDTH', .5], ['fm', 'FM', 0], ['pwm', 'PWM', 0]],\n        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0]],\n        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },\n      { id: 'vco2', title: 'OSCILLATOR 2', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .52, 'bi'], ['width', 'WIDTH', .3], ['fm', 'FM', 0], ['pwm', 'PWM', 0]],\n        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0], ['sync', 'SYNC', ['OFF', 'ON'], 0]],\n        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM'], ['sync', 'SYNC']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },\n      { id: 'vco3', title: 'OSCILLATOR 3', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .5, 'bi'], ['width', 'WIDTH', .5], ['fm', 'FM', 0], ['pwm', 'PWM', 0], ['stab', 'STABILITY', .2]],\n        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0], ['kbd', 'KBD', ['ON', 'OFF'], 0]],\n        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },\n      { id: 'ring', title: 'RING MOD', sl: [['xl', 'X LEVEL', .7], ['yl', 'Y LEVEL', .7]],\n        in: [['x', 'X'], ['y', 'Y']], out: [['out', 'RING']] },\n      { id: 'sh', title: 'NOISE \u00b7 S&H \u00b7 LAG', sl: [['color', 'COLOR', 0], ['rate', 'CLOCK', .5], ['rise', 'RISE', .3], ['fall', 'FALL', .3]],\n        in: [['shin', 'S&H IN'], ['clk', 'CLOCK'], ['lagin', 'LAG IN']], out: [['noise', 'NOISE'], ['clock', 'CLOCK'], ['sh', 'S&H'], ['lag', 'LAG']] },\n    ] },\n    { title: 'FILTERS & AMPLIFIER', secs: [\n      { id: 'mix', title: 'AUDIO MIXER', sl: [['l1', 'OSC 1', .8], ['l2', 'OSC 2', .6], ['l3', 'OSC 3', 0], ['l4', 'NOISE', 0], ['l5', 'RING', 0]],\n        in: [['in1', 'OSC 1'], ['in2', 'OSC 2'], ['in3', 'OSC 3'], ['in4', 'NOISE'], ['in5', 'RING']], out: [['out', 'MIX']] },\n      { id: 'vcf', title: 'LADDER FILTER  24 dB', sl: [['freq', 'FREQUENCY', .42], ['emph', 'EMPHASIS', .35], ['mode', 'MODE', 0, ['LP', 'BP', 'HP']], ['kbd', 'KBD', 1], ['env', 'ENV', .45], ['mod', 'MOD', 0]],\n        in: [['in', 'IN'], ['kbd', 'KBD'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },\n      { id: 'svf', title: 'STATE VARIABLE  12 dB', sl: [['freq', 'FREQUENCY', .55], ['reso', 'RESONANCE', .3], ['mode', 'MODE', 0, ['LP', 'BP', 'HP', 'N']], ['env', 'ENV', .3], ['mod', 'MOD', 0]],\n        in: [['in', 'IN'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },\n      { id: 'vca', title: 'AMPLIFIER', sl: [['l1', 'LADDER', .8], ['l2', 'STATE VAR.', 0], ['cv', 'ENV', 1], ['initial', 'INITIAL', 0], ['response', 'RESP.', .3, ['LIN', 'EXP']]],\n        in: [['in1', 'LADDER'], ['in2', 'ST. VAR.'], ['cv', 'CV']], out: [['out', 'OUT']] },\n      { id: 'rev', title: 'SPRING REVERB', sl: [['drive', 'DRIVE', .5], ['tone', 'TONE', .5], ['mix', 'MIX', .25]],\n        in: [['in', 'IN']], out: [['out', 'OUT']] },\n      { id: 'out', title: 'OUTPUT', sl: [['vol', 'VOLUME', .7]],\n        in: [['in', 'IN']], out: [['main', 'MAIN'], ['phones', 'PHONES']] },\n    ] },\n    { title: 'CONTROL', secs: [\n      { id: 'kb', title: 'KEYBOARD', sl: [['glide', 'GLIDE', 0]],\n        in: [['cvin', 'CV IN'], ['gatein', 'GATE IN']], out: [['cv', 'CV'], ['gate', 'GATE'], ['trig', 'TRIG']] },\n      { id: 'env1', title: 'ENVELOPE 1', sl: [['a', 'ATTACK', .05], ['d', 'DECAY', .45], ['s', 'SUSTAIN', .3], ['r', 'RELEASE', .35]],\n        sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,\n        in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '\u2212OUT']] },\n      { id: 'env2', title: 'ENVELOPE 2', sl: [['a', 'ATTACK', .03], ['d', 'DECAY', .4], ['s', 'SUSTAIN', .7], ['r', 'RELEASE', .35]],\n        sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,\n        in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '\u2212OUT']] },\n      { id: 'lfo1', title: 'LFO 1', sl: [['rate', 'RATE', .45], ['wave', 'WAVE', .34, ['~up', '~tri', '~dn', '~sq']]], led: 1,\n        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['trig', 'TRIG']] },\n      { id: 'lfo2', title: 'LFO 2', sl: [['rate', 'RATE', .3], ['wave', 'WAVE', .34, ['~up', '~tri', '~dn', '~sq']]], led: 1,\n        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['trig', 'TRIG']] },\n      { id: 'att', title: 'ATTENUVERTERS', sl: [['a1', '1', .5, 'bi'], ['a2', '2', .5, 'bi']],\n        in: [['in1', 'IN 1'], ['in2', 'IN 2']], out: [['o1', 'OUT 1'], ['o2', 'OUT 2']] },\n      { id: 'mult', title: 'MULTIPLE', sl: [],\n        in: [['in', 'IN']], out: [['o1', ''], ['o2', ''], ['o3', '']] },\n    ] },\n  ],\n  // pre-patched connections (switching jacks : plugging a cable into the input breaks the normal)\n  normals: {\n    'vco1.voct': 'kb.cv', 'vco2.voct': 'kb.cv', 'vco3.voct': 'kb.cv',\n    'vco1.fm': 'lfo1.out', 'vco2.fm': 'lfo1.out', 'vco3.fm': 'lfo1.out',\n    'vco1.pwm': 'lfo2.out', 'vco2.pwm': 'lfo2.out', 'vco3.pwm': 'lfo2.out',\n    'vco2.sync': 'vco1.pulse',\n    'ring.x': 'vco1.saw', 'ring.y': 'vco2.saw',\n    'sh.shin': 'sh.noise', 'sh.clk': 'sh.clock', 'sh.lagin': 'sh.sh',\n    'mix.in1': 'vco1.saw', 'mix.in2': 'vco2.pulse', 'mix.in3': 'vco3.saw', 'mix.in4': 'sh.noise', 'mix.in5': 'ring.out',\n    'vcf.in': 'mix.out', 'vcf.kbd': 'kb.cv', 'vcf.env': 'env1.out', 'vcf.mod': 'sh.sh',\n    'svf.in': 'mix.out', 'svf.env': 'env1.out', 'svf.mod': 'lfo2.out',\n    'vca.in1': 'vcf.out', 'vca.in2': 'svf.out', 'vca.cv': 'env2.out',\n    'rev.in': 'vca.out', 'out.in': 'rev.out',\n    'env1.gate': 'kb.gate', 'env2.gate': 'kb.gate',\n    'att.in1': 5, 'att.in2': 5,\n  },\n};\n// ocTavio SEMI - behavioural models, one sample at a time, voltages in volts (Eurorack levels).\n// Same models as the ocTavio Eurorack simulator (SIM/source/engine.js) where the circuit is the same\n// (921 VCO, ladder, 902 VCA, 911 ADSR, S&H / LAG, MC1496 ring, spring reverb) + the new state-variable filter and LFOs.\nclass SemiEngine {\n  constructor(sr) {\n    this.sr = sr; this.P = {}; this.held = []; this.key = null; this.seed = 7; this.cnt = 0;\n    const outs = [], ins = [];\n    for (const t of SEMI_DEF.tiers) for (const s of t.secs) {\n      for (const [j] of s.out) outs.push(s.id + '.' + j);\n      for (const [j] of s.in) ins.push(s.id + '.' + j);\n      for (const [k, , v] of s.sl) this.P[s.id + '.' + k] = v;\n      for (const [k, , , v] of (s.sw || [])) this.P[s.id + '.' + k] = v;\n    }\n    this.P['kb.seq'] = 1;\n    this.outs = outs; this.ins = ins;\n    this.O = new Float64Array(outs.length); this.I = new Float64Array(ins.length);\n    this.o = {}; outs.forEach((n, i) => this.o[n] = i);\n    this.i = {}; ins.forEach((n, i) => this.i[n] = i);\n    this.pat = new Uint8Array(ins.length);\n    this.cab = [];                       // [outIndex, inIndex]\n    this.nrm = ins.map(n => { const v = SEMI_DEF.normals[n]; return v === undefined ? null : v; });\n    this.resolve([]);\n    this.s = {\n      vco: [0, 1, 2].map(() => ({ ph: Math.random(), syncHi: false })), drift: [0, 0], dph: 0,\n      vcf: { y1: 0, y2: 0, y3: 0, y4: 0, hp: 0, hpx: 0 }, svf: { a: 0, b: 0 },\n      env: [0, 1].map(() => ({ env: 0, att: 0, g: false, led: 0 })),\n      lfo: [0, 1].map(() => ({ ph: 0, tr: 0, led: 0 })),\n      sh: { tri: 0, sq: 1, th: false, hold: 0, lag: 0, b: [0, 0, 0, 0, 0, 0, 0], g2: null },\n      rev: null, kb: { cv: 0, cvT: 0, gHi: false, tr: 0, seqPh: 0, step: 0, lastCv: -1 },\n      scope: new Float32Array(1024),\n    };\n    const sp = [0.0371, 0.0433, 0.0517].map((d, k) => ({ buf: new Float32Array(Math.ceil(d * sr) + 2), w: 0, len: Math.round(d * sr), ap: new Float32Array(24), lp: 0, mod: k * 2.1 }));\n    this.s.rev = { sp, hp: 0, hpx: 0, lpIn: 0, tone: 0, t: 0 };\n  }\n  msg(d) {\n    if (d.t === 'p') this.P[d.k] = d.v;\n    else if (d.t === 'cables') this.resolve(d.list);\n    else if (d.t === 'state') { Object.assign(this.P, d.params || {}); this.resolve(d.cables || []); }\n    else if (d.t === 'note') {\n      const i = this.held.indexOf(d.n); if (i >= 0) this.held.splice(i, 1);\n      if (d.on) this.held.push(d.n);\n      this.key = this.held.length ? this.held[this.held.length - 1] : null;\n    }\n  }\n  resolve(list) {\n    this.cab = []; this.pat.fill(0);\n    for (const [a, b] of list) { const oi = this.o[a], ii = this.i[b]; if (oi !== undefined && ii !== undefined) { this.cab.push([oi, ii]); this.pat[ii] = 1; } }\n    // normalled inputs that are not plugged : [inIndex, outIndex] or a fixed voltage\n    this.nOut = []; this.nCst = [];\n    this.nrm.forEach((v, ii) => { if (v === null || this.pat[ii]) return; if (typeof v === 'number') this.nCst.push([ii, v]); else this.nOut.push([ii, this.o[v]]); });\n  }\n  rnd() { this.seed = (this.seed * 16807) % 2147483647; return this.seed / 2147483647; }\n  gauss() { let u, v, q; do { u = 2 * this.rnd() - 1; v = 2 * this.rnd() - 1; q = u * u + v * v; } while (q >= 1 || q === 0); return u * Math.sqrt(-2 * Math.log(q) / q); }\n  render(L, R, n) {\n    const sr = this.sr, P = this.P, tanh = Math.tanh, S = this.s, O = this.O, I = this.I, o = this.o, i = this.i, pat = this.pat;\n    const cl = (x, a, b) => x < a ? a : (x > b ? b : x);\n    const blep = (t, dt) => { if (t < dt) { t /= dt; return t + t - t * t - 1; } if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; } return 0; };\n    const p = k => P[k];\n    const A = x => (Math.pow(10, 2 * x) - 1) / 99;           // audio-taper slide pot\n    const SEQ = [0, 12, 0, 7, 3, 0, 10, 7, 0, 12, 3, 5, 7, 0, 15, 10];\n    // ---- per-block constants (slider positions)\n    const V = [1, 2, 3].map(n => { const id = 'vco' + n; return {\n      base: (p(id + '.coarse') - .5) * 6 + (p(id + '.fine') - .5) + (p(id + '.range') ? -7 : 0),\n      w: p(id + '.width'), fm: p(id + '.fm') * p(id + '.fm'), pwm: p(id + '.pwm'),\n      vo: o[id + '.sine'], iv: i[id + '.voct'], ifm: i[id + '.fm'], ipw: i[id + '.pwm'] }; });\n    const sync2 = p('vco2.sync') === 1, kbd3 = p('vco3.kbd') === 0, stab = p('vco3.stab'), isy = i['vco2.sync'];\n    const ml = [1, 2, 3, 4, 5].map(k => { const v = p('mix.l' + k); return v * v; });\n    const md = p('vcf.mode'), fa = md < 0.5 ? 1 - 2 * md : 0, fc_ = md > 0.5 ? 2 * md - 1 : 0;\n    const fFr = p('vcf.freq'), fE = p('vcf.emph'), fK = p('vcf.kbd'), fEnv = p('vcf.env'), fMod = p('vcf.mod');\n    const sFr = p('svf.freq'), sK = 2 - 1.96 * p('svf.reso'), sEnv = p('svf.env'), sMod = p('svf.mod'), sm = p('svf.mode') * 3;\n    const sw = [0, 0, 0, 0]; { const seg = Math.min(2, Math.floor(sm)), f = sm - seg; sw[seg] = 1 - f; sw[seg + 1] = f; }   // LP BP HP NOTCH weights\n    const va1 = p('vca.l1') ** 2, va2 = p('vca.l2') ** 2, vcv = p('vca.cv'), vfx = p('vca.initial'), vr = p('vca.response');\n    const tc = (x, C) => { const Rr = 320 + 1e6 * (Math.pow(100, x) - 1) / 99; return 1 - Math.exp(-1 / (sr * Rr * C)); };\n    const E = [1, 2].map(n => { const id = 'env' + n, C = p(id + '.speed') ? 150e-6 : 6e-6;\n      return { ka: tc(p(id + '.a'), C), kd: tc(p(id + '.d'), C), kr: tc(p(id + '.r'), C), S: 10 * p(id + '.s'), ig: i[id + '.gate'], oo: o[id + '.out'] }; });\n    const LF = [1, 2].map(n => { const id = 'lfo' + n; return { r: p(id + '.rate'), w: p(id + '.wave') * 3, ic: i[id + '.rcv'], oo: o[id + '.out'] }; });\n    const shf = 106 * (A(p('sh.rate')) + 0.0045), C2 = 2.2e-6, kRise = 1 / ((1e3 + 1e6 * A(p('sh.rise'))) * C2 * sr), kFall = 1 / ((1e3 + 1e6 * A(p('sh.fall'))) * C2 * sr), col = p('sh.color');\n    const rx = p('ring.xl'), ry = p('ring.yl');\n    const fcR = 1500 + 9000 * p('rev.tone') * p('rev.tone');\n    const R_ = { gd: (4.7 + 100 * A(p('rev.drive'))) / 22, kt: 1 - Math.exp(-2 * Math.PI * fcR / sr), mw: (2 * p('rev.mix') - 1) * 12,\n      kd: 1 - Math.exp(-2 * Math.PI * 4200 / sr), kh: Math.exp(-2 * Math.PI * 120 / sr), ki: 1 - Math.exp(-2 * Math.PI * 5000 / sr) };\n    const vol = p('out.vol'), gl = p('kb.glide'), kgl = gl < 0.005 ? 1 : 1 - Math.exp(-1 / (sr * 0.002 * Math.pow(1000, gl)));\n    const seqOn = p('kb.seq'), step = 60 / 120 / 2, a1 = p('att.a1') * 2 - 1, a2 = p('att.a2') * 2 - 1;\n    const g2 = 1 / (2 * sr), cab = this.cab, nc = cab.length, nO = this.nOut, nCs = this.nCst, nI = I.length;\n    for (let t = 0; t < n; t++) {\n      // ---- inputs : user cables add up, unplugged inputs get their normal (previous sample)\n      for (let k = 0; k < nI; k++) I[k] = 0;\n      for (let k = 0; k < nc; k++) I[cab[k][1]] += O[cab[k][0]];\n      for (let k = 0; k < nO.length; k++) I[nO[k][0]] = O[nO[k][1]];\n      for (let k = 0; k < nCs.length; k++) I[nCs[k][0]] = nCs[k][1];\n      // ---- KEYBOARD : on-screen keys / demo sequence, CV IN and GATE IN override, glide, trig\n      const kb = S.kb; let kcv, kg;\n      if (this.key !== null) { kcv = (this.key - 60) / 12; kg = 5; kb.lastCv = kcv; }\n      else if (seqOn) { kb.seqPh += 1 / sr; if (kb.seqPh >= step) { kb.seqPh -= step; kb.step = (kb.step + 1) % SEQ.length; }\n        kcv = -1 + SEQ[kb.step] / 12; kg = kb.seqPh < step * 0.5 ? 5 : 0; kb.lastCv = kcv; }\n      else { kcv = kb.lastCv; kg = 0; }\n      if (pat[i['kb.cvin']]) kcv = I[i['kb.cvin']];\n      if (pat[i['kb.gatein']]) kg = Math.max(kg, I[i['kb.gatein']] > 1.5 ? 5 : 0);\n      kb.cv += (kcv - kb.cv) * kgl;\n      const gHi = kg > 2.5; if (gHi && !kb.gHi) kb.tr = 0.002 * sr; kb.gHi = gHi;\n      O[o['kb.cv']] = kb.cv; O[o['kb.gate']] = kg; O[o['kb.trig']] = kb.tr > 0 ? 10 : 0; if (kb.tr > 0) kb.tr--;\n      // ---- LFO 1 / 2 : RAMP UP -> TRI -> RAMP DOWN -> SQUARE, TRIG at the start of each cycle\n      for (let q = 0; q < 2; q++) {\n        const l = S.lfo[q], k = LF[q];\n        l.ph += 0.02 * Math.pow(2, k.r * 11.3 + I[k.ic]) / sr; let tr = false;\n        if (l.ph >= 1) { l.ph -= Math.floor(l.ph); tr = true; }\n        const ph = l.ph, up = 2 * ph - 1, tri = 1 - 2 * Math.abs(2 * ph - 1) , dn = -up, sq = ph < .5 ? 1 : -1;\n        const seg = Math.min(2, Math.floor(k.w)), f = k.w - seg, W = [up, tri, dn, sq];\n        const v = W[seg] + f * (W[seg + 1] - W[seg]);\n        if (tr) l.tr = 0.005 * sr;\n        O[k.oo] = 5 * v; O[k.oo + 1] = l.tr > 0 ? 10 : 0; if (l.tr > 0) l.tr--;\n        const b = 0.5 * (v + 1); if (b * b > l.led) l.led = b * b;\n      }\n      // ---- NOISE / S&H / LAG\n      const sh = S.sh; let wn; if (sh.g2 !== null) { wn = sh.g2; sh.g2 = null; } else { wn = this.gauss(); sh.g2 = this.gauss(); }\n      const W = cl(1.7 * wn, -5.5, 5.5), b = sh.b;\n      b[0] = 0.99886 * b[0] + W * 0.0555179; b[1] = 0.99332 * b[1] + W * 0.0750759; b[2] = 0.96900 * b[2] + W * 0.1538520;\n      b[3] = 0.86650 * b[3] + W * 0.3104856; b[4] = 0.55000 * b[4] + W * 0.5329522; b[5] = -0.7616 * b[5] - W * 0.0168980;\n      const pk = (b[0] + b[1] + b[2] + b[3] + b[4] + b[5] + b[6] + W * 0.5362) * 0.24; b[6] = W * 0.115926;\n      O[o['sh.noise']] = W + col * (1.25 * pk - W);\n      sh.tri -= sh.sq * 4 * 5.5 * shf / sr;\n      if (sh.tri <= -5.5 && sh.sq > 0) sh.sq = -1; else if (sh.tri >= 5.5 && sh.sq < 0) sh.sq = 1;\n      O[o['sh.clock']] = sh.sq > 0 ? 11 : 0;\n      const hi = I[i['sh.clk']] > 1.57; if (hi && !sh.th) sh.hold = cl(I[i['sh.shin']], -11, 11); sh.th = hi;\n      O[o['sh.sh']] = sh.hold;\n      const tg = I[i['sh.lagin']];\n      if (tg > sh.lag) { sh.lag += (10.4 - sh.lag) * kRise; if (sh.lag > tg) sh.lag = tg; } else { sh.lag += (-10.4 - sh.lag) * kFall; if (sh.lag < tg) sh.lag = tg; }\n      O[o['sh.lag']] = sh.lag;\n      // ---- ENVELOPES (911 style RC, FAST / SLOW = timing capacitor x25)\n      for (let q = 0; q < 2; q++) {\n        const e = S.env[q], k = E[q], gi = I[k.ig];\n        if (!e.g && gi > 3.1) { e.g = true; e.att = 1; } else if (e.g && gi < 2.6) { e.g = false; e.att = 0; }\n        if (e.att) { e.env += (12 - e.env) * k.ka; if (e.env >= 10) { e.env = 10; e.att = 0; } }\n        else if (e.g) e.env += (k.S - e.env) * k.kd; else e.env -= e.env * k.kr;\n        O[k.oo] = e.env; O[k.oo + 1] = -e.env; if (e.env > e.led) e.led = e.env;\n      }\n      // ---- 3 VCO (921 core). VCO 3 : STABILITY = slow drift, KBD OFF = ignores the keyboard\n      S.dph += 1 / sr; const nz = this.gauss(); S.drift[0] += 0.00002 * (nz - S.drift[0] * 0.05); S.drift[1] = 0.6 * Math.sin(S.dph * 0.41) + 0.4 * Math.sin(S.dph * 0.173 + 1) + S.drift[0];\n      for (let q = 0; q < 3; q++) {\n        const k = V[q], s = S.vco[q];\n        let voct = I[k.iv]; if (q === 2 && !kbd3 && !pat[k.iv]) voct = 0;\n        let ex = k.base + voct + I[k.ifm] * k.fm; if (q === 2) ex += stab * 0.035 * S.drift[1];\n        const fr = cl(261.63 * Math.pow(2, ex), 0.02, 20000), dt = fr / sr;\n        if (q === 1) { const sv = (sync2 || pat[isy]) ? I[isy] : 0; if (sv > 1 && !s.syncHi) { s.ph = 0; s.syncHi = true; } else if (sv < 0.5) s.syncHi = false; }\n        s.ph += dt; if (s.ph >= 1) s.ph -= 1;\n        const ph = s.ph, saw = (2 * ph - 1 - blep(ph, dt)) * 5, tri = (2 * Math.abs(2 * ph - 1) - 1) * 5;\n        const duty = cl(0.05 + 0.9 * k.w + I[k.ipw] * k.pwm * 0.09, 0.02, 0.98);\n        let pul = ph < duty ? 1 : -1; pul += blep(ph, dt); pul -= blep((ph + 1 - duty) % 1, dt);\n        O[k.vo] = 5 * tanh(1.55 * tri / 5) / tanh(1.55); O[k.vo + 1] = tri; O[k.vo + 2] = saw; O[k.vo + 3] = 5 * pul;\n      }\n      // ---- RING MOD (MC1496)\n      O[o['ring.out']] = cl(1.0636 * cl(I[i['ring.x']] * rx, -10.4, 10.4) * tanh(I[i['ring.y']] * ry * 0.5656), -11, 11);\n      // ---- AUDIO MIXER : 5 slide pots into a summing amp, soft rails\n      const mx = I[i['mix.in1']] * ml[0] + I[i['mix.in2']] * ml[1] + I[i['mix.in3']] * ml[2] + I[i['mix.in4']] * ml[3] + I[i['mix.in5']] * ml[4];\n      O[o['mix.out']] = 10.5 * tanh(mx / 10.5);\n      // ---- LADDER FILTER (same model as the VCF module)\n      { const f = S.vcf;\n        let fc = 20 * Math.pow(2, 10 * fFr + I[i['vcf.kbd']] * fK + I[i['vcf.env']] * fEnv * 0.8 + I[i['vcf.mod']] * fMod * 0.5); fc = cl(fc, 5, Math.min(20000, 0.45 * sr));\n        const g = 1 - Math.exp(-2 * Math.PI * fc * g2), kk = 4.3 * fE;\n        const xin = I[i['vcf.in']] * 0.18 + (this.rnd() - 0.5) * 1e-4; let u = 0;\n        for (let r = 0; r < 2; r++) { u = tanh(xin - kk * f.y4); const t1 = tanh(f.y1), t2 = tanh(f.y2), t3 = tanh(f.y3);\n          f.y1 += g * (u - t1); f.y2 += g * (t1 - t2); f.y3 += g * (t2 - t3); f.y4 += g * (t3 - tanh(f.y4)); }\n        const q1 = tanh(f.y1), q2 = tanh(f.y2), LP = f.y4, BP = 2 * q1 - 2 * q2, HP = u - 2 * q1 + q2;\n        const fo = -(BP + fa * (LP - BP) + fc_ * (HP - BP)) / 0.18;\n        f.hp = 0.9993 * (f.hp + fo - f.hpx); f.hpx = fo; O[o['vcf.out']] = f.hp; }\n      // ---- STATE VARIABLE FILTER 12 dB (TPT, soft-clipped integrators), LP -> BP -> HP -> NOTCH\n      { const f = S.svf;\n        let fc = 20 * Math.pow(2, 10 * sFr + I[i['svf.env']] * sEnv * 0.8 + I[i['svf.mod']] * sMod * 0.5); fc = cl(fc, 10, 0.42 * sr);\n        const g = Math.tan(Math.PI * fc / sr), a1_ = 1 / (1 + g * (g + sK)), a2_ = g * a1_, a3_ = g * a2_;\n        const x = I[i['svf.in']] * 0.2, v3 = x - f.b, v1 = a1_ * f.a + a2_ * v3, v2 = f.b + a2_ * f.a + a3_ * v3;\n        f.a = 2.2 * tanh((2 * v1 - f.a) / 2.2); f.b = 2 * v2 - f.b;\n        const lp = v2, bp = v1, hp = x - sK * v1 - v2, nt = lp + hp;\n        O[o['svf.out']] = 10.5 * tanh((sw[0] * lp + sw[1] * bp + sw[2] * hp + sw[3] * nt) / 0.2 / 10.5); }\n      // ---- AMPLIFIER (902 : LIN <-> EXP, soft clip), 2 inputs with level sliders\n      { const Vc = Math.max(0, 6 * vfx + 0.6 * vcv * I[i['vca.cv']]);\n        let ga = (1 - vr) * Vc / 3 + vr * 2 * Math.pow(10, 13 * (Vc - 6) / 20); if (ga > 2) ga = 2 + 0.6 * tanh((ga - 2) / 0.6);\n        let ya = ga * 12.6 * tanh((I[i['vca.in1']] * va1 + I[i['vca.in2']] * va2) / 12.6); O[o['vca.out']] = 9 * tanh(ya / 9); }\n      // ---- SPRING REVERB (same model as the SPRING REVERB module, MIX on a slider)\n      { const r = S.rev, dry = -I[i['rev.in']], drv = cl(-dry * R_.gd, -10.8, 10.8);\n        r.lpIn += R_.ki * (drv - r.lpIn); const x = 0.3 * tanh(r.lpIn / 6) * 6; let wet = 0; r.t++;\n        for (let q = 0; q < 3; q++) {\n          const sp = r.sp[q], Lb = sp.buf.length;\n          let rr = sp.w - sp.len - 1.5 - 1.5 * Math.sin(r.t * 0.00021 + sp.mod); while (rr < 0) rr += Lb;\n          const i0 = Math.floor(rr), fr = rr - i0, y = sp.buf[i0 % Lb] * (1 - fr) + sp.buf[(i0 + 1) % Lb] * fr;\n          sp.lp += R_.kd * (y - sp.lp); let v = x + 0.9 * sp.lp; const ap = sp.ap;\n          for (let a = 0; a < 24; a++) { const oo = -0.62 * v + ap[a]; ap[a] = v + 0.62 * oo; v = oo; }\n          sp.buf[sp.w] = v; sp.w = (sp.w + 1) % Lb; wet += y;\n        }\n        const hp = wet - r.hpx + R_.kh * r.hp; r.hpx = wet; r.hp = hp; r.tone += R_.kt * (hp * 1.6 - r.tone);\n        const wb = cl(r.tone, -11, 11), fw = 1 / (1 + Math.exp(cl(-0.47 * R_.mw, -10.5, 10.5) * 0.0215 / 0.02585));\n        O[o['rev.out']] = cl(-1.0045 * 0.0517 * (fw * tanh(wb * 0.002132 / 0.0517) + (1 - fw) * tanh(dry * 0.002132 / 0.0517)) / 0.002132, -11, 11); }\n      // ---- ATTENUVERTERS (empty input = +5 V) and MULTIPLE\n      O[o['att.o1']] = cl(I[i['att.in1']] * a1, -11, 11); O[o['att.o2']] = cl(I[i['att.in2']] * a2, -11, 11);\n      O[o['mult.o1']] = O[o['mult.o2']] = O[o['mult.o3']] = I[i['mult.in']];\n      // ---- OUTPUT : VOLUME, MAIN (Eurorack level) and PHONES\n      const main = cl(I[i['out.in']] * vol * 1.4, -10, 10); O[o['out.main']] = main; O[o['out.phones']] = main;\n      const y = tanh(main * 0.2); L[t] = y; if (R) R[t] = y;\n      S.scope[this.cnt % 1024] = main;\n      if (++this.cnt >= 2048) {\n        this.cnt = 0;\n        if (this.report) {\n          const leds = { env1: S.env[0].led / 10, env2: S.env[1].led / 10, lfo1: S.lfo[0].led, lfo2: S.lfo[1].led };\n          S.env[0].led = S.env[1].led = S.lfo[0].led = S.lfo[1].led = 0;\n          this.report({ leds, scope: S.scope.slice(0) });\n        }\n      }\n    }\n  }\n}\n\nclass SemiSim extends AudioWorkletProcessor {\n  constructor() { super(); this.e = new SemiEngine(sampleRate); this.e.report = r => this.port.postMessage(r); this.port.onmessage = ev => this.e.msg(ev.data); }\n  process(inputs, outputs) { const o = outputs[0]; this.e.render(o[0], o[1], o[0].length); return true; }\n}\nregisterProcessor('semi-sim', SemiSim);\n";
+const LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAAxCAYAAAD9T50MAAAIfUlEQVR4Xu2dgZHeNBBGdQwNhBJCCaGEUEIoISkhlBBKCCWEEkIJUEIoISnBzLvJzmg8lq1vV7bkO72ZmzvI/8trSftptZLlh2VZ0iTM65TS53ApY/BfSunnMUyZ3IEf7mDkZDIZlykik8kkxBSRyWQSYorIZDIJMUVkMpmEmCIymUxCTBGZTCYhpohMJpMQU0Qmk0mIKSKTySTEQ2Db+5uU0svvV3+fUnqxY8nfKT3+AL//DVkdA1sBe+3vEn+m9LgNHP6IXfYQ6vLL4af2oW5/DZYxuT/X+iYiIvy8XZbl09KGD8uyvBaurdi5/uz7ZVm+NDCbMigrYkvpuy8b2Pf5JNuwmbb38kqwy9O/sC3aJtiosnVdTz1Fbbf28dTdFpJv1k5nGLG/ppQ+pvSoci2gTB5a+6dhmTlEGh9SSjxhyG+LmiJQRl7mcyLS7sp3if5UeAAyilrGt5TSX9GLNqC/bx4oOOrcYgSvgVGU0fjIppp/f7Msy9eaiwahbpRRds/2kSMRzyidQ1u8ENrW0+eU8rfaQb0mo/VWOVdFIsP45l4kgsIRJbQYwWtgJOB66oiwhkjh00GOphXUDdFU1ObReRs0kKjw7GgkYuMrRz/3REytGMo3SyKCkTjj1dDZIk7JdOsoWdoabEa06IhPEVUASihOjoMyXVCICLkicEAC2xLuVzOcb26JSC8jcxAS1SkRPaWjtsSEZG+FaiQeBGOo0xb3RXvWtqkn34CIeO1URaRXFDKkb65FhEbuEYFsoUxJ6ARXRyBrLOl6B34UjFQdbA9F5D2OqpRvID7KlJ0IpEdCdVjfXIsIjuuBfR+/p/Q4wuU/7Fng/3ugYWuFwSt8Jbt/S8ndidejrTLqXwH21I7YOFht9FADglR7bdrG9hbV4hE8dRrkEbcWjOubWYbZk1WGmjV6MufeNeyjFRuv3TX7PTwZcO6zZgVp/ZkRV2c+Blevtqipd6sbVtlUjvrLut7VVbyjVSBPfzzqL54yL/PN3Hh1iQvUzWKeTllaSjPbPXbTOY8azv6dTqleQ+3IXGs0EcFZakEYaqEua+uez6l1r4gU/VeB/ntku8fhj8pU6+BS37TpjDovBKYparj5zpHV3pvneuxm+7oyp2UOvDclsykRn+GUdKYLvTL3LVHyC9RnbZ0yTVWmEOr0QZnSKJ+F2ntsiaePX+qbuYgokD1XG9dQn0HZW2JUOqP3+tZ5EIZcMH76Lhi/fH+uhvt6CuJh1IoIdaImGxXnVfuZsgqk2OHJ0bRA7eOX+6ZXRFBkdR3f8OwBKCX31AqO2E2UkQuG9/7vQP4A1xE2Oit1qywbe5yipl8oSd5eUQjU3EuO0g5rXL6JiDDSqxl4dRqzRv1+aQlOWZqDnk8P3wllhM5DfCVqqI10PA5cY7/inB4ha8EtfBMRUR0RomG76sxbIofdtcuFhnrd5wj1WuOEJsp5X1ByBoqIqMdHHE1p1F24kdE9wi18ExFRo5AWIqJOBbYqs0cFPwdqBWQrQkCka4X67ATrXqSh7m5VIqyW3MI3a48CWKOKwCjc1e4rqd3gV5pmnBWNqNHAXqSjCKUaBfXm8j5uORGF6FSmFZ5I5PIKvhlKwtNWZdYoIqIkcGk7ZWWP/rE1kjOVUfIhyv20Rp2ud/FNbyQyeZooI3TJuejISuK8xTVLbJWtrMr0SqjeCkREHZ09EcAZeFRXVfbnBKO2MkLvCYUyeivTpxb7UZR7VCKfM7iFb3ojkagzqt9XK7OEet3nhBIRHCVQlfyFulKiJDnXyVv1WooYjkK0j6vf/4aIeEb0aDSiGrplYw+7nyq0h7LkStTC2bWlH87jVdpYubZ6IFAeeShCiYB4+lhLPNe/3DcRkdoluZyooerSVUlE1AglYjcdkOMbCb+VkPgOKHmCM1CfD1GikVygFBFRrnEWt/BNy4moxkacyLMLr2SfksCDqIjYwTCcvMYozBkPiEqk3BFQIoGzUGxQtmfbaoyyKqMmh8+CQXJ437SciOqMkZFL3egDpYpUK1jpqDmluTT1wIFIvHQKUUFQlEThCLQ+eMiL0jbq8Ym0k1L+CFGIMbxvmoiozqjOoXNUJ6PDlCpSrWCv3bUnp/E5ftR77IkS4p+J2jaKo3OPtdHzaMu6w/umiYgniYSz1DaMgXOp+ZC9zuJ5PPvolZ9r1FEM7pLVVx33bBRBU9pemcooK0tXMLxv5ku8njVxcgO1YaKN0ipHI45qt70rpiaPgUjyGgoFdfWgJ7VtdxXq1Oqob3g4o8woah+Hy3wzF5H85dUKOJmtWqwh6rDX/HlC/JqDfvKXhdeCXeQxStEUtpI0pSGUpUrwNHgvRhMRUKIRzyi9x9H+l14M7ZsPnBmZgXMhCCNAhpxDgGqWcYkqsFt1+NYgaJxw74F7QNgiKNdn1EckR4P25gComnaHlu9i4fjOaCSCMKvRa80bAYb1zfWOVTv+bwR4bUNtR0Jw6AA9wdbeNiioUcjWK0HWrwjZ+m8GAgV1V2nU6Q11xedqhvXNtYgA4bj3XTGtYDRXs9KEtj3t9hxC3Qvl4CHDmywuPe27hyJwrVZTlL0nvRjSN7dEpKeQ0CEQEHXp1uhVyQiI18l6oOQdwCMEOWrdqA8DquVv0SqiOZtefbzomyURMSFRphRREA5CX6+A5EJyld1WsXfpgIaa5I46qadNFaGLHhx0pxW14XxzT0SAzsOrEc5ccbB8BhGI54GjLbCb5NyZzk3ZXMPjID1RDh4yovfI92vzW4a6KzrS1pHv9mIY3zwSEcOSavxWcxUlqASmAWc5uyU6KR+71U5cAkGlTGxvVeaVKCM8tFr2VB1V3Qjn3SSmnlEyGt19c73Eq5CPaPy9t3krP9quZ6PlHZO/j8J6bLXOr+yQnEx6cqlv/g8Yt88oW+2NXgAAAABJRU5ErkJggg==';
+// ocTavio SEMI - panel drawing (mm units), sliders, toggles, cables, keyboard, audio.
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const txt = (s, a, p) => { const e = el('text', a, p); e.textContent = s; return e; };
+// ---------------------------------------------------------------- geometry (mm)
+const SP = 15, SWCOL = 14, PAD = 5, JP = 12.5, STRIP = 8, TOP = 4, TIERH = 122, BOT = 17, TRAVEL = 60;
+const Y_LAB = 12.8, Y_TOP = 21.5, Y_IN = 99, Y_OUT = 114;           // slider label, cap centre at value 1 (value 0 = Y_TOP + 60)
+const FONT = "'Barlow Condensed','Arial Narrow',sans-serif";
+const secW = s => { const g = s.sl.length * SP + (s.sw ? SWCOL : 0); const cols = Math.max(s.in.length, s.out.length); return 2 * PAD + Math.max(g, cols * JP); };
+const tierW = SEMI_DEF.tiers.map(t => t.secs.reduce((a, s) => a + secW(s), 0));
+const INW = Math.ceil(Math.max(...tierW)), PW = INW + 2 * STRIP, PH = TOP + 3 * TIERH + BOT;
+const svg = $('#panel');
+let PARAMS = {}, DEFV = {}, SL = {}, JACKS = {}, LAB = {}, LEDS = {}, cables = [];
+const SECS = {}; SEMI_DEF.tiers.forEach(t => t.secs.forEach(s => SECS[s.id] = s));
+for (const s of Object.values(SECS)) { for (const [k, , v] of s.sl) DEFV[s.id + '.' + k] = v; for (const [k, , , v] of (s.sw || [])) DEFV[s.id + '.' + k] = v; }
+DEFV['kb.seq'] = 1;
+PARAMS = Object.assign({}, DEFV);
+const toastEl = { textContent: '' };
+const status = $('#status');
+// ---------------------------------------------------------------- value display
+function fmt(key, v) {
+  const [id, k] = key.split('.'), s = SECS[id];
+  const sw = s && (s.sw || []).find(x => x[0] === k); if (sw) return sw[2][v];
+  const sl = s && s.sl.find(x => x[0] === k), sc = sl && sl[3];
+  if (k === 'coarse') return ((v - .5) * 6 >= 0 ? '+' : '') + ((v - .5) * 6).toFixed(2) + ' oct';
+  if (k === 'fine') return ((v - .5) * 12 >= 0 ? '+' : '') + ((v - .5) * 12).toFixed(1) + ' demi-tons';
+  if (sc === 'bi') return '× ' + (2 * v - 1).toFixed(2);
+  if (id.startsWith('lfo') && k === 'rate') { const f = 0.02 * Math.pow(2, v * 11.3); return f < 1 ? f.toFixed(2) + ' Hz' : f.toFixed(1) + ' Hz'; }
+  if (Array.isArray(sc)) { const n = sc.length - 1, x = v * n, i = Math.min(n - 1, Math.floor(x)), f = x - i, nm = q => sc[q].replace('~up', 'RAMPE ↑').replace('~tri', 'TRI').replace('~dn', 'RAMPE ↓').replace('~sq', 'CARRÉ');
+    return f < .02 ? nm(i) : f > .98 ? nm(i + 1) : nm(i) + ' → ' + nm(i + 1) + ' ' + Math.round(f * 100) + ' %'; }
+  if (key === 'out.vol') return Math.round(v * 100) + ' %';
+  return (v * 10).toFixed(1);
+}
+function show(key) { if (LAB[key]) status.textContent = LAB[key] + '  ' + fmt(key, PARAMS[key]); }
+// ---------------------------------------------------------------- drawing
+const DEFS = `
+<linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#8d8d8d"/><stop offset=".5" stop-color="#e6e6e6"/><stop offset="1" stop-color="#9c9c9c"/></linearGradient>
+<linearGradient id="capg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3b3b3b"/><stop offset=".5" stop-color="#1c1c1c"/><stop offset="1" stop-color="#0d0d0d"/></linearGradient>
+<radialGradient id="nut" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#f0f0eb"/><stop offset=".6" stop-color="#b7b7b1"/><stop offset="1" stop-color="#6f6e68"/></radialGradient>
+<radialGradient id="screw" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#d2cdc1"/><stop offset="1" stop-color="#6d685e"/></radialGradient>
+<radialGradient id="lamp" cx=".4" cy=".35"><stop offset="0" stop-color="#fff3cc"/><stop offset=".45" stop-color="#ff5a4a"/><stop offset="1" stop-color="#9c1d16"/></radialGradient>`;
+let gCables, gNorm;
+function waveIcon(kind, x, y, p) {
+  const w = 2.6, h = 1.2, d = { up: `M${x - w / 2},${y + h / 2} L${x + w / 2},${y - h / 2} L${x + w / 2},${y + h / 2}`, tri: `M${x - w / 2},${y + h / 2} L${x},${y - h / 2} L${x + w / 2},${y + h / 2}`,
+    dn: `M${x - w / 2},${y + h / 2} L${x - w / 2},${y - h / 2} L${x + w / 2},${y + h / 2}`, sq: `M${x - w / 2},${y + h / 2} L${x - w / 2},${y - h / 2} L${x},${y - h / 2} L${x},${y + h / 2} L${x + w / 2},${y + h / 2}` }[kind];
+  el('path', { d, fill: 'none', stroke: '#fff', 'stroke-width': .3, 'stroke-linejoin': 'round' }, p);
+}
+function build() {
+  svg.innerHTML = ''; SL = {}; JACKS = {}; LAB = {}; LEDS = {};
+  svg.setAttribute('viewBox', `0 0 ${PW} ${PH}`);
+  const defs = el('defs', {}, svg); defs.innerHTML = DEFS;
+  el('rect', { x: 0, y: 0, width: PW, height: PH, rx: 1.5, fill: '#121212' }, svg);
+  el('rect', { x: 0, y: 0, width: STRIP, height: PH, fill: 'url(#alu)' }, svg);
+  el('rect', { x: PW - STRIP, y: 0, width: STRIP, height: PH, fill: 'url(#alu)' }, svg);
+  for (const x of [STRIP / 2, PW - STRIP / 2]) for (const y of [8, PH / 2, PH - 8]) { el('circle', { cx: x, cy: y, r: 1.6, fill: 'url(#screw)', stroke: '#555', 'stroke-width': .2 }, svg); el('line', { x1: x - 1.1, y1: y, x2: x + 1.1, y2: y, stroke: '#4a4740', 'stroke-width': .35 }, svg); }
+  const gP = el('g', {}, svg);
+  SEMI_DEF.tiers.forEach((tier, ti) => {
+    const y0 = TOP + ti * TIERH, extra = (INW - tierW[ti]) / tier.secs.length; let x = STRIP;
+    for (const s of tier.secs) { const w = secW(s) + extra; drawSection(s, x, y0, w, gP); x += w; }
+  });
+  // bottom strip : logo + name
+  const yb = TOP + 3 * TIERH;
+  el('line', { x1: STRIP + 1, y1: yb + 1, x2: PW - STRIP - 1, y2: yb + 1, stroke: '#5d5d5d', 'stroke-width': .35 }, svg);
+  el('image', { href: LOGO, x: PW - STRIP - 6 - 40, y: yb + 4.5, width: 40, height: 40 * 49 / 273 }, svg);
+  txt('SEMI-MODULAR SYNTHESIZER', { x: STRIP + 6, y: yb + 10.4, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 4.2, 'letter-spacing': .9 }, svg);
+  txt('3 VCO · LADDER 24 dB · STATE VARIABLE 12 dB · SPRING REVERB · 1 V/OCT · EURORACK LEVELS', { x: STRIP + 112, y: yb + 10.2, fill: '#9a9a9a', 'font-family': FONT, 'font-weight': 600, 'font-size': 2.3, 'letter-spacing': .4 }, svg);
+  gNorm = el('g', { id: 'normals', 'pointer-events': 'none' }, svg);
+  gCables = el('g', { id: 'cables' }, svg);
+  drawNormals(); renderCables(true);
+}
+function drawSection(s, X, y0, W, p) {
+  const g = el('g', {}, p);
+  el('rect', { x: X + .9, y: y0 + .9, width: W - 1.8, height: TIERH - 1.8, fill: 'none', stroke: '#6a6a6a', 'stroke-width': .35, rx: .6 }, g);
+  el('line', { x1: X + .9, y1: y0 + 8.4, x2: X + W - .9, y2: y0 + 8.4, stroke: '#6a6a6a', 'stroke-width': .3 }, g);
+  el('line', { x1: X + .9, y1: y0 + 90.5, x2: X + W - .9, y2: y0 + 90.5, stroke: '#4a4a4a', 'stroke-width': .3, 'stroke-dasharray': '1 .8' }, g);
+  txt(s.title, { x: X + W / 2, y: y0 + 6.1, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 3.3, 'text-anchor': 'middle', 'letter-spacing': .35 }, g);
+  if (s.led) { const c = el('circle', { cx: X + W - 5, cy: y0 + 4.7, r: 1.5, fill: 'url(#lamp)', opacity: .15 }, g); el('circle', { cx: X + W - 5, cy: y0 + 4.7, r: 1.9, fill: 'none', stroke: '#888', 'stroke-width': .25 }, g); LEDS[s.id] = c; }
+  const gw = s.sl.length * SP + (s.sw ? SWCOL : 0), x0 = X + (W - gw) / 2;
+  s.sl.forEach(([k, label, , sc], i) => drawSlider(s.id + '.' + k, label, sc, x0 + SP * (i + .5), y0, g, s.title));
+  (s.sw || []).forEach(([k, label, opts], i) => drawToggle(s.id + '.' + k, label, opts, x0 + s.sl.length * SP + SWCOL / 2, y0 + (s.sw.length === 1 ? 46 : 34 + 32 * i), g, s.title));
+  const cols = Math.max(s.in.length, s.out.length), pitch = Math.min(15, (W - 2 * PAD) / cols);
+  [[s.in, Y_IN, 'in'], [s.out, Y_OUT, 'out']].forEach(([list, yy, d]) => {
+    const off = X + W / 2 - pitch * list.length / 2;
+    list.forEach(([k, label], c) => drawJack(s.id + '.' + k, label, d, off + pitch * (c + .5), y0 + yy, g, s.title));
+  });
+}
+function drawSlider(key, label, sc, x, y0, p, title) {
+  LAB[key] = title + ' · ' + label;
+  const lt = txt(label, { x, y: y0 + Y_LAB, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle', 'letter-spacing': .15 }, p);
+  if (label.length > 7) { lt.setAttribute('textLength', Math.min(12.6, label.length * 1.35)); lt.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+  const yT = y0 + Y_TOP, yB = yT + TRAVEL;
+  // scale
+  if (Array.isArray(sc)) {
+    sc.forEach((nm, q) => { const yy = yB - TRAVEL * q / (sc.length - 1);
+      el('line', { x1: x - 5.6, y1: yy, x2: x - 4.4, y2: yy, stroke: '#fff', 'stroke-width': .3 }, p);
+      if (nm[0] === '~') waveIcon(nm.slice(1), x - 6.6, yy, p);
+      else txt(nm, { x: x - 6.1, y: yy + .6, fill: '#fff', 'font-family': FONT, 'font-weight': 600, 'font-size': 1.7, 'text-anchor': 'end' }, p); });
+  } else {
+    for (let q = 0; q <= 10; q++) {
+      const yy = yB - TRAVEL * q / 10;
+      el('line', { x1: x - 5.6, y1: yy, x2: x - (q % 5 ? 4.9 : 4.3), y2: yy, stroke: '#fff', 'stroke-width': q % 5 ? .2 : .32 }, p);
+      if (q % 2 === 0) { const n = sc === 'bi' ? q - 5 : sc === 'oct' ? (q - 5) * .6 : q; const s_ = sc === 'oct' ? (q % 5 === 0 ? String((q - 5) * 3 / 5) : '') : (sc === 'bi' && n > 0 ? '+' + n : String(n));
+        if (s_) txt(s_, { x: x - 6.1, y: yy + .55, fill: '#fff', 'font-family': FONT, 'font-weight': 600, 'font-size': 1.6, 'text-anchor': 'end' }, p); }
+    }
+  }
+  const g = el('g', { class: 'sl' }, p);
+  el('rect', { x: x - 5, y: yT - 7, width: 10, height: TRAVEL + 14, fill: 'transparent' }, g);
+  el('rect', { x: x - 1, y: yT - 3.5, width: 2, height: TRAVEL + 7, rx: 1, fill: '#000', stroke: '#3a3a3a', 'stroke-width': .25 }, g);
+  const cap = el('g', {}, g);
+  el('rect', { x: x - 4.5, y: -6.2, width: 9, height: 12.4, rx: 1.1, fill: 'url(#capg)', stroke: '#000', 'stroke-width': .3 }, cap);
+  for (const dy of [-3.6, -2.2, 2.2, 3.6]) el('line', { x1: x - 3.6, y1: dy, x2: x + 3.6, y2: dy, stroke: '#333', 'stroke-width': .35 }, cap);
+  el('line', { x1: x - 4.2, y1: 0, x2: x + 4.2, y2: 0, stroke: '#fff', 'stroke-width': .7 }, cap);
+  SL[key] = { cap, yT, yB };
+  bindSlider(g, key);
+  draw(key);
+}
+function drawToggle(key, label, opts, x, y, p, title) {
+  LAB[key] = title + ' · ' + label;
+  txt(label, { x, y: y - 9.6, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle' }, p);
+  txt(opts[0], { x, y: y - 5.2, fill: '#fff', 'font-family': FONT, 'font-weight': 600, 'font-size': 1.8, 'text-anchor': 'middle' }, p);
+  txt(opts[1], { x, y: y + 7.1, fill: '#fff', 'font-family': FONT, 'font-weight': 600, 'font-size': 1.8, 'text-anchor': 'middle' }, p);
+  const g = el('g', { class: 'sw' }, p);
+  el('rect', { x: x - 5, y: y - 6, width: 10, height: 12, fill: 'transparent' }, g);
+  el('circle', { cx: x, cy: y, r: 2.9, fill: 'url(#nut)', stroke: '#555', 'stroke-width': .2 }, g);
+  el('circle', { cx: x, cy: y, r: 1.4, fill: '#222' }, g);
+  const lev = el('line', { x1: x, y1: y, x2: x, y2: y - 4.2, stroke: '#ddd', 'stroke-width': 1.3, 'stroke-linecap': 'round' }, g);
+  SL[key] = { lev, x, y, toggle: 1 };
+  g.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
+  draw(key);
+}
+function drawJack(key, label, d, x, y, p, title) {
+  LAB[key] = title + ' · ' + (label || 'MULT') + (d === 'out' ? ' (sortie)' : ' (entrée)');
+  if (label) {
+    const w = Math.max(7.5, label.length * 1.15 + 2.2);
+    if (d === 'out') { el('rect', { x: x - w / 2, y: y - 7.6, width: w, height: 2.9, rx: .5, fill: '#e9e9e9' }, p); txt(label, { x, y: y - 5.45, fill: '#111', 'font-family': FONT, 'font-weight': 700, 'font-size': 2, 'text-anchor': 'middle' }, p); }
+    else txt(label, { x, y: y - 5.45, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2, 'text-anchor': 'middle' }, p);
+  } else if (d === 'out') el('rect', { x: x - 3.75, y: y - 7.6, width: 7.5, height: 2.9, rx: .5, fill: '#e9e9e9' }, p);
+  const g = el('g', { class: 'jack' }, p); g.dataset.key = key;
+  el('circle', { cx: x, cy: y, r: 4.6, fill: 'transparent' }, g);
+  el('polygon', { points: [0, 1, 2, 3, 4, 5].map(a => (x + 3.3 * Math.cos(a * Math.PI / 3 + Math.PI / 6)) + ',' + (y + 3.3 * Math.sin(a * Math.PI / 3 + Math.PI / 6))).join(' '), fill: 'url(#nut)', stroke: '#666', 'stroke-width': .2 }, g);
+  el('circle', { cx: x, cy: y, r: 2.0, fill: '#060606', stroke: '#444', 'stroke-width': .2 }, g);
+  JACKS[key] = { x, y, d, g };
+  bindJack(g, key);
+}
+function draw(key) {
+  const S = SL[key]; if (!S) return; const v = PARAMS[key];
+  if (S.toggle) S.lev.setAttribute('y2', S.y + (v ? 4.2 : -4.2));
+  else S.cap.setAttribute('transform', `translate(0 ${S.yB - TRAVEL * v})`);
+}
+// ---------------------------------------------------------------- sliders
+function svgPt(e) { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); }
+function setParam(key, v) { PARAMS[key] = v; draw(key); show(key); send({ t: 'p', k: key, v }); }
+function bindSlider(g, key) {
+  let st = null, lastTap = 0;
+  g.addEventListener('pointerdown', e => {
+    e.preventDefault(); e.stopPropagation(); g.setPointerCapture(e.pointerId);
+    const now = performance.now(); if (now - lastTap < 320) { setParam(key, DEFV[key]); lastTap = 0; st = null; return; } lastTap = now;
+    st = { y: svgPt(e).y, v: PARAMS[key] }; show(key);
+  });
+  g.addEventListener('pointermove', e => { if (!st) return; const v = Math.min(1, Math.max(0, st.v - (svgPt(e).y - st.y) / TRAVEL)); setParam(key, Math.round(v * 1000) / 1000); });
+  const up = () => { st = null; }; g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+}
+// ---------------------------------------------------------------- normals overlay and cables
+function drawNormals() {
+  gNorm.innerHTML = '';
+  for (const [dst, src] of Object.entries(SEMI_DEF.normals)) {
+    if (typeof src !== 'string') continue; const A = JACKS[src], B = JACKS[dst]; if (!A || !B) continue;
+    const plugged = cables.some(c => c.dst === dst);
+    el('path', { d: cablePath(A, B, 3), fill: 'none', stroke: plugged ? '#555' : '#ffae3d', 'stroke-width': .45, 'stroke-dasharray': '1.4 1', opacity: .8 }, gNorm);
+    el('circle', { cx: B.x, cy: B.y, r: .9, fill: plugged ? '#555' : '#ffae3d' }, gNorm);
+  }
+}
+const PAL = ['#c8332b', '#e3b23c', '#2f6fb5', '#2f8f5b', '#e9e2cf', '#d26a1e', '#7a4fa0', '#3fb8b0'];
+let ci = 0;
+function cablePath(a, b, sagMin = 6) {
+  const dx = b.x - a.x, d = Math.hypot(dx, b.y - a.y), sag = sagMin + d * 0.14, lim = PH - 2;
+  return `M${a.x},${a.y} C${a.x + dx * .15},${Math.min(a.y + sag, lim)} ${b.x - dx * .15},${Math.min(b.y + sag, lim)} ${b.x},${b.y}`;
+}
+function cableG(a, b, col, parent) {
+  const g = el('g', {}, parent), d = cablePath(a, b);
+  el('path', { d, fill: 'none', stroke: 'rgba(0,0,0,.45)', 'stroke-width': 2.4, transform: 'translate(.6 1.5)' }, g);
+  el('path', { d, fill: 'none', stroke: col, 'stroke-width': 1.7, 'stroke-linecap': 'round' }, g);
+  el('path', { d, fill: 'none', stroke: 'rgba(255,255,255,.22)', 'stroke-width': .45, transform: 'translate(-.3 -.3)' }, g);
+  for (const p of [a, b]) { el('circle', { cx: p.x, cy: p.y, r: 2.9, fill: col, stroke: '#0a0908', 'stroke-width': .6 }, g); el('circle', { cx: p.x - .7, cy: p.y - .7, r: .9, fill: 'rgba(255,255,255,.35)' }, g); }
+  return g;
+}
+function renderCables(quiet) {
+  gCables.innerHTML = '';
+  for (const c of cables) cableG(JACKS[c.src], JACKS[c.dst], c.col, gCables);
+  drawNormals();
+  if (!quiet) send({ t: 'cables', list: cables.map(c => [c.src, c.dst]) });
+}
+function connect(a, b, col) {
+  if (a === b) return; const A = JACKS[a], B = JACKS[b]; if (!A || !B) return;
+  if (A.d === B.d) { status.textContent = A.d === 'in' ? 'Deux entrées : branche une sortie' : 'Deux sorties : branche une entrée'; return; }
+  if (A.d === 'in') [a, b] = [b, a];
+  cables = cables.filter(c => c.dst !== b);
+  cables.push({ src: a, dst: b, col: col || PAL[ci++ % PAL.length] });
+  status.textContent = LAB[a].replace(' (sortie)', '') + '  →  ' + LAB[b].replace(' (entrée)', '');
+  renderCables();
+}
+let drag = null;
+function bindJack(g, key) {
+  g.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); g.setPointerCapture(e.pointerId); drag = { key, moved: false, x0: e.clientX, y0: e.clientY, col: PAL[ci % PAL.length], tmp: null }; status.textContent = LAB[key]; });
+  g.addEventListener('pointermove', e => {
+    if (!drag) return; if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 6) drag.moved = true; if (!drag.moved) return;
+    if (drag.tmp) drag.tmp.remove(); drag.tmp = cableG(JACKS[drag.key], svgPt(e), drag.col, svg); drag.tmp.setAttribute('opacity', .85); drag.tmp.setAttribute('pointer-events', 'none');
+  });
+  g.addEventListener('pointerup', e => {
+    if (!drag) return; const d = drag; drag = null; if (d.tmp) d.tmp.remove();
+    if (!d.moved) { const n = cables.length; cables = cables.filter(c => c.src !== d.key && c.dst !== d.key); if (cables.length !== n) renderCables(); return; }
+    const t = document.elementFromPoint(e.clientX, e.clientY); let jg = t && t.closest && t.closest('.jack');
+    if (!jg) { const p = svgPt(e); let best = null, bd = 8; for (const k in JACKS) { const J = JACKS[k], dd = Math.hypot(J.x - p.x, J.y - p.y); if (dd < bd) { bd = dd; best = J.g; } } jg = best; }
+    if (jg && jg.dataset.key) { ci++; connect(d.key, jg.dataset.key, d.col); }
+  });
+  g.addEventListener('pointercancel', () => { if (drag && drag.tmp) drag.tmp.remove(); drag = null; });
+}
+// ---------------------------------------------------------------- audio
+let ctx = null, node = null, engine = null, sp = null, audioOn = false;
+function send(d) { if (node) node.port.postMessage(d); else if (engine) engine.msg(d); }
+const fullState = () => ({ t: 'state', params: PARAMS, cables: cables.map(c => [c.src, c.dst]) });
+const scope = $('#scope'), sctx = scope.getContext('2d');
+function onReport(r) {
+  for (const id in r.leds) if (LEDS[id]) LEDS[id].setAttribute('opacity', (0.15 + 0.85 * Math.min(1, r.leds[id])).toFixed(2));
+  if (r.scope && scope.offsetParent) {
+    const W = scope.width, H = scope.height, s = r.scope; sctx.clearRect(0, 0, W, H);
+    sctx.strokeStyle = '#2a2622'; sctx.beginPath(); sctx.moveTo(0, H / 2); sctx.lineTo(W, H / 2); sctx.stroke();
+    let z = 1; while (z < 400 && !(s[z - 1] < 0 && s[z] >= 0)) z++;
+    sctx.strokeStyle = '#ffae3d'; sctx.lineWidth = 2; sctx.beginPath();
+    for (let x = 0; x < W; x++) { const v = s[(z + x * 2) % 1024] || 0, y = H / 2 - v / 10 * (H / 2 - 2); x ? sctx.lineTo(x, y) : sctx.moveTo(x, y); }
+    sctx.stroke();
+  }
+}
+async function startAudio() {
+  if (ctx) { if (ctx.state !== 'running') await ctx.resume(); audioOn = true; $('#pled').classList.add('on'); return; }
+  ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+  try {
+    const url = URL.createObjectURL(new Blob([WORKLET_SRC], { type: 'application/javascript' }));
+    await ctx.audioWorklet.addModule(url);
+    node = new AudioWorkletNode(ctx, 'semi-sim', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
+    node.port.onmessage = e => onReport(e.data); node.connect(ctx.destination); node.port.postMessage(fullState());
+  } catch (err) {
+    node = null; engine = new SemiEngine(ctx.sampleRate); engine.msg(fullState()); engine.report = r => requestAnimationFrame(() => onReport(r));
+    sp = ctx.createScriptProcessor(2048, 0, 2);
+    sp.onaudioprocess = e => engine.render(e.outputBuffer.getChannelData(0), e.outputBuffer.getChannelData(1), e.outputBuffer.length);
+    sp.connect(ctx.destination);
+  }
+  await ctx.resume(); audioOn = true; $('#pled').classList.add('on');
+}
+async function stopAudio() { if (ctx) await ctx.suspend(); audioOn = false; $('#pled').classList.remove('on'); }
+$('#startBtn').onclick = () => { $('#startOv').hidden = true; startAudio(); };
+$('#power').onclick = () => audioOn ? stopAudio() : startAudio();
+$('#bSeq').onclick = () => { PARAMS['kb.seq'] = PARAMS['kb.seq'] ? 0 : 1; send({ t: 'p', k: 'kb.seq', v: PARAMS['kb.seq'] }); $('#sled').classList.toggle('on', !!PARAMS['kb.seq']); };
+$('#bNorm').onclick = () => { const on = svg.classList.toggle('norm'); $('#nled').classList.toggle('on', on); };
+$('#bClear').onclick = () => { cables = []; renderCables(); };
+$('#bReset').onclick = () => { const seq = PARAMS['kb.seq']; PARAMS = Object.assign({}, DEFV, { 'kb.seq': seq }); for (const k in SL) draw(k); send(fullState()); };
+$('#cabOp').onclick = () => svg.classList.toggle('faded');
+$('#help').onclick = () => { $('#helpOv').hidden = false; };
+$('#helpClose').onclick = () => { $('#helpOv').hidden = true; };
+// ---------------------------------------------------------------- keyboard (same as the Eurorack simulator)
+const kbd = $('#kbd'); let kbBase = 48, keyEls = {}; const kbPtr = new Map(), noteCnt = {};
+const elh = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+function buildKbd() {
+  kbd.innerHTML = ''; keyEls = {}; const w = kbd.clientWidth || 300; const nW = clamp(Math.floor(w / 36), 8, 36), kw = w / nW, WS = [0, 2, 4, 5, 7, 9, 11];
+  for (let i = 0; i < nW; i++) {
+    const s = WS[i % 7], n = kbBase + Math.floor(i / 7) * 12 + s; const e = elh('div', 'wk', s === 0 ? `<span>C${Math.floor(n / 12) - 1}</span>` : '');
+    e.style.left = i * kw + 'px'; e.style.width = kw + 'px'; e.dataset.n = n; kbd.appendChild(e); keyEls[n] = e;
+    if ([0, 2, 5, 7, 9].includes(s) && i < nW - 1) { const b = elh('div', 'bk'); b.style.left = (i + 1) * kw - kw * 0.31 + 'px'; b.style.width = kw * 0.62 + 'px'; b.dataset.n = n + 1; kbd.appendChild(b); keyEls[n + 1] = b; }
+  }
+  $('#kOct').textContent = 'C' + (Math.floor(kbBase / 12) - 1);
+  for (const n in noteCnt) if (noteCnt[n] > 0 && keyEls[n]) keyEls[n].classList.add('on');
+}
+let hold = false, physTotal = 0; const phys = {}, latched = new Set();
+function releaseLatched() { for (const l of latched) rawOff(l); latched.clear(); }
+function setHold(on) { hold = on; $('#kHold').classList.toggle('on', on); $('#hled').classList.toggle('on', on); if (!hold) releaseLatched(); }
+$('#kHold').onclick = () => setHold(!hold);
+function showKbd(on) { $('#kbdWrap').hidden = !on; $('#kled').classList.toggle('on', on); if (on) buildKbd(); fit(); }
+$('#kbToggle').onclick = () => showKbd($('#kbdWrap').hidden);
+function noteOn(n) { if (hold && physTotal === 0 && latched.size) releaseLatched(); if (latched.has(n)) { latched.delete(n); rawOff(n); } phys[n] = (phys[n] || 0) + 1; physTotal++; rawOn(n); }
+function noteOff(n) { if (!phys[n]) return; phys[n]--; physTotal--; if (hold) latched.add(n); else rawOff(n); }
+function rawOn(n) { if (!audioOn) { $('#startOv').hidden = true; startAudio(); } noteCnt[n] = (noteCnt[n] || 0) + 1; if (noteCnt[n] === 1) { send({ t: 'note', on: 1, n }); keyEls[n] && keyEls[n].classList.add('on'); } }
+function rawOff(n) { if (!noteCnt[n]) return; noteCnt[n]--; if (noteCnt[n] === 0) { send({ t: 'note', on: 0, n }); keyEls[n] && keyEls[n].classList.remove('on'); } }
+function noteAt(e) { const t = document.elementFromPoint(e.clientX, e.clientY); const k = t && t.closest && t.closest('.wk,.bk'); return k && kbd.contains(k) ? +k.dataset.n : null; }
+kbd.addEventListener('pointerdown', e => { e.preventDefault(); try { kbd.setPointerCapture(e.pointerId); } catch (_) { } const n = noteAt(e); if (n != null) { kbPtr.set(e.pointerId, n); noteOn(n); } });
+kbd.addEventListener('pointermove', e => { if (!kbPtr.has(e.pointerId)) return; const cur = kbPtr.get(e.pointerId), n = noteAt(e); if (n !== cur) { if (cur != null) noteOff(cur); if (n != null) noteOn(n); kbPtr.set(e.pointerId, n); } });
+const kUp = e => { if (!kbPtr.has(e.pointerId)) return; const n = kbPtr.get(e.pointerId); if (n != null) noteOff(n); kbPtr.delete(e.pointerId); };
+kbd.addEventListener('pointerup', kUp); kbd.addEventListener('pointercancel', kUp);
+$('#kUp').onclick = () => { kbBase = Math.min(84, kbBase + 12); buildKbd(); }; $('#kDn').onclick = () => { kbBase = Math.max(24, kbBase - 12); buildKbd(); };
+const KEYMAP = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12, o: 13, l: 14, p: 15 }; const qwHeld = {};
+window.addEventListener('keydown', e => {
+  if (e.repeat || e.metaKey || e.ctrlKey) return; const k = e.key.toLowerCase();
+  if (k === 'z') { kbBase = Math.max(24, kbBase - 12); buildKbd(); return; } if (k === 'x') { kbBase = Math.min(84, kbBase + 12); buildKbd(); return; }
+  if (k in KEYMAP && !qwHeld[k]) { const n = kbBase + 12 + KEYMAP[k]; qwHeld[k] = n; noteOn(n); }
+});
+window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (qwHeld[k] != null) { noteOff(qwHeld[k]); delete qwHeld[k]; } });
+// ---------------------------------------------------------------- zoom : fit the panel width by default
+const wrap = $('#wrap'); let zoom = 1;
+function fit() { const w = Math.max(320, wrap.clientWidth - 56) * zoom; svg.style.width = w + 'px'; svg.style.height = (w * PH / PW) + 'px'; }
+$('#zFit').onclick = () => { zoom = 1; fit(); };
+$('#zIn').onclick = () => { zoom = Math.min(4, zoom * 1.25); fit(); };
+$('#zOut').onclick = () => { zoom = Math.max(.3, zoom / 1.25); fit(); };
+window.addEventListener('resize', () => { fit(); buildKbd(); });
+if (new URLSearchParams(location.search).has('norm')) { svg.classList.add('norm'); $('#nled').classList.add('on'); }
+if (new URLSearchParams(location.search).has('noov')) $('#startOv').hidden = true;
+build(); buildKbd(); fit();
+window.SEMI_SIZE = { PW, PH };
+
+</script>
+</body>
+</html>
