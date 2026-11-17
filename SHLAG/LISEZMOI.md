@@ -1,5 +1,7 @@
 # Octavio S&H / LAG — échantillonneur-bloqueur + lag, Eurorack 8 HP (rev 0.1)
 
+> **17 nov. 2026 – SPICE** : R17 déplacée (100k entre la grille du JFET et l'entrée tamponnée, au lieu de 1M vers le condensateur, qui le vidait). Le S&H tient maintenant ses valeurs. Voir `outils/spice/LISEZMOI.md`.
+
 Tout analogique. Sans aucun câble, il sort déjà des tensions aléatoires : le S&H échantillonne son propre bruit au rythme de sa propre horloge.
 
 ## Façade

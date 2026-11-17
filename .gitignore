@@ -7,3 +7,5 @@ _autosave-*
 ~*
 # fabrication outputs
 production/
+__pycache__/
+*.pyc

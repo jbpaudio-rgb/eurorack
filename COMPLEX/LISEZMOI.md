@@ -1,5 +1,7 @@
 # Octavio COMPLEX — générateur d'onde complexe façon Buchla 259, Eurorack 30 HP (rev 0.3)
 
+> **17 nov. 2026 – SPICE** : les deux cœurs ne démarraient pas (même défaut de remise à zéro que le VCO rev 0.4). Correction du VCO rev 0.5 appliquée aux deux cœurs (R193–R198, C47, C48, D19, D20) et sortie SINE à haute impédance (R88 / R90 470k, R89 / R91 560k). Voir `outils/spice/LISEZMOI.md`.
+
 Architecture reprise du **Buchla 259** (et de sa version Eurorack 259t), avec **notre propre circuit** : cœurs dent de scie de notre VCO 921, OTA LM13700, replieurs à redresseurs de précision. La rev 0.1 (façon Music Easel, 16 HP) est dans l'historique GitHub.
 
 ## Façade (4 zones)

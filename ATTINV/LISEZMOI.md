@@ -1,5 +1,7 @@
 # Octavio ATT / INV — quatre atténuateurs / inverseurs, Eurorack 8 HP (rev 0.1)
 
+> **17 nov. 2026 – SPICE** : diviseur +5 V raidi (R1 1k4, R2 1k au lieu de 14k / 10k) : une entrée vide donne +4,7 V au lieu de +3,6 V. Voir `outils/spice/LISEZMOI.md`.
+
 ## Façade
 - En haut, une rangée par canal (1 à 4) : bouton de niveau, LED bicolore (rouge = sortie positive, vert = négative), inverseur **INV / ATT**.
   - **INV** (levier à gauche) : atténuverteur, de −1 (à gauche) à 0 (au centre) à +1 (à droite).

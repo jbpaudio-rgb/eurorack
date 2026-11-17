@@ -1,0 +1,3 @@
+== AD
+  ONE : crête 9.35 V (visé 9,3 V), attaque 9.8 ms, decay jusqu à 10 % 43.6 ms, repos -0.000 V
+  CYCLE : 120.6 Hz, de 0.18 à 9.36 V

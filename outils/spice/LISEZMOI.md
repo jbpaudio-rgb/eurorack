@@ -34,5 +34,24 @@ Résultat : oscillation propre, 252 Hz à 0 V (FREQUENCY au milieu, avant calibr
 - Gain : −3,5 dB dans la bande passante. Perte de grave avec EMPHASIS : −5 dB à 0,35, −14 dB au maximum (comme sur un Moog). Auto-oscillation vers 0,9.
 - **Mode LP imparfait** : la sortie LP = BP + a·(LP − BP) n'est un vrai 24 dB que si le gain de l'OTA vaut exactement a = 1. Dans SPICE, il reste une fuite de passe-bande à ≈ −18 dB au-dessus de la coupure (creux puis remontée, voir le graphique). Le LP est donc moins sombre que prévu. Pistes : un trimmer pour régler a = 1 en position LP, ou une architecture où chaque sortie (LP, BP, HP) a son propre OTA dont le courant tombe à zéro aux extrémités : un zéro est exact, un gain de 1 ne l'est pas.
 
+## Bancs de test de tous les modules analogiques (`bench.py`)
+`python3 outils/spice/bench.py all` (ou un module : `VCA`, `AD`…) : chaque carte entière, des sources sur les jacks, des mesures. Les résultats sont dans `bench-<MODULE>.txt`. Les pots marqués A sont simulés en courbe logarithmique.
+
+| Module | Résultat SPICE | Corrigé |
+|---|---|---|
+| **VCO** | ne démarrait pas (reset), SINE à ±0,9 V | **oui, rev 0.5** (carte routée refaite) |
+| **COMPLEX** | **les deux cœurs ne démarraient pas** (même reset que le VCO) ; SINE à ±0,9 V | **oui** : même correction sur les deux cœurs (R193–R198, C47, C48, D19, D20) + R88 / R90 470k, R89 / R91 560k. Les deux oscillateurs tournent (≈ 510 Hz et 840 Hz, boutons au milieu) |
+| **S&H / LAG** | **le S&H ne tenait pas** : R17 (1M) entre la grille du JFET et le condensateur de maintien le vidait (≈ 100 V/s) et la grille montait trop lentement pendant l'impulsion | **oui** : R17 = 100k vers l'entrée tamponnée (SHIN_B). Échantillons justes à quelques mV, aucune dérive mesurable en 50 ms |
+| **NOISE TOOLS** | même défaut de S&H (R24) | **oui** : R24 = 100k vers SHIN_B |
+| **ATT / INV** | l'entrée vide donnait +3,6 V au lieu de +5 V (diviseur 14k / 10k trop faible pour 3 entrées) | **oui** : R1 = 1k4, R2 = 1k → +4,7 V |
+| **VCA** | fonctionne : ×1,1 à 5 V, ×1,3 à 10 V (saturation douce), EXP OK, coupure à 0 V. Fuite de CV ≈ 0,9 V trimmer au milieu, **réglable à ≈ 0** avec RV2 (vers 35 % de la course) | réglage seulement |
+| **AD** | fonctionne : crête 9,35 V, attaque / decay comme prévu, CYCLE ≈ 120 Hz réglages rapides | — |
+| **ADSR** | fonctionne : crête 9,7 V, sustain suit le bouton, relance correcte sur des gates de 20 ms | — |
+| **MIX** | fonctionne : gain 1, −OUT inversé, saturation douce au MASTER | — |
+| **RING MOD** | fonctionne : vrai produit (bandes 850 / 1150 Hz), fuite de X −23 dB et de Y −44 dB trimmers au milieu (à régler), Y vide = VCA | réglage seulement |
+| **SPRING REVERB** | driver : jusqu'à ≈ 6,5 mA dans la cuve. Avec un modèle de cuve estimé (sortie ≈ 0,6 V/A), WET ≈ 17 dB sous le sec à DRIVE maximum | **à vérifier avec la vraie cuve** : si le retour est trop faible, augmenter le gain de U3B |
+| bruit (NOISE TOOLS, S&H / LAG) | non simulable : SPICE ne modélise pas l'avalanche base-émetteur | — |
+| STAGES, LFOs | numériques (RP2040) : rien à simuler ici | — |
+
 ### Simulateurs
 Le simulateur SEMI a été recalé sur ces résultats : rampe droite et sans filtrage, plage du ladder 20 Hz → 13 kHz, courbe d'EMPHASIS et gain de −3,5 dB mesurés. Il garde volontairement le LP « idéal » (24 dB), c'est-à-dire le son visé une fois le mode corrigé.

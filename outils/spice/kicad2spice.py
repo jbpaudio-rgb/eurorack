@@ -19,6 +19,34 @@ MODELS = r"""
 .model DSS14 D(IS=1e-6 N=1.1 RS=0.05 CJO=100p BV=40)
 .model DZ5V1 D(IS=1e-14 N=1 RS=10 BV=5.1 IBV=1m CJO=50p)
 .model DLIN D(IS=1e-14 N=1)
+.model DSCH D(IS=2e-7 N=1.0 RS=2 CJO=10p BV=30)
+.model BC857 PNP(IS=1.02E-14 NF=0.9932 BF=327 IKF=0.08 VAF=39 NR=0.995 ISE=6.9E-15 NE=1.4 BR=10 IKR=0.08 VAR=10 RB=10 RE=0.6 RC=0.8
++ CJE=1.23E-11 VJE=0.75 MJE=0.36 TF=6.1E-10 CJC=4.6E-12 VJC=0.6 MJC=0.45 TR=1E-08)
+.model SW4066 SW(VT=6 VH=0.5 RON=150 ROFF=1e10)
+* CD4013 (one D flip-flop, 12 V logic) : XSPICE digital model between analog bridges
+.model ab4013 adc_bridge(in_low=4 in_high=8)
+.model db4013 dac_bridge(out_low=0 out_high=12 out_undef=6 t_rise=60n t_fall=60n)
+.model ff4013 d_dff(clk_delay=150n set_delay=150n reset_delay=150n ic=0 rise_delay=60n fall_delay=60n)
+.subckt FF4013 d clk s r q qn
+Aa [d clk s r] [dd dc ds dr] ab4013
+Af dd dc ds dr dq dqn ff4013
+Ab [dq dqn] [q qn] db4013
+.ends
+* MC1496 : Gilbert cell (datasheet schematic : Q1-Q4 carrier quad, Q5-Q6 signal pair, Q7-Q8 + diode = current mirror from pin 5)
+.subckt MC1496 sigp sigm carp carm gadj1 gadj2 bias outp outm vm
+Q1 outp carp e12 BC847
+Q2 outm carm e12 BC847
+Q3 outp carm e34 BC847
+Q4 outm carp e34 BC847
+Q5 e12 sigp gadj1 BC847
+Q6 e34 sigm gadj2 BC847
+Qd bias bias md BC847
+Rd md vm 500
+Q7 gadj1 bias m7 BC847
+R7 m7 vm 500
+Q8 gadj2 bias m8 BC847
+R8 m8 vm 500
+.ends
 * TL07x : JFET op-amp, 3 MHz GBW, 13 V/us, output ~1.5 V from the rails, 50 ohm out
 .subckt TL07X inp inn out vp vn
 Rin inp inn 1e12
@@ -99,9 +127,10 @@ def netlist(parts, cfg):
             L.append(f"D{ref} {g('2')} {g('1')} {m}")
         elif t == 'NPN':
             if 'J11' in v: L.append(f"J{ref} {g('1')} {g('3')} {g('2')} J112")
-            else: L.append(f"Q{ref} {g('3')} {g('1')} {g('2')} BC847")
+            else: L.append(f"Q{ref} {g('3')} {g('1')} {g('2')} {'BC857' if '857' in v else 'BC847'}")
         elif t == 'DUALNPN':
-            L.append(f"Q{ref}a {g('6')} {g('2')} {g('1')} BC847"); L.append(f"Q{ref}b {g('3')} {g('5')} {g('4')} BC847")
+            m = 'BC857' if '857' in v else 'BC847'                     # BCM857DS (PNP pair) drawn with the dual-transistor symbol
+            L.append(f"Q{ref}a {g('6')} {g('2')} {g('1')} {m}"); L.append(f"Q{ref}b {g('3')} {g('5')} {g('4')} {m}")
         elif t in ('TL074', 'TL072'):
             units = [('3', '2', '1'), ('5', '6', '7')] + ([('10', '9', '8'), ('12', '13', '14')] if t == 'TL074' else [])
             vp, vn = (g('4'), g('11')) if t == 'TL074' else (g('8'), g('4'))
@@ -112,6 +141,7 @@ def netlist(parts, cfg):
                 L.append(f"X{ref}{k + 1} {g(a)} {g(b)} {g(c)} {g(d)} {g(bi)} {g(bo)} {g(o)} {g('11')} {g('6')} LM13700H")
         elif t in ('POT', 'TRIM'):
             R = val(v); x = min(max(pots.get(ref, 0.5), 0.001), 0.999)
+            if re.search(r'\bA\b', v): x = min(max((100 ** x - 1) / 99, 0.0005), 0.999)   # audio (log) taper : 10 % at mid-travel
             L.append(f"R{ref}a {g('1')} {g('2')} {R * x:.6g}"); L.append(f"R{ref}b {g('2')} {g('3')} {R * (1 - x):.6g}")
         elif t == 'JACK':
             if ref in drive: L.append(f"V{ref} {g('T')} 0 {drive[ref]}")
@@ -119,6 +149,22 @@ def netlist(parts, cfg):
             L.append(f"R{ref}load {g('T')} 0 100k")
         elif t == 'SPDT': L.append(f"R{ref}sw {g('2')} {g(spdt.get(ref, '1'))} 0.01")
         elif t == 'ROT12': L.append(f"R{ref}sw {g('C')} {g(rot.get(ref, '1'))} 0.01")
+        elif t == 'CD4013':
+            L.append(f"X{ref}A {g('5')} {g('3')} {g('6')} {g('4')} {g('1')} {g('2')} FF4013")
+            L.append(f"X{ref}B {g('9')} {g('11')} {g('8')} {g('10')} {g('13')} {g('12')} FF4013")
+        elif t == 'CD4066':
+            for a, b, c in (('1', '2', '13'), ('4', '3', '5'), ('8', '9', '6'), ('11', '10', '12')):
+                L.append(f"S{ref}{a} {g(a)} {g(b)} {g(c)} {g('7')} SW4066")
+        elif t == 'BAT54S':
+            L.append(f"D{ref}a {g('1')} {g('3')} DSCH"); L.append(f"D{ref}b {g('3')} {g('2')} DSCH")
+        elif t == 'MC1496':
+            L.append(f"X{ref} {g('1')} {g('4')} {g('8')} {g('10')} {g('2')} {g('3')} {g('5')} {g('6')} {g('12')} {g('14')} MC1496")
+        elif t == 'DUALPNP':
+            L.append(f"Q{ref}a {g('6')} {g('2')} {g('1')} BC857"); L.append(f"Q{ref}b {g('3')} {g('5')} {g('4')} BC857")
+        elif t == 'CONN2':
+            sp = cfg.get('conn', {}).get(ref)
+            if sp: L.append(sp.replace('P1', g('1')).replace('P2', g('2')))
+            else: L.append(f"* {ref} ({v}) left open")
         elif t == 'EURO10':
             # supplies ramp up in 1 ms from 0 V (start the simulation with "uic") : like a real power-on, oscillators start by themselves
             L.append(f"V{ref}m {g('1')} 0 PWL(0 0 1m -12)"); L.append(f"V{ref}p {g('10')} 0 PWL(0 0 1m 12)")

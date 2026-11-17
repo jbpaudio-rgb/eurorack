@@ -1,0 +1,3 @@
+== ADSR
+  gate 300 ms : crête 9.73 V à 53.8 ms (visé 10 V), sustain 6.02 V (bouton au milieu → visé 5 V), release à 10 % en nan ms, fin 0.92 V, −OUT min -9.73 V
+  4 gates de 20 ms : crêtes 9.73, 9.73, 9.73, 9.73 V (doivent toutes atteindre ≈ 10 V)

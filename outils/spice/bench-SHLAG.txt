@@ -1,0 +1,4 @@
+== SHLAG
+  CLOCK : 16.2 Hz, de -1.48 à 10.25 V
+  S&H (entrée = sinus 3 Hz) : 106 paliers, de -4.80 à 4.92 V ; GATE de -1.48 à 10.26 V ; LAG de -4.80 à 4.93 V
+  NOISE moyen 1.78 V (polarisation, doit être ≈ 0 V)

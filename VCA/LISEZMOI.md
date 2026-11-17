@@ -1,5 +1,7 @@
 # Octavio 902 VCA — Eurorack 6 HP (rev 0.7)
 
+> **17 nov. 2026 – SPICE** : fonctionne. Régler RV2 (CV REJECT) est indispensable : fuite de CV ≈ 0,9 V au milieu, ≈ 0 vers 35 % de la course.
+
 VCA différentiel inspiré du Moog 902, adapté au ±12 V Eurorack.
 
 ## Contenu
