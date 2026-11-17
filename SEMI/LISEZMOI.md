@@ -14,21 +14,23 @@ Grand panneau semi-modulaire dans l'esprit des gros semi-modulaires des années 
 
 | | |
 |---|---|
-| Panneau | **461 × 387 mm** (3 rangées de 122 mm + bande logo de 17 mm, bandes argent de 8 mm) |
+| Panneau | **659 × 265 mm** (2 rangées de 122 mm + bande logo de 17 mm, bandes argent de 8 mm) |
 | Sliders | 62 sliders, course **60 mm**, pas de 15 mm, capuchon 9 × 12,4 mm (ex. Bourns PTA6043, série PTA 60 mm, à confirmer chez JLCPCB) |
 | Jacks | 81 Thonkiconn 3,5 mm à contact de coupure (normalisations) |
 | Inverseurs | 7 (RANGE ×3, SYNC, KBD, TIME ×2), mêmes Dailywell 2MS1 que les modules |
 
-Si 60 mm ne plaît pas : passer à 45 mm (PTA4543) = changer `TRAVEL` et `SP` dans `source/app.js`, le panneau perd environ 15 mm par rangée.
+Si 60 mm ne plaît pas : passer à 45 mm (PTA4543) = changer `TRAVEL` et `SP` dans `source/app.js`, le panneau perd environ 15 mm par rangée (≈ 235 mm de haut).
 
 ## Sections
 
-**Rangée 1 – SOURCES**
+Disposition sur 2 rangées (dans l'ordre du signal) : en haut OSC 1–3, RING MOD, NOISE · S&H · LAG, AUDIO MIXER, LADDER FILTER ; en bas STATE VARIABLE, AMPLIFIER, SPRING REVERB, OUTPUT, KEYBOARD, ENVELOPE 1–2, LFO 1–2, ATTENUVERTERS, MULTIPLE. L'ordre se change dans `rows` de `source/def.js`.
+
+**Sources**
 - **OSCILLATOR 1, 2, 3** (cœur 921 du VCO) : COARSE ±3 oct, FINE ±6 demi-tons, WIDTH, FM, PWM, RANGE AUDIO/LO. OSC 2 : SYNC (sur OSC 1). OSC 3 : STABILITY (dérive lente façon années 70) et KBD ON/OFF. Sorties SINE, TRI, SAW, PULSE.
 - **RING MOD** (MC1496 du module RING MOD) : X LEVEL, Y LEVEL.
 - **NOISE · S&H · LAG** (module S&H / LAG + bruit rose de NOISE TOOLS) : COLOR blanc → rose, CLOCK, RISE, FALL.
 
-**Rangée 2 – FILTERS & AMPLIFIER**
+**Filtres et amplificateur**
 - **AUDIO MIXER** : 5 sliders (OSC 1, OSC 2, OSC 3, NOISE, RING), alimente les deux filtres en parallèle.
 - **LADDER FILTER 24 dB** (module VCF) : FREQUENCY, EMPHASIS, MODE LP → BP → HP, KBD, ENV, MOD.
 - **STATE VARIABLE 12 dB** (nouveau) : FREQUENCY, RESONANCE, MODE LP → BP → HP → NOTCH, ENV, MOD.
@@ -36,7 +38,7 @@ Si 60 mm ne plaît pas : passer à 45 mm (PTA4543) = changer `TRAVEL` et `SP` da
 - **SPRING REVERB** (module SPRING REVERB) : DRIVE, TONE, MIX.
 - **OUTPUT** : VOLUME, sorties MAIN (niveau Eurorack) et PHONES.
 
-**Rangée 3 – CONTROL**
+**Contrôle**
 - **KEYBOARD** : GLIDE ; sorties CV, GATE, TRIG ; entrées CV IN et GATE IN (un séquenceur Eurorack prend la place du clavier).
 - **ENVELOPE 1 et 2** (911 du module ADSR) : ATTACK, DECAY, SUSTAIN, RELEASE, TIME FAST/SLOW (condensateur ×25, jusqu'à ~2 min), LED, sorties OUT et −OUT.
 - **LFO 1 et 2** : RATE (0,02 à 50 Hz), WAVE en fondu continu RAMPE ↑ → TRI → RAMPE ↓ → CARRÉ, entrée RATE CV (1 V/oct), sorties OUT et TRIG, LED.
@@ -68,4 +70,4 @@ Sur la façade, le nom de la source est imprimé en gris sous chaque entrée nor
 
 1. Valider la disposition et la course des sliders dans le simulateur.
 2. Schéma du filtre à variable d'état (seul circuit audio nouveau) et des 2 LFO.
-3. Découper la fabrication par rangée : une carte + une façade par rangée (461 × 122 mm), reliées par nappes, alimentation ±12 V commune. Commencer par la rangée SOURCES (3 VCO).
+3. Découper la fabrication : chaque rangée fait ≈ 643 mm, donc 2 ou 3 cartes + façades par rangée (ex. les 3 VCO ensemble, ≈ 312 mm), reliées par nappes, alimentation ±12 V commune. Commencer par le bloc des 3 VCO.

@@ -8,8 +8,10 @@ const SP = 15, SWCOL = 14, PAD = 5, JP = 12.5, STRIP = 8, TOP = 4, TIERH = 122, 
 const Y_LAB = 12.8, Y_TOP = 21.5, Y_IN = 99, Y_OUT = 114;           // slider label, cap centre at value 1 (value 0 = Y_TOP + 60)
 const FONT = "'Barlow Condensed','Arial Narrow',sans-serif";
 const secW = s => { const g = s.sl.length * SP + (s.sw ? SWCOL : 0); const cols = Math.max(s.in.length, s.out.length); return 2 * PAD + Math.max(g, cols * JP); };
-const tierW = SEMI_DEF.tiers.map(t => t.secs.reduce((a, s) => a + secW(s), 0));
-const INW = Math.ceil(Math.max(...tierW)), PW = INW + 2 * STRIP, PH = TOP + 3 * TIERH + BOT;
+const SECS0 = {}; SEMI_DEF.tiers.forEach(t => t.secs.forEach(s => SECS0[s.id] = s));
+const ROWS = SEMI_DEF.rows.map(r => r.map(id => SECS0[id])), NROW = ROWS.length;
+const tierW = ROWS.map(r => r.reduce((a, s) => a + secW(s), 0));
+const INW = Math.ceil(Math.max(...tierW)), PW = INW + 2 * STRIP, PH = TOP + NROW * TIERH + BOT;
 const svg = $('#panel');
 let PARAMS = {}, DEFV = {}, SL = {}, JACKS = {}, LAB = {}, LEDS = {}, cables = [];
 const SECS = {}; SEMI_DEF.tiers.forEach(t => t.secs.forEach(s => SECS[s.id] = s));
@@ -55,12 +57,12 @@ function build() {
   el('rect', { x: PW - STRIP, y: 0, width: STRIP, height: PH, fill: 'url(#alu)' }, svg);
   for (const x of [STRIP / 2, PW - STRIP / 2]) for (const y of [8, PH / 2, PH - 8]) { el('circle', { cx: x, cy: y, r: 1.6, fill: 'url(#screw)', stroke: '#555', 'stroke-width': .2 }, svg); el('line', { x1: x - 1.1, y1: y, x2: x + 1.1, y2: y, stroke: '#4a4740', 'stroke-width': .35 }, svg); }
   const gP = el('g', {}, svg);
-  SEMI_DEF.tiers.forEach((tier, ti) => {
-    const y0 = TOP + ti * TIERH, extra = (INW - tierW[ti]) / tier.secs.length; let x = STRIP;
-    for (const s of tier.secs) { const w = secW(s) + extra; drawSection(s, x, y0, w, gP); x += w; }
+  ROWS.forEach((secs, ti) => {
+    const y0 = TOP + ti * TIERH, extra = (INW - tierW[ti]) / secs.length; let x = STRIP;
+    for (const s of secs) { const w = secW(s) + extra; drawSection(s, x, y0, w, gP); x += w; }
   });
   // bottom strip : logo + name
-  const yb = TOP + 3 * TIERH;
+  const yb = TOP + NROW * TIERH;
   el('line', { x1: STRIP + 1, y1: yb + 1, x2: PW - STRIP - 1, y2: yb + 1, stroke: '#5d5d5d', 'stroke-width': .35 }, svg);
   el('image', { href: LOGO, x: PW - STRIP - 6 - 40, y: yb + 4.5, width: 40, height: 40 * 49 / 273 }, svg);
   txt('SEMI-MODULAR SYNTHESIZER', { x: STRIP + 6, y: yb + 10.4, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 4.2, 'letter-spacing': .9 }, svg);

@@ -19,7 +19,7 @@ Modules Eurorack inspirés du Moog modulaire (façades alu noir, lettrage blanc,
 | SPRINGREVERB | Réverbe à ressort, 10 HP (rev 0.1), pour cuve Accutronics 4FB3C1B : DRIVE avec LED PEAK, TONE, MIX commandé en tension (MIX CV avec atténuateur, fondu par 2 OTA LM13700), boucle SEND / RETURN, sortie WET | schéma + façade prêts ; carte placée, à router |
 | SHLAG | S&H / LAG, 8 HP (rev 0.1), analogique : S&H / T&H avec bruit et horloge RATE internes (normalisés), sorties NOISE, CLOCK, GATE aléatoire, LAG à RISE et FALL séparés (entrée = S&H par défaut) | schéma + façade prêts ; carte placée, à router |
 | RINGMOD | Modulateur en anneau, 8 HP (rev 0.1), MC1496 couplé en continu : niveaux X et Y (Y haut = son plus dur), MIX DRY → RING, sorties RING et OUT, Y vide = +5 V (devient un VCA) | schéma + façade prêts ; carte placée, à router |
-| SEMI | Grand semi-modulaire (prototype), 461 × 387 mm : 3 OSC, ring mod, bruit / S&H / lag, mixeur 5 entrées, filtre ladder 24 dB + filtre à variable d'état 12 dB, amplificateur, réverbe à ressort, 2 enveloppes FAST/SLOW, 2 LFO ; 62 sliders 60 mm, jacks 3,5 mm normalisés aux niveaux Eurorack | façade + simulateur jouable (`SEMI/index.html`) |
+| SEMI | Grand semi-modulaire (prototype), 659 × 265 mm sur 2 rangées : 3 OSC, ring mod, bruit / S&H / lag, mixeur 5 entrées, filtre ladder 24 dB + filtre à variable d'état 12 dB, amplificateur, réverbe à ressort, 2 enveloppes FAST/SLOW, 2 LFO ; 62 sliders 60 mm, jacks 3,5 mm normalisés aux niveaux Eurorack | façade + simulateur jouable (`SEMI/index.html`) |
 
 Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), jacks Thonkiconn, pots 9 mm, façades PCB aluminium 1,6 mm (vernis noir, sérigraphie blanche, HASL sans plomb), montage JLCPCB.
 
