@@ -1,0 +1,38 @@
+Comment,Designator,Footprint,LCSC Part #,Notes
+10u 25V X5R/X7R 1206,"C1,C2,C8",C_1206_3216Metric,,X5R/X7R 1206 - SMT bottom - laisser JLC choisir (Basic de preference)
+4n7 C0G C0G/NP0 0603,C10,C_0603_1608Metric,,C0G/NP0 0603 - SMT bottom - laisser JLC choisir (Basic de preference)
+1u X7R 0603 25 V,"C3,C9",C_0603_1608Metric,,X7R 0603 25 V - SMT bottom - laisser JLC choisir (Basic de preference)
+22p C0G C0G/NP0 0603,"C4,C13",C_0603_1608Metric,,C0G/NP0 0603 - SMT bottom - laisser JLC choisir (Basic de preference)
+100n,"C5,C6,C11,C12,C14,C15,C16,C17",C_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100p C0G C0G/NP0 0603,C7,C_0603_1608Metric,,C0G/NP0 0603 - SMT bottom - laisser JLC choisir (Basic de preference)
+SS14,"D1,D2",D_SMA,,SS14 (40 V 1 A Schottky) - SMT bottom - laisser JLC choisir (Basic de preference)
+LED,D10,LED_D3.0mm,,LED 3 mm rouge (PEAK : s'allume quand les ressorts sont bien attaqués) - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+Eurorack 2x5,J1,IDC-Header_2x05_P2.54mm_Vertical,,Shrouded header 2x5 2.54 mm - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+TANK IN,J10,JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical,,JST PH 2 broches (câble blindé vers la fiche RCA IN de la cuve) - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+TANK OUT,J11,JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical,,JST PH 2 broches (câble blindé vers la fiche RCA OUT de la cuve) - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+IN,J2,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+SEND,J3,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+RETURN,J4,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+MIX CV,J5,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+WET,J6,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+OUT,J7,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+"BCM857DS,115",Q1,SOT-457,,"BCM857DS,115 (Nexperia, paire PNP appairée) - SMT bottom - laisser JLC choisir (Basic de preference)"
+100k 1% 0805,"R1,R2,R9,R15,R16,R18",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+10k 1% 0805,R11,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1M 1% 0805,R13,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+56k 1% 0805,R21,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+220k 1% 0805,"R22,R25",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+470R 1% 0805,"R23,R24,R26,R27",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+120k 1% 0805,R28,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+22k 1% 0805,"R3,R12",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+4k7 1% 0805,R4,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k 1% 0805,"R5,R10,R14,R29",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+2k2 1% 0805,"R6,R19,R20",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+47R 1% 0805,R7,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+47k 1% 0805,"R8,R17",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100k A,RV1,Pot_Alpha_9mm_Vertical,,"POT-R09V-100K A (9 mm vertical, log) - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+100k B,"RV2,RV4",Pot_Alpha_9mm_Vertical,C9900018037,"POT-R09V-100K (9 mm vertical, B100k) - THT (wave soldering)"
+10k B,RV3,Pot_Alpha_9mm_Vertical,,POT-R09V-10K B (9 mm vertical) - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+TL074CDR,"U1,U2",SOIC-14_3.9x8.7mm_P1.27mm,C12594,TL074CDR - SMT bottom
+NE5532DR,U3,SOIC-8_3.9x4.9mm_P1.27mm,,"NE5532DR (double ampli bas bruit, sortie 30 mA) - SMT bottom - laisser JLC choisir (Basic de preference)"
+LM13700MX/NOPB,U4,SOIC-16_3.9x9.9mm_P1.27mm,,LM13700MX/NOPB - SMT bottom - laisser JLC choisir (Basic de preference)

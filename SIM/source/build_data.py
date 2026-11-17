@@ -123,6 +123,25 @@ MY = [15.5 + i * 13.29 for i in range(8)]
 ctl = [J('a', 10.01, MY[0], 'in'), J('a2', 10.01, MY[1], 'out'), J('a3', 10.01, MY[2], 'out'), J('a4', 10.01, MY[3], 'out'),
        J('b', 10.01, MY[4], 'in'), J('b2', 10.01, MY[5], 'out'), J('b3', 10.01, MY[6], 'out'), J('b4', 10.01, MY[7], 'out')]
 M.append(dict(id='mult', name='MULT', w=20.02, **p, ctl=ctl))
+p = panel(W + 'sh/panel.json', W + 'out/SHLAG/panel/octavio-shlag-panel.kicad_pcb')
+ctl = [K('rate', 12.0, 22.0, 0.8, 0.5, 'RATE'), dict(t='led', id='lc', x=30.2, y=12.6),
+       dict(t='toggle', id='shmode', label='S&H / T&H', x=30.2, y=27.4, v=0, vert=1, opts=['S&H', 'T&H']),
+       K('rise', 11.0, 52.5, 0.8, 0.3, 'RISE'), K('fall', 29.3, 52.5, 0.8, 0.3, 'FALL'), dict(t='led', id='ll', x=20.15, y=45.6),
+       J('shin', 10.1, 76.5, 'in'), J('trig', 30.2, 76.5, 'in'), J('noise', 10.1, 87.5, 'out'), J('clock', 30.2, 87.5, 'out'),
+       J('sh', 10.1, 98.5, 'out'), J('gate', 30.2, 98.5, 'out'), J('lagin', 10.1, 109.5, 'in'), J('lag', 30.2, 109.5, 'out')]
+M.append(dict(id='shl', name='S&H / LAG', w=40.3, **p, ctl=ctl))
+p = panel(W + 'ring/panel.json', W + 'out/RINGMOD/panel/octavio-ringmod-panel.kicad_pcb')
+ctl = [K('xl', 11.0, 22.0, 0.8, 0.7, 'X LEVEL'), K('yl', 29.3, 22.0, 0.8, 0.7, 'Y LEVEL'), K('mix', 20.15, 54.0, 0.8, 1.0, 'MIX'),
+       dict(t='led', id='led', x=33.2, y=66.0),
+       J('x', 10.1, 95.5, 'in'), J('y', 30.2, 95.5, 'in'), J('ring', 10.1, 109.5, 'out'), J('out', 30.2, 109.5, 'out')]
+p['text'] = [[t, x, y, 2.3 if t == 'RING MOD' else sz] for (t, x, y, sz) in p['text']]
+M.append(dict(id='ring', name='RING MOD', w=40.3, **p, ctl=ctl))
+p = panel(W + 'rev/panel.json', W + 'out/SPRINGREVERB/panel/octavio-springreverb-panel.kicad_pcb')
+ctl = [K('drive', 12.6, 22.0, 0.8, 0.5, 'DRIVE'), K('tone', 37.9, 22.0, 0.8, 0.5, 'TONE'), dict(t='led', id='led', x=25.25, y=21.0),
+       K('mix', 12.6, 53.0, 0.8, 0.35, 'MIX'), K('cv', 37.9, 53.0, 0.8, 0.0, 'MIX CV'),
+       J('in', 9.0, 95.5, 'in'), J('send', 25.25, 95.5, 'out'), J('ret', 41.5, 95.5, 'in'),
+       J('mixcv', 9.0, 109.5, 'in'), J('wet', 25.25, 109.5, 'out'), J('out', 41.5, 109.5, 'out')]
+M.append(dict(id='rev', name='SPRING REVERB', w=50.5, **p, ctl=ctl))
 # simulator utility panel (not a real module)
 SW = 40.3   # 8 HP
 holes = [[7.5, 3.0, 3.2, [5.2, 3.2]], [7.5, 125.5, 3.2, [5.2, 3.2]], [7.5 + 5 * 5.08, 3.0, 3.2, [5.2, 3.2]], [7.5 + 5 * 5.08, 125.5, 3.2, [5.2, 3.2]]]
@@ -135,7 +154,8 @@ M.append(dict(id='sim', name='SIM', w=SW, holes=holes, logo=[SW / 2 - 8, 119.859
          J('cv', 10.1, 83.0, 'out'), J('gate', 30.2, 83.0, 'out'), J('audio', 10.1, 103.0, 'in'), J('scope', 30.2, 103.0, 'in')]))
 # ---- default rack : two rows of 104 HP, every module, 3 VCO, 2 AD, 1 ADSR
 LAYOUT = [['vco', 'vco2', 'vco3', 'mix', 'vcf', 'vca', 'ad', 'adsr', 'att', 'mult', 'sim', 'mix2'],
-          ['cx', 'stg', 'lfo', 'nt', 'vcf2', 'vca2', 'ad2']]
+          ['cx', 'stg', 'lfo', 'nt', 'vcf2', 'vca2', 'ad2'],
+          ['rev', 'shl', 'ring']]
 PATCH = [
     # voice 1 : keyboard / SIM sequence -> 3 VCO (8', detuned 8', sub 16') -> MIX -> VCF -> VCA (ADSR)
     ['sim', 'cv', 'vco', 'voct'], ['sim', 'cv', 'vco2', 'voct'], ['sim', 'cv', 'vco3', 'voct'],
@@ -153,16 +173,20 @@ PATCH = [
     ['nt', 'slew', 'vcf2', 'fcv'], ['nt', 'sh', 'att', 'in1'], ['att', 'o1', 'cx', 'ordercv'],
     # master : MIX 2 -> speaker + scope
     ['vca', 'outp', 'mix2', 'in1'], ['vca2', 'outp', 'mix2', 'in2'], ['nt', 'pink', 'mix2', 'in3'],
-    ['mix2', 'out', 'sim', 'audio'], ['mix2', 'out', 'sim', 'scope']]
+    # new modules : ring mod into MIX 4, random LAG on the reverb amount, MIX 2 -> SPRING REVERB -> speaker
+    ['vco2', 'tri', 'ring', 'x'], ['vco3', 'sine', 'ring', 'y'], ['ring', 'ring', 'mix', 'in4'],
+    ['shl', 'lag', 'rev', 'mixcv'],
+    ['mix2', 'out', 'rev', 'in'], ['rev', 'out', 'sim', 'audio'], ['rev', 'out', 'sim', 'scope']]
 PARAMS = {'vco.range': 3, 'vco2.range': 3, 'vco2.fine': 0.53, 'vco2.width': 0.3, 'vco3.range': 2, 'vco.pwm': 0.3, 'vco2.pwm': 0.25,
-          'mix.l1': 0.55, 'mix.l2': 0.45, 'mix.l3': 0.6, 'mix.l4': 0.0,
+          'mix.l1': 0.55, 'mix.l2': 0.45, 'mix.l3': 0.6,
           'vcf.freq': 0.38, 'vcf.emph': 0.5, 'vcf.contour': 0.55, 'vcf.fcv': 0.25, 'vcf.ecv': 0.2,
           'vcf2.freq': 0.45, 'vcf2.emph': 0.35, 'vcf2.contour': 0.5, 'vcf2.fcv': 0.3, 'vcf2.mode': 0.25,
           'vca2.cvlevel': 0.7, 'ad2.attack': 0.05, 'ad2.decay': 0.45,
           'mix2.l1': 0.6, 'mix2.l2': 0.5, 'mix2.l3': 0.06, 'mix2.l4': 0.0,
           'lfo.s1': 0, 'lfo.s2': 0, 'lfo.s3': 0, 'lfo.s4': 0, 'lfo.f1': 0.5, 'lfo.f2': 0.2, 'lfo.f3': 0.7, 'lfo.f4': 0.1,
           'lfo.w1': 0.0, 'lfo.w2': 0.25, 'lfo.w3': 0.5, 'lfo.w4': 0.0,
-          'att.s1': 1, 'att.a1': 0.8, 'att.s2': 0, 'att.a2': 0.65, 'nt.rate': 0.45, 'nt.slew': 0.55}
+          'att.s1': 1, 'att.a1': 0.8, 'att.s2': 0, 'att.a2': 0.65, 'nt.rate': 0.45, 'nt.slew': 0.55,
+          'mix.l4': 0.25, 'rev.mix': 0.42, 'rev.cv': 0.25, 'rev.drive': 0.55, 'rev.tone': 0.55, 'shl.rate': 0.3, 'shl.rise': 0.55, 'shl.fall': 0.6}
 logo = 'data:image/png;base64,' + base64.b64encode(open(W + 'logo_white.png', 'rb').read()).decode()
 json.dump(dict(modules=M, patch=PATCH, layout=LAYOUT, params=PARAMS, logo=logo), open(W + 'sim/data.json', 'w'))
 print([ (m['id'], len(m['lines']), len(m['text'])) for m in M])

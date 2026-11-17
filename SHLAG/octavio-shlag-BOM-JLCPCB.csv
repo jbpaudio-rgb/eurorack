@@ -1,0 +1,37 @@
+Comment,Designator,Footprint,LCSC Part #,Notes
+10u 25V X5R/X7R 1206,"C1,C2,C4",C_1206_3216Metric,,X5R/X7R 1206 - SMT bottom - laisser JLC choisir (Basic de preference)
+2u2 X7R 1206 25 V,C10,C_1206_3216Metric,,X7R 1206 25 V - SMT bottom - laisser JLC choisir (Basic de preference)
+1u X7R 0603 25 V,C3,C_0603_1608Metric,,X7R 0603 25 V - SMT bottom - laisser JLC choisir (Basic de preference)
+22p,C5,C_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+47n C0G C0G/NP0 0805,C6,C_0805_2012Metric,,C0G/NP0 0805 - SMT bottom - laisser JLC choisir (Basic de preference)
+100n,"C7,C11,C12,C13,C14,C15,C16",C_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1n C0G C0G/NP0 0603,C8,C_0603_1608Metric,,C0G/NP0 0603 - SMT bottom - laisser JLC choisir (Basic de preference)
+100n C0G C0G/NP0 1206,C9,C_1206_3216Metric,,"C0G/NP0 1206 (condensateur de maintien, très faible fuite) - SMT bottom - laisser JLC choisir (Basic de preference)"
+SS14,"D1,D2",D_SMA,,SS14 (40 V 1 A Schottky) - SMT bottom - laisser JLC choisir (Basic de preference)
+LED,D10,LED_D3.0mm,,LED 3 mm ambre (CLOCK) - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+LED,D11,LED_D3.0mm,,"LED 3 mm rouge (LAG, positif) - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+1N4148W,"D3,D4,D5,D6,D7,D8,D9,D10",D_SOD-123,,1N4148W - SMT bottom - laisser JLC choisir (Basic de preference)
+Eurorack 2x5,J1,IDC-Header_2x05_P2.54mm_Vertical,,Shrouded header 2x5 2.54 mm - THT (wave soldering) - laisser JLC choisir (Basic de preference)
+S&H IN,J2,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+TRIG,J3,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+NOISE,J4,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+CLOCK,J5,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+S&H OUT,J6,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+GATE,J7,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+LAG IN,J8,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+LAG OUT,J9,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
+BC847C,Q1,SOT-23,,BC847C (jonction base-émetteur en avalanche = source de bruit) - SMT bottom - laisser JLC choisir (Basic de preference)
+MMBFJ112,Q2,SOT-23,,"MMBFJ112 (JFET N, D-S-G) - SMT bottom - laisser JLC choisir (Basic de preference)"
+100k 1% 0805,"R1,R2,R5,R7,R12,R15,R16",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+2k2 1% 0805,"R11,R24",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+15k 1% 0805,R13,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1M 1% 0805,R17,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k 1% 0805,"R3,R4,R10,R18,R20,R21,R22,R23",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+22M 1% 0805,R6,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+200k 1% 0805,R8,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+10k 1% 0805,"R9,R14,R19",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+10k A,RV1,Pot_Alpha_9mm_Vertical,,"POT-R09V-10K A (9 mm vertical, log) - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+1M A,"RV2,RV3",Pot_Alpha_9mm_Vertical,,"POT-R09V-1M A (9 mm vertical, log) - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+200k Bourns 3314J-1-204E,RV4,Trim_SMD_Bourns_3314J,,Bourns 3314J-1-204E (niveau du bruit : 10 V crête à crête) - SMT bottom - laisser JLC choisir (Basic de preference)
+S&H / T&H,SW1,Toggle_SPDT_Dailywell_2MS1,,"Dailywell 2MS1T1B1M2QES (SPDT ON-ON) : haut = S&H, bas = T&H - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
+TL074CDR,"U1,U2,U3",SOIC-14_3.9x8.7mm_P1.27mm,C12594,TL074CDR - SMT bottom

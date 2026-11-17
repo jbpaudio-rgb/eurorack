@@ -2,7 +2,7 @@ const DATA = __DATA__;
 const $ = s => document.querySelector(s);
 const PH = 128.5, MX = 1.2, MY = 4.5, HPMM = 5.08, ROWHP = 104, GAPY = 5;
 const ROWW = ROWHP * HPMM, TW = ROWW + 2 * MX, RH = PH + 2 * MY;
-const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 30, stg: 30, lfo: 12, nt: 10, att: 8, mult: 4, sim: 8 };
+const HP = { vco: 12, mix: 8, vcf: 10, vca: 6, ad: 6, adsr: 8, cx: 30, stg: 30, lfo: 12, nt: 10, att: 8, mult: 4, sim: 8, shl: 8, ring: 8, rev: 10 };
 const DESC = {
   vco: 'Oscillateur façon 921 : RANGE LO à 2′, 4 formes d’onde, FM, PWM, sync et sortie BLEND.',
   mix: 'Mixeur 4 entrées façon CP3, MASTER GAIN avec saturation douce, OUT et −OUT.',
@@ -16,6 +16,9 @@ const DESC = {
   mult: 'MULT double passif (2 × 4 jacks reliés). Dans le simulateur, le jack du haut de chaque groupe sert d’entrée.',
   nt: 'NOISE TOOLS façon Intellijel : PULSE (horloge ou impulsions au hasard), bruit WHITE et PINK, S&H / T&H (entrée = bruit blanc, TRIG = PULSE par défaut), SLEW (entrée = S&H par défaut).',
   lfo: 'LFOs (RP2040) : 4 LFO avec fondu SINE → SAW → SQUARE, FREE (0,02 à 25 Hz) ou CLOCKED (/16 à ×16 du CLOCK), entrée RESET.',
+  shl: 'S&H / LAG : S&H / T&H (entrée = bruit, TRIG = horloge RATE par défaut), sorties NOISE, CLOCK, GATE aléatoire, LAG à RISE et FALL séparés (entrée = S&H par défaut).',
+  ring: 'RING MOD : multiplicateur MC1496, niveaux X et Y (Y haut = son plus dur), MIX DRY → RING, Y vide = +5 V (le module devient un VCA).',
+  rev: 'SPRING REVERB : vraie cuve à ressorts, DRIVE avec LED PEAK, TONE, MIX commandé en tension (MIX CV), boucle SEND / RETURN, sortie WET.',
   sim: 'Outil du simulateur : séquence, CV/GATE du clavier, sortie son et oscilloscope.',
 };
 const TYPE = {}; DATA.modules.forEach(m => TYPE[m.id] = m);

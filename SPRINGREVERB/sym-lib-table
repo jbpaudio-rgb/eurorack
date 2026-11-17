@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "octavio_mu")(type "KiCad")(uri "${KIPRJMOD}/octavio_mu.kicad_sym")(options "")(descr "Octavio MU symbols"))
+)

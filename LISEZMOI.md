@@ -16,6 +16,9 @@ Modules Eurorack inspirés du Moog modulaire (façades alu noir, lettrage blanc,
 | NOISETOOLS | NOISE TOOLS façon Intellijel, 10 HP (rev 0.1), analogique : PULSE (RATE, CLK / RND), bruit WHITE et PINK, S&H / T&H (entrée = bruit blanc, TRIG = PULSE par défaut), SLEW (entrée = S&H par défaut), 3 LED | schéma + façade prêts ; carte placée, à router |
 | ATTINV | ATT / INV : 4 atténuateurs / inverseurs, 8 HP (rev 0.1) : bouton, LED bicolore et inverseur INV (−1 à +1) / ATT (0 à 1) par canal, 8 jacks en bas, entrées vides = +5 V | schéma + façade prêts ; carte placée, à router |
 | MULT | Double multiple passif, 4 HP (rev 0.1) : 2 groupes de 4 jacks l'un sous l'autre | façade + carte prêtes (8 jacks, sans alimentation) |
+| SPRINGREVERB | Réverbe à ressort, 10 HP (rev 0.1), pour cuve Accutronics 4FB3C1B : DRIVE avec LED PEAK, TONE, MIX commandé en tension (MIX CV avec atténuateur, fondu par 2 OTA LM13700), boucle SEND / RETURN, sortie WET | schéma + façade prêts ; carte placée, à router |
+| SHLAG | S&H / LAG, 8 HP (rev 0.1), analogique : S&H / T&H avec bruit et horloge RATE internes (normalisés), sorties NOISE, CLOCK, GATE aléatoire, LAG à RISE et FALL séparés (entrée = S&H par défaut) | schéma + façade prêts ; carte placée, à router |
+| RINGMOD | Modulateur en anneau, 8 HP (rev 0.1), MC1496 couplé en continu : niveaux X et Y (Y haut = son plus dur), MIX DRY → RING, sorties RING et OUT, Y vide = +5 V (devient un VCA) | schéma + façade prêts ; carte placée, à router |
 
 Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), jacks Thonkiconn, pots 9 mm, façades PCB aluminium 1,6 mm (vernis noir, sérigraphie blanche, HASL sans plomb), montage JLCPCB.
 
@@ -30,3 +33,4 @@ Standards communs : alimentation Eurorack 10 broches (−12 V = bande rouge), ja
 ## Fabrication
 - **VCO** : dossier `VCO/FABRICATION` (ou `VCO/OCTAVIO-VCO-FABRICATION.zip`) : Gerbers de la carte 4 couches routée et de la façade aluminium, fichiers d'assemblage JLCPCB, liste d'achat (jacks, pots, boutons, câble) et guide pas à pas.
 - `outils/` : les scripts qui produisent ces fichiers (export Freerouting, Gerbers, vérification des liaisons et des écartements).
+- `outils/generateur/` : le générateur commun des nouveaux modules (`python3 genmod.py rev|sh|ring`, puis `previewmod.py`, `scenemod.py`, `checkmod.py`).
