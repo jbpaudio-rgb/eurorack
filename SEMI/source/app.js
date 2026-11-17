@@ -129,6 +129,10 @@ function drawToggle(key, label, opts, x, y, p, title) {
   g.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
   draw(key);
 }
+const NSHORT = { 'kb.cv': 'KBD CV', 'kb.gate': 'KBD GATE', 'lfo1.out': 'LFO 1', 'lfo2.out': 'LFO 2', 'vco1.pulse': 'OSC 1 PULSE', 'vco1.saw': 'OSC 1 SAW',
+  'vco2.saw': 'OSC 2 SAW', 'vco2.pulse': 'OSC 2 PULSE', 'vco3.saw': 'OSC 3 SAW', 'sh.noise': 'NOISE', 'sh.clock': 'CLOCK', 'sh.sh': 'S&H', 'ring.out': 'RING',
+  'mix.out': 'MIX', 'env1.out': 'ENV 1', 'env2.out': 'ENV 2', 'vcf.out': 'LADDER', 'svf.out': 'ST. VAR.', 'vca.out': 'AMP', 'rev.out': 'REVERB' };
+const pitchOf = () => 11.5;
 function drawJack(key, label, d, x, y, p, title) {
   LAB[key] = title + ' · ' + (label || 'MULT') + (d === 'out' ? ' (sortie)' : ' (entrée)');
   if (label) {
@@ -136,6 +140,12 @@ function drawJack(key, label, d, x, y, p, title) {
     if (d === 'out') { el('rect', { x: x - w / 2, y: y - 7.6, width: w, height: 2.9, rx: .5, fill: '#e9e9e9' }, p); txt(label, { x, y: y - 5.45, fill: '#111', 'font-family': FONT, 'font-weight': 700, 'font-size': 2, 'text-anchor': 'middle' }, p); }
     else txt(label, { x, y: y - 5.45, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2, 'text-anchor': 'middle' }, p);
   } else if (d === 'out') el('rect', { x: x - 3.75, y: y - 7.6, width: 7.5, height: 2.9, rx: .5, fill: '#e9e9e9' }, p);
+  const nsrc = d === 'in' ? SEMI_DEF.normals[key] : undefined;
+  if (nsrc !== undefined) {                                   // printed normal : what this input receives with nothing plugged
+    const nm = typeof nsrc === 'number' ? '+' + nsrc + ' V' : (NSHORT[nsrc] || nsrc);
+    const t = txt(nm, { x, y: y + 5.1, fill: '#a8a8a8', 'font-family': FONT, 'font-weight': 600, 'font-size': 1.55, 'text-anchor': 'middle', 'letter-spacing': .05 }, p);
+    if (nm.length > 8) { t.setAttribute('textLength', Math.min(pitchOf(x), nm.length * 0.95)); t.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+  }
   const g = el('g', { class: 'jack' }, p); g.dataset.key = key;
   el('circle', { cx: x, cy: y, r: 4.6, fill: 'transparent' }, g);
   el('polygon', { points: [0, 1, 2, 3, 4, 5].map(a => (x + 3.3 * Math.cos(a * Math.PI / 3 + Math.PI / 6)) + ',' + (y + 3.3 * Math.sin(a * Math.PI / 3 + Math.PI / 6))).join(' '), fill: 'url(#nut)', stroke: '#666', 'stroke-width': .2 }, g);

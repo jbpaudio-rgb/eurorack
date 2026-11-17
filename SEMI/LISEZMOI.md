@@ -45,6 +45,8 @@ Si 60 mm ne plaît pas : passer à 45 mm (PTA4543) = changer `TRAVEL` et `SP` da
 
 ## Normalisations (câblage interne, coupé dès qu'un câble entre dans la prise)
 
+Sur la façade, le nom de la source est imprimé en gris sous chaque entrée normalisée (façon ARP 2600).
+
 | Entrée | Reçoit |
 |---|---|
 | 1V/OCT des 3 OSC, LADDER KBD | KEYBOARD CV (OSC 3 : seulement si KBD = ON) |
