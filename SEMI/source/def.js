@@ -52,9 +52,6 @@ const SEMI_DEF = {
         in: [['in', 'IN']], out: [['o1', ''], ['o2', ''], ['o3', '']] },
     ] },
   ],
-  // panel layout : 2 long rows (sections listed in signal order)
-  rows: [['vco1', 'vco2', 'vco3', 'ring', 'sh', 'mix', 'vcf'],
-         ['svf', 'vca', 'rev', 'out', 'kb', 'env1', 'env2', 'lfo1', 'lfo2', 'att', 'mult']],
   // pre-patched connections (switching jacks : plugging a cable into the input breaks the normal)
   normals: {
     'vco1.voct': 'kb.cv', 'vco2.voct': 'kb.cv', 'vco3.voct': 'kb.cv',
