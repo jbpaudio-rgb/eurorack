@@ -4,7 +4,7 @@
 | Dossier / fichier | Pour quoi |
 |---|---|
 | `1-carte/octavio-vco-gerber.zip` | Gerbers + perçages de la carte (4 couches, routée, plans de masse) |
-| `1-carte/octavio-vco-BOM-JLCPCB.csv` | Liste des 140 CMS du dos, pour l'assemblage JLC |
+| `1-carte/octavio-vco-BOM-JLCPCB.csv` | Liste des 145 CMS du dos, pour l'assemblage JLC |
 | `1-carte/octavio-vco-CPL-JLCPCB.csv` | Position de chaque CMS (même origine que les Gerbers) |
 | `1-carte/octavio-vco.kicad_pcb` | La carte routée, à ouvrir dans KiCad 8 si tu veux la vérifier ou la retoucher (appuie sur **B** pour remplir les plans de masse avant de ressortir des Gerbers) |
 | `2-facade/octavio-vco-facade-gerber.zip` | Gerbers + perçages de la façade aluminium |
@@ -13,8 +13,8 @@
 
 ## La carte en bref
 - 4 couches : dessus, deux couches intérieures (pistes + **plans de masse**), dessous. Les 4 couches ont été nécessaires : en 2 couches, le routeur laissait une trentaine de liaisons impossibles.
-- Routée avec Freerouting, puis les 3 dernières liaisons terminées par un petit routeur maison. Vérification indépendante : toutes les liaisons sont faites, écartement ≥ 0,12 mm partout (JLC accepte 0,09 mm en 4 couches).
-- 140 CMS au dos (0603), le reste traversant côté façade.
+- Routée avec Freerouting, puis les dernières liaisons terminées par un petit routeur maison (rev 0.5 : correction du reset ajoutée de la même façon). Vérification indépendante : toutes les liaisons sont faites, écartement ≥ 0,12 mm partout (JLC accepte 0,09 mm en 4 couches).
+- 145 CMS au dos (0603), le reste traversant côté façade.
 
 ## 1. Vérifier avant de commander (10 minutes)
 1. **Commutateur RANGE** : mini commutateur **SR16 1 circuit 8 positions** à broches PCB (corps 16 mm, filetage M9). L'empreinte est faite d'après son dessin coté : 8 contacts sur un cercle de 16 mm, commun à 2,65 mm du centre. La façade a un petit trou de 2,6 mm sous le bouton pour l'ergot anti-rotation. Règle la rondelle de butée sur **6 positions**, et serre le bouton (à vis) avec le repère sur **LO** en première position.
@@ -24,7 +24,7 @@
 ## 2. Commander la carte chez JLCPCB
 1. jlcpcb.com → **Order now** → glisser `octavio-vco-gerber.zip`.
 2. Réglages : *Base material* FR-4, *Layers* **4**, *Thickness* 1,6 mm, quantité 5, couleur au choix, *Surface finish* HASL sans plomb. Pour l'ordre des couches, laisse JLC proposer l'empilage standard (F_Cu, In1_Cu, In2_Cu, B_Cu dans cet ordre). Laisse le reste par défaut.
-3. Si tu veux que JLC soude les CMS (conseillé : 140 pièces en 0603) : active **PCB Assembly**, choisis **Bottom Side**, puis téléverse `octavio-vco-BOM-JLCPCB.csv` et `octavio-vco-CPL-JLCPCB.csv`.
+3. Si tu veux que JLC soude les CMS (conseillé : 145 pièces en 0603) : active **PCB Assembly**, choisis **Bottom Side**, puis téléverse `octavio-vco-BOM-JLCPCB.csv` et `octavio-vco-CPL-JLCPCB.csv`.
    - JLC te propose une pièce pour chaque ligne : prends de préférence les pièces « Basic » ; garde bien les résistances **0,1 %** là où la liste le dit (précision du 1 V/oct).
    - À l'écran de placement, vérifie que les CI (points du pin 1) et les diodes sont dans le bon sens ; tourne-les dans l'outil de JLC si besoin.
 4. Les pièces traversantes (jacks, pots, commutateur, barrette d'alimentation) ne sont pas dans cette liste : tu les soudes toi-même (étape 5).

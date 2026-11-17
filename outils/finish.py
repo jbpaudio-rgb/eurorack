@@ -3,7 +3,7 @@ that joins every isolated island of a net to its main island, keeping 0.2 mm cle
 to reach an inner layer (the inner layers are poured ground planes)."""
 import sys, math, heapq, uuid, re
 import numpy as np
-sys.path.insert(0, "/home/claude/work/fab")
+sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))
 from gerber import load, on
 from drc import dist
 
