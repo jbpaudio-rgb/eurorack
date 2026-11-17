@@ -77,8 +77,9 @@ def set_value(txt, ref, value):
     f = re.sub(r'\(property "Value" "[^"]*"', '(property "Value" "%s"' % value, f, count=1)
     return txt[:a] + f + txt[b:]
 
-def add_fp(txt, template, ref, value, x, y, rot, pads):
-    a, b = fp_span(txt, template); f = txt[a:b]
+def add_fp(txt, template, ref, value, x, y, rot, pads, src=None):
+    """src : text of another board to take the template footprint from (same library)."""
+    a, b = fp_span(src or txt, template); f = (src or txt)[a:b]
     f = re.sub(r'\(uuid "[^"]+"\)', lambda q: '(uuid "%s")' % uuid.uuid4(), f)
     f = re.sub(r'\(property "Reference" "[^"]*"', '(property "Reference" "%s"' % ref, f, count=1)
     f = re.sub(r'\(property "Value" "[^"]*"', '(property "Value" "%s"' % value, f, count=1)

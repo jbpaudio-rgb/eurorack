@@ -24,7 +24,7 @@ IN 2,J7,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkico
 100k 1% 0805,"R27,R29,R31,R37,R39,R41,R42,R44,R53,R54,R55,R56",R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
 2k26 1% 0805,"R32,R28,R30",R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
 1k13 1% 0805,R34,R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-10k 1% 0805,"R35,R63,R74,R77,R78,R80,R82,R45,R47,R57",R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+10k 1% 0805,"R35,R63,R74,R77,R78,R45,R47,R57",R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
 19k1 1% 0805,R36,R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
 165k 1% 0805,R43,R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
 12k 1% 0805,R46,R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
@@ -46,3 +46,6 @@ IN 2,J7,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkico
 TL074CDR,"U1,U2,U3",SOIC-14_3.9x8.7mm_P1.27mm,C12594,TL074CDR - SMT bottom
 LM13700MX/NOPB,"U4,U5",SOIC-16_3.9x9.9mm_P1.27mm,,LM13700MX/NOPB - SMT bottom - laisser JLC choisir (Basic de preference)
 TL072CDR,U6,SOIC-8_3.9x4.9mm_P1.27mm,,TL072CDR - SMT bottom - laisser JLC choisir (Basic de preference)
+8k2 1% 0805,R80,R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+2k Bourns 3314J-1-202E,"RV7,RV8",Trim_SMD_Bourns_3314J,,"Bourns 3314J-1-202E (trimmer CMS, réglage LP / HP du mode) - SMT bottom - laisser JLC choisir (Basic de preference)"
+7k5 1% 0805,R82,R_0805_2012Metric,,SMT bottom - laisser JLC choisir (Basic de preference)

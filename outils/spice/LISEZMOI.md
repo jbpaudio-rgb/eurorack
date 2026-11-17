@@ -44,6 +44,7 @@ Résultat : oscillation propre, 252 Hz à 0 V (FREQUENCY au milieu, avant calibr
 | **S&H / LAG** | **le S&H ne tenait pas** : R17 (1M) entre la grille du JFET et le condensateur de maintien le vidait (≈ 100 V/s) et la grille montait trop lentement pendant l'impulsion | **oui** : R17 = 100k vers l'entrée tamponnée (SHIN_B). Échantillons justes à quelques mV, aucune dérive mesurable en 50 ms |
 | **NOISE TOOLS** | même défaut de S&H (R24) | **oui** : R24 = 100k vers SHIN_B |
 | **ATT / INV** | l'entrée vide donnait +3,6 V au lieu de +5 V (diviseur 14k / 10k trop faible pour 3 entrées) | **oui** : R1 = 1k4, R2 = 1k → +4,7 V |
+| **VCF** | mode LP pas vraiment 24 dB : fuite de passe-bande ≈ −18 dB (gain de l'OTA « a » ≠ 1) ; même chose pour le HP | **oui** : R80 8,2k + RV7 2k, R82 7,5k + RV8 2k ; une fois réglés, LP ≈ −41 dB et HP ≈ −45 dB. Reste : en BP, le grave n'est rejeté que de ≈ 7 dB (petites différences de gain entre les étages du ladder) |
 | **VCA** | fonctionne : ×1,1 à 5 V, ×1,3 à 10 V (saturation douce), EXP OK, coupure à 0 V. Fuite de CV ≈ 0,9 V trimmer au milieu, **réglable à ≈ 0** avec RV2 (vers 35 % de la course) | réglage seulement |
 | **AD** | fonctionne : crête 9,35 V, attaque / decay comme prévu, CYCLE ≈ 120 Hz réglages rapides | — |
 | **ADSR** | fonctionne : crête 9,7 V, sustain suit le bouton, relance correcte sur des gates de 20 ms | — |

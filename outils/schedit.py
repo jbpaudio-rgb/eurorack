@@ -29,14 +29,19 @@ def set_value(s, ref, val):
     k = s.find('"', j + len('(property "Value" "'))
     return s[:j] + '(property "Value" "%s' % val + s[k:]
 
-def add(s, template, ref, val, X, Y, pins):
-    i = s.find('(property "Reference" "%s"' % template); j = s.rfind('(symbol (lib_id', 0, i); d = 0
-    for k in range(j, len(s)):
-        if s[k] == '(': d += 1
-        elif s[k] == ')':
+def add(s, template, ref, val, X, Y, pins, src=None):
+    """src : text of another sheet to take the template symbol from (its lib symbol must exist in this sheet)."""
+    T = src or s
+    i = T.find('(property "Reference" "%s"' % template); j = T.rfind('(symbol (lib_id', 0, i); d = 0
+    for k in range(j, len(T)):
+        if T[k] == '(': d += 1
+        elif T[k] == ')':
             d -= 1
-            if d == 0: b = s[j:k + 1]; break
-    lib, X0, Y0 = sym(s, template)
+            if d == 0: b = T[j:k + 1]; break
+    lib, X0, Y0 = sym(T, template)
+    if src:
+        proj = re.search(r'\(instances \(project "([^"]+)" \(path "([^"]+)"', s)
+        b = re.sub(r'\(instances \(project "[^"]+" \(path "[^"]+"', '(instances (project "%s" (path "%s"' % (proj.group(1), proj.group(2)), b)
     def mv(m):
         return '(at %g %g' % (float(m.group(1)) - X0 + X, float(m.group(2)) - Y0 + Y)
     b = re.sub(r'\(at ([\d.-]+) ([\d.-]+)', mv, b)
