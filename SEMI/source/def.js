@@ -22,7 +22,7 @@ const SEMI_DEF = {
     { title: 'FILTERS & AMPLIFIER', secs: [
       { id: 'mix', title: 'AUDIO MIXER', sl: [['l1', 'OSC 1', .8], ['l2', 'OSC 2', .6], ['l3', 'OSC 3', 0], ['l4', 'NOISE', 0], ['l5', 'RING', 0]],
         in: [['in1', 'OSC 1'], ['in2', 'OSC 2'], ['in3', 'OSC 3'], ['in4', 'NOISE'], ['in5', 'RING']], out: [['out', 'MIX']] },
-      { id: 'vcf', title: 'LADDER FILTER  24 dB', sl: [['freq', 'FREQUENCY', .42], ['emph', 'EMPHASIS', .35], ['mode', 'MODE', 0, ['LP', 'BP', 'HP']], ['kbd', 'KBD', 1], ['env', 'ENV', .45], ['mod', 'MOD', 0]],
+      { id: 'vcf', title: 'LADDER FILTER  24 dB', sl: [['freq', 'FREQUENCY', .46], ['emph', 'EMPHASIS', .35], ['mode', 'MODE', 0, ['LP', 'BP', 'HP']], ['kbd', 'KBD', 1], ['env', 'ENV', .45], ['mod', 'MOD', 0]],
         in: [['in', 'IN'], ['kbd', 'KBD'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },
       { id: 'svf', title: 'STATE VARIABLE  12 dB', sl: [['freq', 'FREQUENCY', .55], ['reso', 'RESONANCE', .3], ['mode', 'MODE', 0, ['LP', 'BP', 'HP', 'N']], ['env', 'ENV', .3], ['mod', 'MOD', 0]],
         in: [['in', 'IN'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },

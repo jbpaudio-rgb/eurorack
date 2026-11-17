@@ -1,0 +1,1 @@
+{"rot": {"SW2": "4"}, "pots": {"RV2": 0.5, "RV3": 0.5, "RV6": 0.0, "RV8": 0.5}, "drive": {"J2": "DC 0"}, "tran": ".tran 0.25u 30m 0 0.25u uic", "extra": ".control\nset filetype=ascii\nrun\nwrdata vco_out.txt v(SAWJ) v(TRIJ) v(SINJ) v(PULJ) v(RAMP)\n.endc"}

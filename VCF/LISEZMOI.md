@@ -1,5 +1,7 @@
 # Octavio VCF — filtre ladder façon Moog, LP / BP / HP, Eurorack 10 HP (rev 0.3)
 
+> ⚠️ **Simulation SPICE (17 nov. 2026)** : fonctionne, coupure max ≈ 13 kHz, fuite de passe-bande en mode LP (≈ −18 dB) – voir `outils/spice/LISEZMOI.md`.
+
 ## Façade (de haut en bas)
 - **rev 0.3 : passage en 10 HP** pour donner de l'espace : colonnes plus larges, atténuateurs CONTOUR / FREQ CV / EMPH CV plus gros.
 - **VCF** entre les trous du haut

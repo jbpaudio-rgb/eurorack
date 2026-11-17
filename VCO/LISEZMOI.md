@@ -1,5 +1,7 @@
 # Octavio VCO — oscillateur façon Moog 921, Eurorack 12 HP (rev 0.4)
 
+> ⚠️ **Simulation SPICE (17 nov. 2026) : le cœur ne démarre pas tel que dessiné (reset). Ne pas commander avant correction** – voir `outils/spice/LISEZMOI.md`.
+
 ## Façade (de haut en bas)
 - **rev 0.4 : passage en 12 HP** pour donner de l'espace : FREQUENCY et WIDTH en gros boutons gradués, FM / PWM / BLEND en boutons moyens, colonnes plus larges.
 - **VCO** entre les trous du haut

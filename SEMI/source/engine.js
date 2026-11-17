@@ -63,7 +63,7 @@ class SemiEngine {
       base: (p(id + '.coarse') - .5) * 6 + (p(id + '.fine') - .5) + (p(id + '.range') ? -7 : 0),
       w: p(id + '.width'), fm: p(id + '.fm') * p(id + '.fm'), pwm: p(id + '.pwm'),
       vo: o[id + '.sine'], iv: i[id + '.voct'], ifm: i[id + '.fm'], ipw: i[id + '.pwm'] }; });
-    const CURV = 0.45, CURN = 1 / (1 - Math.exp(-0.45)), kVlp = 1 - Math.exp(-2 * Math.PI * 11000 / sr);
+    const kVlp = 1;   // SPICE of the 921 core : linear ramp, flat to well above 20 kHz -> no extra roll-off
     const sync2 = p('vco2.sync') === 1, kbd3 = p('vco3.kbd') === 0, stab = p('vco3.stab'), isy = i['vco2.sync'];
     const ml = [1, 2, 3, 4, 5].map(k => { const v = p('mix.l' + k); return v * v; });
     const md = p('vcf.mode'), fa = md < 0.5 ? 1 - 2 * md : 0, fc_ = md > 0.5 ? 2 * md - 1 : 0;
@@ -145,12 +145,12 @@ class SemiEngine {
         const fr = cl(261.63 * Math.pow(2, ex), 0.02, 20000), dt = fr / sr;
         if (q === 1) { const sv = (sync2 || pat[isy]) ? I[isy] : 0; if (sv > 1 && !s.syncHi) { s.ph = 0; s.syncHi = true; } else if (sv < 0.5) s.syncHi = false; }
         s.ph += dt; if (s.ph >= 1) s.ph -= 1;
-        const ph = s.ph, cv_ = (1 - Math.exp(-CURV * ph)) * CURN;    // timing cap charge is slightly exponential : rounder ramp, even harmonics
-        const saw = (2 * cv_ - 1 - blep(ph, dt)) * 5, tri = (2 * Math.abs(2 * ph - 1) - 1) * 5;
+        const ph = s.ph;
+        const saw = (2 * ph - 1 - blep(ph, dt)) * 5, tri = (2 * Math.abs(2 * ph - 1) - 1) * 5;
         const duty = cl(0.05 + 0.9 * k.w + I[k.ipw] * k.pwm * 0.09, 0.02, 0.98);
         let pul = ph < duty ? 1 : -1; pul += blep(ph, dt); pul -= blep((ph + 1 - duty) % 1, dt);
         const W4 = [5 * tanh(1.55 * tri / 5) / tanh(1.55), tri, saw, 5 * pul];
-        for (let w = 0; w < 4; w++) { s.lp[w] += kVlp * (W4[w] - s.lp[w]); O[k.vo + w] = s.lp[w]; }   // reset time + output op-amp : ~11 kHz roll-off
+        for (let w = 0; w < 4; w++) O[k.vo + w] = W4[w];
       }
       // ---- RING MOD (MC1496)
       O[o['ring.out']] = cl(1.0636 * cl(I[i['ring.x']] * rx, -10.4, 10.4) * tanh(I[i['ring.y']] * ry * 0.5656), -11, 11);
@@ -159,13 +159,14 @@ class SemiEngine {
       O[o['mix.out']] = 7.5 * tanh(mx / 7.5 + 0.04) - 7.5 * tanh(0.04);
       // ---- LADDER FILTER (same model as the VCF module)
       { const f = S.vcf;
-        let fc = 20 * Math.pow(2, 10 * fFr + I[i['vcf.kbd']] * fK + I[i['vcf.env']] * fEnv * 0.8 + I[i['vcf.mod']] * fMod * 0.5); fc = 16000 * tanh(cl(fc, 5, 40000) / 16000);
-        const g = 1 - Math.exp(-2 * Math.PI * fc * g2), kk = 4.3 * fE / (1 + (fc / 9000) * (fc / 9000));
-        const xin = I[i['vcf.in']] * 0.18 * (1 + 0.35 * kk / 4.3) + (this.rnd() - 0.5) * 1e-4; let u = 0;
+        // FREQUENCY range and EMPHASIS curve fitted on the SPICE run of the VCF board (outils/spice) : 20 Hz -> 13 kHz, self-oscillation near 9
+        let fc = 20.4 * Math.pow(2, 9.3 * fFr + I[i['vcf.kbd']] * fK + I[i['vcf.env']] * fEnv * 0.8 + I[i['vcf.mod']] * fMod * 0.5); fc = 16000 * tanh(cl(fc, 5, 40000) / 16000);
+        const g = 1 - Math.exp(-2 * Math.PI * fc * g2), kk = 4.3 * Math.pow(fE, 1.4) / (1 + (fc / 9000) * (fc / 9000));   // fade near the top = simulation limit (no aliasing scream), not the circuit
+        const xin = I[i['vcf.in']] * 0.18 + (this.rnd() - 0.5) * 1e-4; let u = 0;
         for (let r = 0; r < 2; r++) { u = tanh(xin - kk * f.y4); const t1 = tanh(f.y1), t2 = tanh(f.y2), t3 = tanh(f.y3);
           f.y1 += g * (u - t1); f.y2 += g * (t1 - t2); f.y3 += g * (t2 - t3); f.y4 += g * (t3 - tanh(f.y4)); }
         const q1 = tanh(f.y1), q2 = tanh(f.y2), LP = f.y4, BP = 2 * q1 - 2 * q2, HP = u - 2 * q1 + q2;
-        const fo = -(BP + fa * (LP - BP) + fc_ * (HP - BP)) / 0.18 / (1 + 0.12 * kk / 4.3);
+        const fo = -0.67 * (BP + fa * (LP - BP) + fc_ * (HP - BP)) / 0.18;   // SPICE : passband -3.5 dB
         f.hp = 0.9993 * (f.hp + fo - f.hpx); f.hpx = fo; O[o['vcf.out']] = f.hp; }
       // ---- STATE VARIABLE FILTER 12 dB (TPT, soft-clipped integrators), LP -> BP -> HP -> NOTCH
       { const f = S.svf;
