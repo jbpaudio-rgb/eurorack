@@ -1,4 +1,4 @@
-# Back panel of the SEMI (preview) : IEC power inlet (switch + fuse), MIDI IN / MIDI OUT (3.5 mm TRS type A), USB-C (USB-MIDI).
+# Back panel of the SEMI (preview) : IEC power inlet (switch + fuse), MIDI IN / MIDI OUT (5-pin DIN, 180 deg, panel mount), USB-C (USB-MIDI).
 # python3 source/arriere.py -> arriere.svg (then rendered to apercu-arriere.png)
 import base64, io, os
 from PIL import Image
@@ -10,6 +10,15 @@ FF = "font-family=\"'Barlow Condensed','Arial Narrow',sans-serif\" font-weight=\
 F = FF + ' fill="#fff" text-anchor="middle"'
 G = FF + ' fill="#9a9a9a" text-anchor="middle"'
 L = FF + ' fill="#fff" text-anchor="start"'
+def din(x, y, lab, sub):
+    import math
+    pins = ''.join(f'<circle cx="{x + 3.5 * math.cos(math.radians(a)):.2f}" cy="{y - 3.5 * math.sin(math.radians(a)):.2f}" r=".55" fill="#b8a66a"/>' for a in (180, 135, 90, 45, 0))
+    return (f'<text x="{x}" y="{y - 12}" {F} font-size="3.2">{lab}</text>'
+            f'<circle cx="{x}" cy="{y}" r="9.6" fill="#c9c9c3" stroke="#666" stroke-width=".3"/>'
+            f'<circle cx="{x - 8.2}" cy="{y}" r=".9" fill="#555"/><circle cx="{x + 8.2}" cy="{y}" r=".9" fill="#555"/>'
+            f'<circle cx="{x}" cy="{y}" r="6.8" fill="#151515" stroke="#888" stroke-width=".3"/>'
+            f'<rect x="{x - .9}" y="{y + 5.2}" width="1.8" height="1.8" fill="#c9c9c3"/>' + pins +
+            f'<text x="{x}" y="{y + 14}" {G} font-size="2.2">{sub}</text>')
 def jack(x, y, lab, sub):
     return (f'<text x="{x}" y="{y - 8}" {F} font-size="3.2">{lab}</text>'
             f'<polygon points="{" ".join(f"{x + 4.2 * __import__("math").cos(a * 1.0472 + .5236):.2f},{y + 4.2 * __import__("math").sin(a * 1.0472 + .5236):.2f}" for a in range(6))}" fill="#c9c9c3" stroke="#666" stroke-width=".25"/>'
@@ -25,7 +34,9 @@ s = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W *
 # vents
 for k in range(14): s.append(f'<rect x="{150 + k * 9}" y="18" width="4" height="34" rx="2" fill="#050505"/>')
 # MIDI + USB
-s += [jack(x0, 36, 'MIDI IN', 'TRS type A'), jack(x0 + 20, 36, 'MIDI OUT', 'TRS type A')]
+x0 = 300
+s += [din(x0, 35, 'MIDI IN', 'DIN 5 broches'), din(x0 + 30, 35, 'MIDI OUT', 'DIN 5 broches')]
+x0 += 14
 s += [f'<text x="{x0 + 42}" y="28" {F} font-size="3.2">USB</text>',
       f'<rect x="{x0 + 36.5}" y="33.6" width="11" height="4.8" rx="2.3" fill="#bdbdbd" stroke="#666" stroke-width=".3"/>',
       f'<rect x="{x0 + 38}" y="34.9" width="8" height="2.2" rx="1" fill="#111"/>',

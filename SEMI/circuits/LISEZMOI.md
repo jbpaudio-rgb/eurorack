@@ -26,7 +26,7 @@ Un LM13700 pour les deux (un OTA par LFO), 3 × TL074, 2 × BCM857DS.
 ## KEYBOARD · MIDI et haut-parleur (`midi.py`, programme dans `../firmware`)
 MIDI IN, MIDI OUT et USB sont à l'arrière, sur une petite carte avec le Pico, le H11L1, les DAC et leurs ampli-ops. Une nappe vers la façade transporte CV, GATE, TRIG, VEL, MOD, la lecture de CV IN / GATE IN, LEARN et la LED.
 Raspberry Pi Pico, 2 × MCP4822 (DAC 12 bits), H11L1 (entrée MIDI), 2 × TL074, LM386.
-- **MIDI IN** (jack 3,5 mm type A) : 0 erreur sur 3 octets, venant d'un émetteur 5 V ou 3,3 V (6 à 9,5 mA dans la LED). **MIDI OUT** : 6,7 mA dans un récepteur standard.
+- **MIDI IN** (prise DIN 5 broches) : 0 erreur sur 3 octets, venant d'un émetteur 5 V ou 3,3 V (6 à 9,5 mA dans la LED). **MIDI OUT** : 6,7 mA dans un récepteur standard.
 - **USB-C** : USB-MIDI, reconnu sans pilote. Tout ce qui entre (MIDI IN ou USB) ressort sur MIDI OUT et USB.
 - **CV** : −3,6 à +6,3 V. Note 60 (C4) = 0 V, donc les notes 17 à 127 sont jouables. 2,4 mV par pas, calibré en 2 points par le programme. **GATE** 5 V, **TRIG** 10 V (2 ms), **VEL** et **MOD** (molette) 0 à 10 V. Pitch bend ±2 demi-tons, priorité à la dernière note, legato.
 - **CV → MIDI** : quand un séquenceur Eurorack joue CV IN / GATE IN, ses notes partent sur MIDI OUT et USB. Lecture de −10 à +10 V, entrées protégées jusqu'à ±15 V, seuil de gate 1,3 V.

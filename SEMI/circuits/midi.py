@@ -2,10 +2,10 @@
 MIDI IN / OUT and USB-C are on the back panel (next to the IEC inlet), on a small back board with the Pico, H11L1, DACs and output op-amps ;
 a ribbon cable brings CV / GATE / TRIG / VEL / MOD, the CV IN / GATE IN sensing, LEARN and the MIDI LED to the front panel.
 
-MIDI IN (3.5 mm TRS type A : tip = MIDI pin 5, ring = pin 4)
-  ring -> R1 220 -> H11L1 LED anode (pin 1) ; LED cathode (pin 2) -> tip ; D1 1N4148 reverse across the LED
+MIDI IN (5-pin DIN socket : pin 4 = current source, pin 5 = current sink, pin 2 = shield, not connected on IN)
+  pin 4 -> R1 220 -> H11L1 LED anode (pin 1) ; LED cathode (pin 2) -> pin 5 ; D1 1N4148 reverse across the LED
   H11L1 (Schmitt-trigger opto, works from 3 V) : pin 6 = +3.3 V (100n), pin 4 (out) R3 1k pull-up to +3.3 V -> Pico GP1 (UART0 RX)
-MIDI OUT (3.5 mm TRS type A) : +3.3 V -> R4 33 -> ring ; Pico GP0 (UART0 TX) -> R5 10 -> tip   (MIDI 1.0 3.3 V specification)
+MIDI OUT (5-pin DIN socket) : +3.3 V -> R4 33 -> pin 4 ; Pico GP0 (UART0 TX) -> R5 10 -> pin 5 ; pin 2 -> GND   (MIDI 1.0 3.3 V specification)
 USB-C : Pico USB (USB-MIDI, class compliant) ; 5.1k CC pull-downs ; VBUS -> Pico VBUS (power from the computer is not needed)
 Power : +12 V -> 78L05 -> Pico VSYS (through the Pico's own Schottky), 3.3 V from the Pico regulator
 DACs : 2 x MCP4822 (12 bit, internal 2.048 V reference, gain x2 = 0..4.095 V), SPI0 (GP2 SCK, GP3 MOSI, GP5 / GP6 CS)
