@@ -474,8 +474,7 @@ function build() {
   const yb = TOP + 3 * TIERH;
   el('line', { x1: STRIP + 1, y1: yb + 1, x2: PW - STRIP - 1, y2: yb + 1, stroke: '#5d5d5d', 'stroke-width': .35 }, svg);
   el('image', { href: LOGO, x: PW - STRIP - 6 - 40, y: yb + 4.5, width: 40, height: 40 * 49 / 273 }, svg);
-  txt('SEMI-MODULAR SYNTHESIZER', { x: STRIP + 6, y: yb + 10.4, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 4.2, 'letter-spacing': .9 }, svg);
-  txt('3 VCO · LADDER 24 dB · STATE VARIABLE 12 dB · SPRING REVERB · MIDI · 1 V/OCT · EURORACK LEVELS', { x: STRIP + 112, y: yb + 10.2, fill: '#9a9a9a', 'font-family': FONT, 'font-weight': 600, 'font-size': 2.3, 'letter-spacing': .4 }, svg);
+  txt('3019 SEMI-MODULAR SYNTHESIZER', { x: STRIP + 6, y: yb + 10.4, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 4.2, 'letter-spacing': .9 }, svg);
   gNorm = el('g', { id: 'normals', 'pointer-events': 'none' }, svg);
   gCables = el('g', { id: 'cables' }, svg);
   drawNormals(); renderCables(true);

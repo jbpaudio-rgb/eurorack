@@ -21,7 +21,7 @@ s = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W *
      f'<rect width="8" height="{H}" fill="#9a9a9a"/><rect x="{W - 8}" width="8" height="{H}" fill="#9a9a9a"/>',
      '<g transform="translate(0 20)">',
      f'<image href="{logo}" x="20" y="{35 - 4}" width="44" height="{44 * 49 / 273}"/>',
-     f'<text x="70" y="{35 + 3}" {L} font-size="3.4">SEMI-MODULAR SYNTHESIZER</text>']
+     f'<text x="70" y="{35 + 3}" {L} font-size="3.4">3019 SEMI-MODULAR SYNTHESIZER</text>']
 # vents
 for k in range(14): s.append(f'<rect x="{150 + k * 9}" y="18" width="4" height="34" rx="2" fill="#050505"/>')
 # MIDI + USB
