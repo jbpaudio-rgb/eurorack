@@ -14,10 +14,11 @@ Grand panneau semi-modulaire dans l'esprit des gros semi-modulaires des années 
 
 | | |
 |---|---|
-| Panneau | **461 × 387 mm** (3 rangées de 122 mm + bande logo de 17 mm, bandes argent de 8 mm) |
+| Panneau | **475 × 387 mm** (3 rangées de 122 mm + bande logo de 17 mm, bandes argent de 8 mm) |
 | Sliders | 62 sliders, course **60 mm**, pas de 15 mm, capuchon 9 × 12,4 mm (ex. Bourns PTA6043, série PTA 60 mm, à confirmer chez JLCPCB) |
-| Jacks | 81 Thonkiconn 3,5 mm à contact de coupure (normalisations) |
-| Inverseurs | 7 (RANGE ×3, SYNC, KBD, TIME ×2), mêmes Dailywell 2MS1 que les modules |
+| Jacks | 85 Thonkiconn 3,5 mm à contact de coupure (normalisations) + 2 jacks MIDI 3,5 mm (type A) + 1 USB-C |
+| Inverseurs | 9 (RANGE ×3, SYNC, KBD, BP, TIME ×2, SPEAKER), mêmes Dailywell 2MS1 que les modules ; 1 bouton LEARN |
+| Haut-parleur | 40 mm, 8 Ω, 1 W, au-dessus du MULT (ampli LM386) |
 
 Si 60 mm ne plaît pas : passer à 45 mm (PTA4543) = changer `TRAVEL` et `SP` dans `source/app.js`, le panneau perd environ 15 mm par rangée.
 
@@ -31,17 +32,17 @@ Si 60 mm ne plaît pas : passer à 45 mm (PTA4543) = changer `TRAVEL` et `SP` da
 **Rangée 2 – FILTERS & AMPLIFIER**
 - **AUDIO MIXER** : 5 sliders (OSC 1, OSC 2, OSC 3, NOISE, RING), alimente les deux filtres en parallèle.
 - **LADDER FILTER 24 dB** (module VCF) : FREQUENCY, EMPHASIS, MODE LP → BP → HP, KBD, ENV, MOD.
-- **STATE VARIABLE 12 dB** (nouveau) : FREQUENCY, RESONANCE, MODE LP → BP → HP → NOTCH, ENV, MOD.
+- **STATE VARIABLE 12 dB** (nouveau, façon Oberheim SEM) : FREQUENCY, RESONANCE (jusqu'à l'auto-oscillation), MODE LP → NOTCH → HP, inverseur BP, ENV, MOD.
 - **AMPLIFIER** (902 du module VCA) : niveau LADDER, niveau STATE VAR., ENV, INITIAL (bourdon), RESP. LIN ↔ EXP.
 - **SPRING REVERB** (module SPRING REVERB) : DRIVE, TONE, MIX.
 - **OUTPUT** : VOLUME, sorties MAIN (niveau Eurorack) et PHONES.
 
 **Rangée 3 – CONTROL**
-- **KEYBOARD** : GLIDE ; sorties CV, GATE, TRIG ; entrées CV IN et GATE IN (un séquenceur Eurorack prend la place du clavier).
+- **KEYBOARD · MIDI** : GLIDE ; MIDI IN, MIDI OUT, USB-MIDI, bouton LEARN (canal), LED MIDI ; sorties CV, GATE, TRIG, VEL, MOD ; entrées CV IN et GATE IN. Le MIDI (prise ou USB) joue le clavier interne ; un séquenceur Eurorack branché dans CV IN / GATE IN prend sa place, et ses notes ressortent en MIDI.
 - **ENVELOPE 1 et 2** (911 du module ADSR) : ATTACK, DECAY, SUSTAIN, RELEASE, TIME FAST/SLOW (condensateur ×25, jusqu'à ~2 min), LED, sorties OUT et −OUT.
-- **LFO 1 et 2** : RATE (0,02 à 50 Hz), WAVE en fondu continu RAMPE ↑ → TRI → RAMPE ↓ → CARRÉ, entrée RATE CV (1 V/oct), sorties OUT et TRIG, LED.
+- **LFO 1 et 2** (nouveaux, analogiques) : RATE (0,02 à 50 Hz), WAVE RAMPE ↑ → TRI → RAMPE ↓ à vitesse constante, entrée RATE CV (1 V/oct), sorties OUT, SQ et TRIG, LED.
 - **ATTENUVERTERS** : 2 sliders −1 à +1, entrée vide = +5 V (offset).
-- **MULTIPLE** : 1 entrée, 3 sorties.
+- **SPEAKER · MULT** : haut-parleur intégré (coupé par l'inverseur SPEAKER ou quand un casque est branché) ; multiple 1 entrée, 3 sorties.
 
 ## Normalisations (câblage interne, coupé dès qu'un câble entre dans la prise)
 
@@ -64,8 +65,11 @@ Sur la façade, le nom de la source est imprimé en gris sous chaque entrée nor
 | GATE des 2 enveloppes | KEYBOARD GATE |
 | ATTENUVERTERS IN 1 et 2 | +5 V |
 
+## Circuits nouveaux
+Le filtre à variable d'état, les LFO, la partie MIDI et le haut-parleur sont décrits et vérifiés dans SPICE dans `circuits/` (voir `circuits/LISEZMOI.md`). Le programme du Pico est dans `firmware/` : il compile pour le Pico, et sa logique passe 24 tests sur l'ordinateur (`firmware/test`).
+
 ## Prochaines étapes
 
 1. Valider la disposition et la course des sliders dans le simulateur.
-2. Schéma du filtre à variable d'état (seul circuit audio nouveau) et des 2 LFO.
-3. Découper la fabrication par rangée : une carte + une façade par rangée (461 × 122 mm), reliées par nappes, alimentation ±12 V commune. Commencer par la rangée SOURCES (3 VCO).
+2. ~~Schéma du filtre à variable d'état et des 2 LFO~~ : fait et vérifié dans SPICE (`circuits/`), avec le MIDI et le haut-parleur.
+3. Découper la fabrication par rangée : une carte + une façade par rangée (475 × 122 mm), reliées par nappes, alimentation ±12 V commune. Commencer par la rangée SOURCES (3 VCO).

@@ -6,8 +6,8 @@ class SemiEngine {
     this.sr = sr; this.P = {}; this.held = []; this.key = null; this.seed = 7; this.cnt = 0;
     const outs = [], ins = [];
     for (const t of SEMI_DEF.tiers) for (const s of t.secs) {
-      for (const [j] of s.out) outs.push(s.id + '.' + j);
-      for (const [j] of s.in) ins.push(s.id + '.' + j);
+      for (const [j, , t] of s.out) if (t !== 'midi') outs.push(s.id + '.' + j);   // MIDI jacks are not CV
+      for (const [j, , t] of s.in) if (t !== 'midi') ins.push(s.id + '.' + j);
       for (const [k, , v] of s.sl) this.P[s.id + '.' + k] = v;
       for (const [k, , , v] of (s.sw || [])) this.P[s.id + '.' + k] = v;
     }
@@ -26,7 +26,7 @@ class SemiEngine {
       env: [0, 1].map(() => ({ env: 0, att: 0, g: false, led: 0 })),
       lfo: [0, 1].map(() => ({ ph: 0, tr: 0, led: 0 })),
       sh: { tri: 0, sq: 1, th: false, hold: 0, lag: 0, b: [0, 0, 0, 0, 0, 0, 0], g2: null },
-      rev: null, kb: { cv: 0, cvT: 0, gHi: false, tr: 0, seqPh: 0, step: 0, lastCv: -1 },
+      rev: null, kb: { cv: 0, cvT: 0, gHi: false, tr: 0, seqPh: 0, step: 0, lastCv: -1 }, vel: 8, cc1: 0, spk: [0, 0, 0],
       scope: new Float32Array(1024),
     };
     const sp = [0.0371, 0.0433, 0.0517].map((d, k) => ({ buf: new Float32Array(Math.ceil(d * sr) + 2), w: 0, len: Math.round(d * sr), ap: new Float32Array(24), lp: 0, mod: k * 2.1 }));
@@ -40,7 +40,9 @@ class SemiEngine {
       const i = this.held.indexOf(d.n); if (i >= 0) this.held.splice(i, 1);
       if (d.on) this.held.push(d.n);
       this.key = this.held.length ? this.held[this.held.length - 1] : null;
+      if (d.on && d.v !== undefined) this.s.vel = 10 * d.v / 127;           // VEL output : 0..10 V (MIDI velocity)
     }
+    else if (d.t === 'cc1') this.s.cc1 = 10 * d.v / 127;                     // MOD output : 0..10 V (mod wheel)
   }
   resolve(list) {
     this.cab = []; this.pat.fill(0);
@@ -68,18 +70,20 @@ class SemiEngine {
     const ml = [1, 2, 3, 4, 5].map(k => { const v = p('mix.l' + k); return v * v; });
     const md = p('vcf.mode'), fa = md < 0.5 ? 1 - 2 * md : 0, fc_ = md > 0.5 ? 2 * md - 1 : 0;
     const fFr = p('vcf.freq'), fE = p('vcf.emph'), fK = p('vcf.kbd'), fEnv = p('vcf.env'), fMod = p('vcf.mod');
-    const sFr = p('svf.freq'), sK = 2 - 1.96 * p('svf.reso'), sEnv = p('svf.env'), sMod = p('svf.mod'), sm = p('svf.mode') * 3;
-    const sw = [0, 0, 0, 0]; { const seg = Math.min(2, Math.floor(sm)), f = sm - seg; sw[seg] = 1 - f; sw[seg + 1] = f; }   // LP BP HP NOTCH weights
+    // SEM style (SPICE of SEMI/circuits/svf.py) : MODE slider = divider between LP and HP (middle = notch), BP switch ; resonance up to self-oscillation
+    const sFr = p('svf.freq'), sK = 2 * (1 - p('svf.reso')) - 0.03, sEnv = p('svf.env'), sMod = p('svf.mod'), sm = p('svf.mode'), sbp = p('svf.bp') === 1;
     const va1 = p('vca.l1') ** 2, va2 = p('vca.l2') ** 2, vcv = p('vca.cv'), vfx = p('vca.initial'), vr = p('vca.response');
     const tc = (x, C) => { const Rr = 320 + 1e6 * (Math.pow(100, x) - 1) / 99; return 1 - Math.exp(-1 / (sr * Rr * C)); };
     const E = [1, 2].map(n => { const id = 'env' + n, C = p(id + '.speed') ? 150e-6 : 6e-6;
       return { ka: tc(p(id + '.a'), C), kd: tc(p(id + '.d'), C), kr: tc(p(id + '.r'), C), S: 10 * p(id + '.s'), ig: i[id + '.gate'], oo: o[id + '.out'] }; });
-    const LF = [1, 2].map(n => { const id = 'lfo' + n; return { r: p(id + '.rate'), w: p(id + '.wave') * 3, ic: i[id + '.rcv'], oo: o[id + '.out'] }; });
+    // WAVE = constant-period symmetry (SPICE of SEMI/circuits/lfo.py) : the rising part goes from 92 % (RAMP UP) to 8 % (RAMP DOWN) of the cycle
+    const LF = [1, 2].map(n => { const id = 'lfo' + n; return { r: p(id + '.rate'), rise: 0.918 - 0.836 * p(id + '.wave'), ic: i[id + '.rcv'], oo: o[id + '.out'], osq: o[id + '.sq'], otr: o[id + '.trig'] }; });
     const shf = 106 * (A(p('sh.rate')) + 0.0045), C2 = 2.2e-6, kRise = 1 / ((1e3 + 1e6 * A(p('sh.rise'))) * C2 * sr), kFall = 1 / ((1e3 + 1e6 * A(p('sh.fall'))) * C2 * sr), col = p('sh.color');
     const rx = p('ring.xl'), ry = p('ring.yl');
     const fcR = 1500 + 9000 * p('rev.tone') * p('rev.tone');
     const R_ = { gd: (4.7 + 100 * A(p('rev.drive'))) / 22, kt: 1 - Math.exp(-2 * Math.PI * fcR / sr), mw: (2 * p('rev.mix') - 1) * 12,
       kd: 1 - Math.exp(-2 * Math.PI * 4200 / sr), kh: Math.exp(-2 * Math.PI * 120 / sr), ki: 1 - Math.exp(-2 * Math.PI * 5000 / sr) };
+    const spkOn = p('mult.spk') === 0, kS1 = 1 - Math.exp(-2 * Math.PI * 180 / sr), kS2 = 1 - Math.exp(-2 * Math.PI * 6000 / sr);
     const vol = p('out.vol'), gl = p('kb.glide'), kgl = gl < 0.005 ? 1 : 1 - Math.exp(-1 / (sr * 0.002 * Math.pow(1000, gl)));
     const seqOn = p('kb.seq'), step = 60 / 120 / 2, a1 = p('att.a1') * 2 - 1, a2 = p('att.a2') * 2 - 1;
     const g2 = 1 / (2 * sr), cab = this.cab, nc = cab.length, nO = this.nOut, nCs = this.nCst, nI = I.length;
@@ -99,17 +103,17 @@ class SemiEngine {
       if (pat[i['kb.gatein']]) kg = Math.max(kg, I[i['kb.gatein']] > 1.5 ? 5 : 0);
       kb.cv += (kcv - kb.cv) * kgl;
       const gHi = kg > 2.5; if (gHi && !kb.gHi) kb.tr = 0.002 * sr; kb.gHi = gHi;
+      O[o['kb.vel']] = S.vel; O[o['kb.mod']] = S.cc1;
       O[o['kb.cv']] = kb.cv; O[o['kb.gate']] = kg; O[o['kb.trig']] = kb.tr > 0 ? 10 : 0; if (kb.tr > 0) kb.tr--;
-      // ---- LFO 1 / 2 : RAMP UP -> TRI -> RAMP DOWN -> SQUARE, TRIG at the start of each cycle
+      // ---- LFO 1 / 2 : triangle core, WAVE = symmetry (RAMP UP -> TRI -> RAMP DOWN), SQ = Schmitt output, TRIG at the start of each rise
       for (let q = 0; q < 2; q++) {
         const l = S.lfo[q], k = LF[q];
         l.ph += 0.02 * Math.pow(2, k.r * 11.3 + I[k.ic]) / sr; let tr = false;
         if (l.ph >= 1) { l.ph -= Math.floor(l.ph); tr = true; }
-        const ph = l.ph, up = 2 * ph - 1, tri = 1 - 2 * Math.abs(2 * ph - 1) , dn = -up, sq = ph < .5 ? 1 : -1;
-        const seg = Math.min(2, Math.floor(k.w)), f = k.w - seg, W = [up, tri, dn, sq];
-        const v = W[seg] + f * (W[seg + 1] - W[seg]);
-        if (tr) l.tr = 0.005 * sr;
-        O[k.oo] = 5 * v; O[k.oo + 1] = l.tr > 0 ? 10 : 0; if (l.tr > 0) l.tr--;
+        const ph = l.ph, rising = ph < k.rise;
+        const v = rising ? -1 + 2 * ph / k.rise : 1 - 2 * (ph - k.rise) / (1 - k.rise);
+        if (tr) l.tr = 0.0056 * sr;
+        O[k.oo] = 4.9 * v; O[k.osq] = rising ? -5.2 : 5.2; O[k.otr] = l.tr > 0 ? 10 : 0; if (l.tr > 0) l.tr--;
         const b = 0.5 * (v + 1); if (b * b > l.led) l.led = b * b;
       }
       // ---- NOISE / S&H / LAG
@@ -168,14 +172,14 @@ class SemiEngine {
         const q1 = tanh(f.y1), q2 = tanh(f.y2), LP = f.y4, BP = 2 * q1 - 2 * q2, HP = u - 2 * q1 + q2;
         const fo = -0.67 * (BP + fa * (LP - BP) + fc_ * (HP - BP)) / 0.18;   // SPICE : passband -3.5 dB
         f.hp = 0.9993 * (f.hp + fo - f.hpx); f.hpx = fo; O[o['vcf.out']] = f.hp; }
-      // ---- STATE VARIABLE FILTER 12 dB (TPT, soft-clipped integrators), LP -> BP -> HP -> NOTCH
+      // ---- STATE VARIABLE FILTER 12 dB (TPT, soft-clipped integrators), MODE LP -> NOTCH -> HP, BP switch
       { const f = S.svf;
         let fc = 20 * Math.pow(2, 10 * sFr + I[i['svf.env']] * sEnv * 0.8 + I[i['svf.mod']] * sMod * 0.5); fc = cl(fc, 10, 0.42 * sr);
         const g = Math.tan(Math.PI * fc / sr), a1_ = 1 / (1 + g * (g + sK)), a2_ = g * a1_, a3_ = g * a2_;
-        const x = I[i['svf.in']] * 0.2, v3 = x - f.b, v1 = a1_ * f.a + a2_ * v3, v2 = f.b + a2_ * f.a + a3_ * v3;
+        const x = I[i['svf.in']] * 0.2 + (this.rnd() - 0.5) * 1e-5, v3 = x - f.b, v1 = a1_ * f.a + a2_ * v3, v2 = f.b + a2_ * f.a + a3_ * v3;
         f.a = 2.2 * tanh((2 * v1 - f.a) / 2.2); f.b = 2 * v2 - f.b;
         const lp = v2, bp = v1, hp = x - sK * v1 - v2, nt = lp + hp;
-        O[o['svf.out']] = 10.5 * tanh((sw[0] * lp + sw[1] * bp + sw[2] * hp + sw[3] * nt) / 0.2 / 10.5); }
+        O[o['svf.out']] = 10.5 * tanh((sbp ? bp : (1 - sm) * lp + sm * hp) / 0.2 / 10.5); }
       // ---- AMPLIFIER (902 : LIN <-> EXP, soft clip), 2 inputs with level sliders
       { const Vc = Math.max(0, 6 * vfx + 0.6 * vcv * I[i['vca.cv']]);
         let ga = (1 - vr) * Vc / 3 + vr * 2 * Math.pow(10, 13 * (Vc - 6) / 20); if (ga > 2) ga = 2 + 0.6 * tanh((ga - 2) / 0.6);
@@ -199,7 +203,9 @@ class SemiEngine {
       O[o['mult.o1']] = O[o['mult.o2']] = O[o['mult.o3']] = I[i['mult.in']];
       // ---- OUTPUT : VOLUME, MAIN (Eurorack level) and PHONES
       const main = cl(I[i['out.in']] * vol * 1.4, -10, 10); O[o['out.main']] = main; O[o['out.phones']] = main;
-      const y = tanh(main * 0.2); L[t] = y; if (R) R[t] = y;
+      let y = tanh(main * 0.2);
+      if (spkOn) { const z = S.spk; z[0] += kS1 * (y - z[0]); const hpo = y - z[0]; z[1] += kS2 * (hpo - z[1]); z[2] += kS2 * (z[1] - z[2]); y = tanh(1.6 * z[2]) * 0.8; }   // little 40 mm speaker : ~180 Hz -> ~6 kHz
+      L[t] = y; if (R) R[t] = y;
       S.scope[this.cnt % 1024] = main;
       if (++this.cnt >= 2048) {
         this.cnt = 0;

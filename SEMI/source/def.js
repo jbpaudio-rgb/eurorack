@@ -1,7 +1,7 @@
 // ocTavio SEMI - definition of the big semi-modular panel (single source for the engine and the panel).
 // Three tiers, sections left to right. Sliders = 60 mm travel, jacks = Thonkiconn 3.5 mm, Eurorack levels.
 // sl : sliders [id, label, default 0..1, scale ('bi' = -5..+5, 'oct' = -3..+3, or position names)]   sw : toggles [id, label, [positions], default index]
-// in / out : jacks [id, label]            normals : input -> output it receives when nothing is plugged (or a fixed voltage)
+// in / out : jacks [id, label, 'midi' = MIDI 3.5 mm TRS jack, not patchable with CV cables]            normals : input -> output it receives when nothing is plugged (or a fixed voltage)
 const SEMI_DEF = {
   tiers: [
     { title: 'SOURCES', secs: [
@@ -24,7 +24,8 @@ const SEMI_DEF = {
         in: [['in1', 'OSC 1'], ['in2', 'OSC 2'], ['in3', 'OSC 3'], ['in4', 'NOISE'], ['in5', 'RING']], out: [['out', 'MIX']] },
       { id: 'vcf', title: 'LADDER FILTER  24 dB', sl: [['freq', 'FREQUENCY', .46], ['emph', 'EMPHASIS', .35], ['mode', 'MODE', 0, ['LP', 'BP', 'HP']], ['kbd', 'KBD', 1], ['env', 'ENV', .45], ['mod', 'MOD', 0]],
         in: [['in', 'IN'], ['kbd', 'KBD'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },
-      { id: 'svf', title: 'STATE VARIABLE  12 dB', sl: [['freq', 'FREQUENCY', .55], ['reso', 'RESONANCE', .3], ['mode', 'MODE', 0, ['LP', 'BP', 'HP', 'N']], ['env', 'ENV', .3], ['mod', 'MOD', 0]],
+      { id: 'svf', title: 'STATE VARIABLE  12 dB', sl: [['freq', 'FREQUENCY', .55], ['reso', 'RESONANCE', .3], ['mode', 'MODE', 0, ['LP', 'N', 'HP']], ['env', 'ENV', .3], ['mod', 'MOD', 0]],
+        sw: [['bp', 'BP', ['OFF', 'ON'], 0]],
         in: [['in', 'IN'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },
       { id: 'vca', title: 'AMPLIFIER', sl: [['l1', 'LADDER', .8], ['l2', 'STATE VAR.', 0], ['cv', 'ENV', 1], ['initial', 'INITIAL', 0], ['response', 'RESP.', .3, ['LIN', 'EXP']]],
         in: [['in1', 'LADDER'], ['in2', 'ST. VAR.'], ['cv', 'CV']], out: [['out', 'OUT']] },
@@ -34,21 +35,21 @@ const SEMI_DEF = {
         in: [['in', 'IN']], out: [['main', 'MAIN'], ['phones', 'PHONES']] },
     ] },
     { title: 'CONTROL', secs: [
-      { id: 'kb', title: 'KEYBOARD', sl: [['glide', 'GLIDE', 0]],
-        in: [['cvin', 'CV IN'], ['gatein', 'GATE IN']], out: [['cv', 'CV'], ['gate', 'GATE'], ['trig', 'TRIG']] },
+      { id: 'kb', title: 'KEYBOARD · MIDI', sl: [['glide', 'GLIDE', 0]], midi: 1,
+        in: [['cvin', 'CV IN'], ['gatein', 'GATE IN'], ['midiin', 'MIDI IN', 'midi']], out: [['cv', 'CV'], ['gate', 'GATE'], ['trig', 'TRIG'], ['vel', 'VEL'], ['mod', 'MOD'], ['midiout', 'MIDI OUT', 'midi']] },
       { id: 'env1', title: 'ENVELOPE 1', sl: [['a', 'ATTACK', .05], ['d', 'DECAY', .45], ['s', 'SUSTAIN', .3], ['r', 'RELEASE', .35]],
         sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,
         in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '−OUT']] },
       { id: 'env2', title: 'ENVELOPE 2', sl: [['a', 'ATTACK', .03], ['d', 'DECAY', .4], ['s', 'SUSTAIN', .7], ['r', 'RELEASE', .35]],
         sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,
         in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '−OUT']] },
-      { id: 'lfo1', title: 'LFO 1', sl: [['rate', 'RATE', .45], ['wave', 'WAVE', .34, ['~up', '~tri', '~dn', '~sq']]], led: 1,
-        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['trig', 'TRIG']] },
-      { id: 'lfo2', title: 'LFO 2', sl: [['rate', 'RATE', .3], ['wave', 'WAVE', .34, ['~up', '~tri', '~dn', '~sq']]], led: 1,
-        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['trig', 'TRIG']] },
+      { id: 'lfo1', title: 'LFO 1', sl: [['rate', 'RATE', .45], ['wave', 'WAVE', .5, ['~up', '~tri', '~dn']]], led: 1,
+        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['sq', 'SQ'], ['trig', 'TRIG']] },
+      { id: 'lfo2', title: 'LFO 2', sl: [['rate', 'RATE', .3], ['wave', 'WAVE', .5, ['~up', '~tri', '~dn']]], led: 1,
+        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['sq', 'SQ'], ['trig', 'TRIG']] },
       { id: 'att', title: 'ATTENUVERTERS', sl: [['a1', '1', .5, 'bi'], ['a2', '2', .5, 'bi']],
         in: [['in1', 'IN 1'], ['in2', 'IN 2']], out: [['o1', 'OUT 1'], ['o2', 'OUT 2']] },
-      { id: 'mult', title: 'MULTIPLE', sl: [],
+      { id: 'mult', title: 'SPEAKER · MULT', sl: [], spk: 1, sw: [['spk', 'SPEAKER', ['ON', 'OFF'], 1]],
         in: [['in', 'IN']], out: [['o1', ''], ['o2', ''], ['o3', '']] },
     ] },
   ],

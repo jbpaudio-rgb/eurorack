@@ -7,7 +7,7 @@ const txt = (s, a, p) => { const e = el('text', a, p); e.textContent = s; return
 const SP = 15, SWCOL = 14, PAD = 5, JP = 12.5, STRIP = 8, TOP = 4, TIERH = 122, BOT = 17, TRAVEL = 60;
 const Y_LAB = 12.8, Y_TOP = 21.5, Y_IN = 99, Y_OUT = 114;           // slider label, cap centre at value 1 (value 0 = Y_TOP + 60)
 const FONT = "'Barlow Condensed','Arial Narrow',sans-serif";
-const secW = s => { const g = s.sl.length * SP + (s.sw ? SWCOL : 0); const cols = Math.max(s.in.length, s.out.length); return 2 * PAD + Math.max(g, cols * JP); };
+const secW = s => { const g = s.sl.length * SP + (s.sw ? SWCOL : 0) + (s.midi ? SWCOL + 2 : 0) + (s.spk ? 38 : 0); const cols = Math.max(s.in.length, s.out.length); return 2 * PAD + Math.max(g, cols * JP); };
 const tierW = SEMI_DEF.tiers.map(t => t.secs.reduce((a, s) => a + secW(s), 0));
 const INW = Math.ceil(Math.max(...tierW)), PW = INW + 2 * STRIP, PH = TOP + 3 * TIERH + BOT;
 const svg = $('#panel');
@@ -64,7 +64,7 @@ function build() {
   el('line', { x1: STRIP + 1, y1: yb + 1, x2: PW - STRIP - 1, y2: yb + 1, stroke: '#5d5d5d', 'stroke-width': .35 }, svg);
   el('image', { href: LOGO, x: PW - STRIP - 6 - 40, y: yb + 4.5, width: 40, height: 40 * 49 / 273 }, svg);
   txt('SEMI-MODULAR SYNTHESIZER', { x: STRIP + 6, y: yb + 10.4, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 4.2, 'letter-spacing': .9 }, svg);
-  txt('3 VCO · LADDER 24 dB · STATE VARIABLE 12 dB · SPRING REVERB · 1 V/OCT · EURORACK LEVELS', { x: STRIP + 112, y: yb + 10.2, fill: '#9a9a9a', 'font-family': FONT, 'font-weight': 600, 'font-size': 2.3, 'letter-spacing': .4 }, svg);
+  txt('3 VCO · LADDER 24 dB · STATE VARIABLE 12 dB · SPRING REVERB · MIDI · USB · 1 V/OCT · EURORACK LEVELS', { x: STRIP + 112, y: yb + 10.2, fill: '#9a9a9a', 'font-family': FONT, 'font-weight': 600, 'font-size': 2.3, 'letter-spacing': .4 }, svg);
   gNorm = el('g', { id: 'normals', 'pointer-events': 'none' }, svg);
   gCables = el('g', { id: 'cables' }, svg);
   drawNormals(); renderCables(true);
@@ -76,13 +76,15 @@ function drawSection(s, X, y0, W, p) {
   el('line', { x1: X + .9, y1: y0 + 90.5, x2: X + W - .9, y2: y0 + 90.5, stroke: '#4a4a4a', 'stroke-width': .3, 'stroke-dasharray': '1 .8' }, g);
   txt(s.title, { x: X + W / 2, y: y0 + 6.1, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 3.3, 'text-anchor': 'middle', 'letter-spacing': .35 }, g);
   if (s.led) { const c = el('circle', { cx: X + W - 5, cy: y0 + 4.7, r: 1.5, fill: 'url(#lamp)', opacity: .15 }, g); el('circle', { cx: X + W - 5, cy: y0 + 4.7, r: 1.9, fill: 'none', stroke: '#888', 'stroke-width': .25 }, g); LEDS[s.id] = c; }
-  const gw = s.sl.length * SP + (s.sw ? SWCOL : 0), x0 = X + (W - gw) / 2;
+  const gw = s.sl.length * SP + (s.sw ? SWCOL : 0) + (s.midi ? SWCOL + 2 : 0) + (s.spk ? 38 : 0), x0 = X + (W - gw) / 2;
+  if (s.spk) drawSpeaker(x0 + 19, y0 + 47, g);
+  if (s.midi) drawMidiPanel(x0 + s.sl.length * SP + (SWCOL + 2) / 2, y0, g);
   s.sl.forEach(([k, label, , sc], i) => drawSlider(s.id + '.' + k, label, sc, x0 + SP * (i + .5), y0, g, s.title));
-  (s.sw || []).forEach(([k, label, opts], i) => drawToggle(s.id + '.' + k, label, opts, x0 + s.sl.length * SP + SWCOL / 2, y0 + (s.sw.length === 1 ? 46 : 34 + 32 * i), g, s.title));
+  (s.sw || []).forEach(([k, label, opts], i) => drawToggle(s.id + '.' + k, label, opts, x0 + s.sl.length * SP + (s.spk ? 38 : 0) + SWCOL / 2, y0 + (s.sw.length === 1 ? 46 : 34 + 32 * i), g, s.title));
   const cols = Math.max(s.in.length, s.out.length), pitch = Math.min(15, (W - 2 * PAD) / cols);
   [[s.in, Y_IN, 'in'], [s.out, Y_OUT, 'out']].forEach(([list, yy, d]) => {
     const off = X + W / 2 - pitch * list.length / 2;
-    list.forEach(([k, label], c) => drawJack(s.id + '.' + k, label, d, off + pitch * (c + .5), y0 + yy, g, s.title));
+    list.forEach(([k, label, t], c) => t === 'midi' ? drawMidiJack(label, d, off + pitch * (c + .5), y0 + yy, g) : drawJack(s.id + '.' + k, label, d, off + pitch * (c + .5), y0 + yy, g, s.title));
   });
 }
 function drawSlider(key, label, sc, x, y0, p, title) {
@@ -133,6 +135,31 @@ const NSHORT = { 'kb.cv': 'KBD CV', 'kb.gate': 'KBD GATE', 'lfo1.out': 'LFO 1', 
   'vco2.saw': 'OSC 2 SAW', 'vco2.pulse': 'OSC 2 PULSE', 'vco3.saw': 'OSC 3 SAW', 'sh.noise': 'NOISE', 'sh.clock': 'CLOCK', 'sh.sh': 'S&H', 'ring.out': 'RING',
   'mix.out': 'MIX', 'env1.out': 'ENV 1', 'env2.out': 'ENV 2', 'vcf.out': 'LADDER', 'svf.out': 'ST. VAR.', 'vca.out': 'AMP', 'rev.out': 'REVERB' };
 const pitchOf = () => 11.5;
+// MIDI : 3.5 mm TRS jacks (type A), drawn with a dark nut and a frame : they carry MIDI, not CV
+function drawMidiJack(label, d, x, y, p) {
+  el('rect', { x: x - 5.6, y: y - 8.4, width: 11.2, height: 13.2, rx: 1, fill: 'none', stroke: '#9a9a9a', 'stroke-width': .3, 'stroke-dasharray': '.8 .5' }, p);
+  txt(label, { x, y: y - 5.45, fill: '#ffae3d', 'font-family': FONT, 'font-weight': 700, 'font-size': 1.9, 'text-anchor': 'middle' }, p);
+  el('polygon', { points: [0, 1, 2, 3, 4, 5].map(a => (x + 3.3 * Math.cos(a * Math.PI / 3 + Math.PI / 6)) + ',' + (y + 3.3 * Math.sin(a * Math.PI / 3 + Math.PI / 6))).join(' '), fill: '#3a3a3a', stroke: '#777', 'stroke-width': .2 }, p);
+  el('circle', { cx: x, cy: y, r: 2.0, fill: '#060606', stroke: '#444', 'stroke-width': .2 }, p);
+}
+// USB-C (USB-MIDI), LEARN button (MIDI channel = channel of the next note), MIDI activity LED
+function drawMidiPanel(x, y0, p) {
+  txt('USB', { x, y: y0 + 17, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle' }, p);
+  el('rect', { x: x - 4.6, y: y0 + 19.5, width: 9.2, height: 3.4, rx: 1.6, fill: '#bdbdbd', stroke: '#666', 'stroke-width': .25 }, p);
+  el('rect', { x: x - 3.4, y: y0 + 20.5, width: 6.8, height: 1.4, rx: .6, fill: '#111' }, p);
+  txt('MIDI', { x, y: y0 + 36, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle' }, p);
+  const c = el('circle', { cx: x, cy: y0 + 40, r: 1.5, fill: 'url(#lamp)', opacity: .15 }, p); el('circle', { cx: x, cy: y0 + 40, r: 1.9, fill: 'none', stroke: '#888', 'stroke-width': .25 }, p); LEDS.midi = c;
+  txt('LEARN', { x, y: y0 + 56, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle' }, p);
+  el('circle', { cx: x, cy: y0 + 62, r: 3.4, fill: 'url(#nut)', stroke: '#555', 'stroke-width': .2 }, p);
+  el('circle', { cx: x, cy: y0 + 62, r: 2.3, fill: '#1b1b1b', stroke: '#000', 'stroke-width': .2 }, p);
+}
+// 40 mm speaker behind a grille of holes
+function drawSpeaker(x, y, p) {
+  el('circle', { cx: x, cy: y, r: 18, fill: '#0b0b0b', stroke: '#6a6a6a', 'stroke-width': .35 }, p);
+  for (let r = 2.6; r < 16.5; r += 2.6) { const n = Math.max(1, Math.round(2 * Math.PI * r / 2.6));
+    for (let k = 0; k < n; k++) { const a = 2 * Math.PI * k / n + r; el('circle', { cx: x + r * Math.cos(a), cy: y + r * Math.sin(a), r: .75, fill: '#2a2a2a' }, p); } }
+  el('circle', { cx: x, cy: y, r: .75, fill: '#2a2a2a' }, p);
+}
 function drawJack(key, label, d, x, y, p, title) {
   LAB[key] = title + ' · ' + (label || 'MULT') + (d === 'out' ? ' (sortie)' : ' (entrée)');
   if (label) {
@@ -256,7 +283,24 @@ async function startAudio() {
     sp.onaudioprocess = e => engine.render(e.outputBuffer.getChannelData(0), e.outputBuffer.getChannelData(1), e.outputBuffer.length);
     sp.connect(ctx.destination);
   }
-  await ctx.resume(); audioOn = true; $('#pled').classList.add('on');
+  await ctx.resume(); audioOn = true; $('#pled').classList.add('on'); initMidi();
+}
+// ---------------------------------------------------------------- Web MIDI : a real controller plays the KEYBOARD · MIDI section (CV, GATE, VEL, MOD)
+let midiOn = false;
+function midiBlink() { if (LEDS.midi) { LEDS.midi.setAttribute('opacity', 1); clearTimeout(midiBlink.t); midiBlink.t = setTimeout(() => LEDS.midi.setAttribute('opacity', .15), 80); } }
+function onMidi(e) {
+  const [st, d1, d2] = e.data, c = st & 0xf0; midiBlink();
+  if (c === 0x90 && d2 > 0) { send({ t: 'note', on: 1, n: d1, v: d2 }); keyEls[d1] && keyEls[d1].classList.add('on'); }
+  else if (c === 0x80 || (c === 0x90 && d2 === 0)) { send({ t: 'note', on: 0, n: d1 }); if (!noteCnt[d1] && keyEls[d1]) keyEls[d1].classList.remove('on'); }
+  else if (c === 0xb0 && d1 === 1) send({ t: 'cc1', v: d2 });
+}
+async function initMidi() {
+  if (midiOn || !navigator.requestMIDIAccess) return; midiOn = true;
+  try {
+    const m = await navigator.requestMIDIAccess();
+    const hook = () => { const names = []; m.inputs.forEach(inp => { inp.onmidimessage = onMidi; names.push(inp.name); }); if (names.length) status.textContent = 'MIDI : ' + names.join(', '); };
+    hook(); m.onstatechange = hook;
+  } catch (err) { /* no MIDI permission here : the on-screen keyboard still works */ }
 }
 async function stopAudio() { if (ctx) await ctx.suspend(); audioOn = false; $('#pled').classList.remove('on'); }
 $('#startBtn').onclick = () => { $('#startOv').hidden = true; startAudio(); };
