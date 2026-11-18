@@ -1,5 +1,5 @@
 # Builds boitier/apercu-3d.html : 3D preview of the upright SEMI case, ARP 2600 style (three.js).
-# Geometry (mm) : panel 475 x 387 leaning back 10 deg from vertical, set 5 mm into a wooden box
+# Geometry (mm) : panel 475 x 387 leaning back 10 deg from vertical, flush with the front of a wooden box
 # (12 mm plywood, tolex or walnut), sloped front, depth 170 mm at the base, ~100 mm at the top,
 # carry handle on top, rear connector plate (IEC, MIDI, USB) at the bottom of the back.
 import base64, json, os, re, subprocess
@@ -25,14 +25,14 @@ canvas{display:block}
 <span style="width:10px"></span>
 <button data-v="front">Avant</button><button data-v="side">Côté</button><button data-v="back">Arrière</button><button data-v="top">Dessus</button>
 </div>
-<div id="info">Debout comme le ARP 2600 : façade 475 × 387 mm penchée de 10° vers l'arrière. Boîte en contreplaqué 12 mm (tolex ou noyer), environ 499 × 420 × 170 mm, poignée sur le dessus, connecteurs en bas à l'arrière. Glisse pour tourner, pince ou molette pour zoomer.</div>
+<div id="info">Debout comme le ARP 2600 : façade 475 × 387 mm penchée de 10° vers l'arrière. Façade à fleur du boîtier. Boîte en contreplaqué 12 mm recouverte de tolex, environ 499 × 412 × 170 mm, poignée sur le dessus, connecteurs en bas à l'arrière. Glisse pour tourner, pince ou molette pour zoomer.</div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 const H = __HOLES__;
 const W = 475, P = 387, T = 2, LEAN = 10 * Math.PI / 180, TH = 12;      // panel, plywood
-const RB = 22, RT = 20, REC = 5, DB = 170;                                // bottom/top rails, recess, base depth
+const RB = 22, RT = 12, REC = 0, DB = 170;  // panel flush with the box front, top board right on the panel edge                                // bottom/top rails, recess, base depth
 const PH = P * Math.cos(LEAN), PD = P * Math.sin(LEAN);                   // panel rise / setback
 const HT = RB + PH + RT;                                                  // total height
 const zf = DB / 2, zb = -DB / 2;                                          // front / back of the base
