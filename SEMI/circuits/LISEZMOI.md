@@ -24,6 +24,7 @@ Un LM13700 pour les deux (un OTA par LFO), 3 × TL074, 2 × BCM857DS.
 - Trimmer **RV3** par LFO : annule l'offset du LM13700. Réglage : WAVE au milieu, tourner jusqu'à un triangle symétrique.
 
 ## KEYBOARD · MIDI et haut-parleur (`midi.py`, programme dans `../firmware`)
+MIDI IN, MIDI OUT et USB sont à l'arrière, sur une petite carte avec le Pico, le H11L1, les DAC et leurs ampli-ops. Une nappe vers la façade transporte CV, GATE, TRIG, VEL, MOD, la lecture de CV IN / GATE IN, LEARN et la LED.
 Raspberry Pi Pico, 2 × MCP4822 (DAC 12 bits), H11L1 (entrée MIDI), 2 × TL074, LM386.
 - **MIDI IN** (jack 3,5 mm type A) : 0 erreur sur 3 octets, venant d'un émetteur 5 V ou 3,3 V (6 à 9,5 mA dans la LED). **MIDI OUT** : 6,7 mA dans un récepteur standard.
 - **USB-C** : USB-MIDI, reconnu sans pilote. Tout ce qui entre (MIDI IN ou USB) ressort sur MIDI OUT et USB.

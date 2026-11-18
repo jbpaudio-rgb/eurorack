@@ -16,7 +16,7 @@ Grand panneau semi-modulaire dans l'esprit des gros semi-modulaires des années 
 |---|---|
 | Panneau | **475 × 387 mm** (3 rangées de 122 mm + bande logo de 17 mm, bandes argent de 8 mm) |
 | Sliders | 62 sliders, course **60 mm**, pas de 15 mm, capuchon 9 × 12,4 mm (ex. Bourns PTA6043, série PTA 60 mm, à confirmer chez JLCPCB) |
-| Jacks | 85 Thonkiconn 3,5 mm à contact de coupure (normalisations) + 2 jacks MIDI 3,5 mm (type A) + 1 USB-C |
+| Jacks | 85 Thonkiconn 3,5 mm à contact de coupure (normalisations) ; MIDI et USB à l'arrière |
 | Inverseurs | 9 (RANGE ×3, SYNC, KBD, BP, TIME ×2, SPEAKER), mêmes Dailywell 2MS1 que les modules ; 1 bouton LEARN |
 | Haut-parleur | 40 mm, 8 Ω, 1 W, au-dessus du MULT (ampli LM386) |
 
@@ -38,7 +38,7 @@ Si 60 mm ne plaît pas : passer à 45 mm (PTA4543) = changer `TRAVEL` et `SP` da
 - **OUTPUT** : VOLUME, sorties MAIN (niveau Eurorack) et PHONES.
 
 **Rangée 3 – CONTROL**
-- **KEYBOARD · MIDI** : GLIDE ; MIDI IN, MIDI OUT, USB-MIDI, bouton LEARN (canal), LED MIDI ; sorties CV, GATE, TRIG, VEL, MOD ; entrées CV IN et GATE IN. Le MIDI (prise ou USB) joue le clavier interne ; un séquenceur Eurorack branché dans CV IN / GATE IN prend sa place, et ses notes ressortent en MIDI.
+- **KEYBOARD · MIDI** : GLIDE ; bouton LEARN (canal MIDI), LED MIDI ; sorties CV, GATE, TRIG, VEL, MOD ; entrées CV IN et GATE IN. Le MIDI (prise ou USB) joue le clavier interne ; un séquenceur Eurorack branché dans CV IN / GATE IN prend sa place, et ses notes ressortent en MIDI.
 - **ENVELOPE 1 et 2** (911 du module ADSR) : ATTACK, DECAY, SUSTAIN, RELEASE, TIME FAST/SLOW (condensateur ×25, jusqu'à ~2 min), LED, sorties OUT et −OUT.
 - **LFO 1 et 2** (nouveaux, analogiques) : RATE (0,02 à 50 Hz), WAVE RAMPE ↑ → TRI → RAMPE ↓ à vitesse constante, entrée RATE CV (1 V/oct), sorties OUT, SQ et TRIG, LED.
 - **ATTENUVERTERS** : 2 sliders −1 à +1, entrée vide = +5 V (offset).
@@ -64,6 +64,10 @@ Sur la façade, le nom de la source est imprimé en gris sous chaque entrée nor
 | REVERB IN → OUTPUT IN | AMPLIFIER OUT → REVERB OUT |
 | GATE des 2 enveloppes | KEYBOARD GATE |
 | ATTENUVERTERS IN 1 et 2 | +5 V |
+
+## Panneau arrière (`apercu-arriere.png`)
+- **POWER** : embase IEC (C14) avec interrupteur et fusible (T 1 A), reliée à une alimentation fermée ±12 V à l'intérieur du boîtier. Le 230 V ne va que de l'embase à l'alimentation : fils sertis et gainés, terre de l'embase vissée sur le châssis.
+- **MIDI IN**, **MIDI OUT** (jacks 3,5 mm type A) et **USB-C** (USB-MIDI), juste à côté. Ils sont sur une petite carte arrière avec le Pico, l'optocoupleur, les DAC et leurs ampli-ops. Seuls les signaux CV / GATE / TRIG / VEL / MOD, la lecture de CV IN / GATE IN, le bouton LEARN et la LED vont vers la façade par une nappe. L'USB et le SPI restent courts.
 
 ## Circuits nouveaux
 Le filtre à variable d'état, les LFO, la partie MIDI et le haut-parleur sont décrits et vérifiés dans SPICE dans `circuits/` (voir `circuits/LISEZMOI.md`). Le programme du Pico est dans `firmware/` : il compile pour le Pico, et sa logique passe 24 tests sur l'ordinateur (`firmware/test`).

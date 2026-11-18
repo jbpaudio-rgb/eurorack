@@ -1,4 +1,6 @@
 """ocTavio SEMI - KEYBOARD · MIDI section and speaker : analog parts around the RP2040 (Raspberry Pi Pico).
+MIDI IN / OUT and USB-C are on the back panel (next to the IEC inlet), on a small back board with the Pico, H11L1, DACs and output op-amps ;
+a ribbon cable brings CV / GATE / TRIG / VEL / MOD, the CV IN / GATE IN sensing, LEARN and the MIDI LED to the front panel.
 
 MIDI IN (3.5 mm TRS type A : tip = MIDI pin 5, ring = pin 4)
   ring -> R1 220 -> H11L1 LED anode (pin 1) ; LED cathode (pin 2) -> tip ; D1 1N4148 reverse across the LED

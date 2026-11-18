@@ -64,7 +64,7 @@ function build() {
   el('line', { x1: STRIP + 1, y1: yb + 1, x2: PW - STRIP - 1, y2: yb + 1, stroke: '#5d5d5d', 'stroke-width': .35 }, svg);
   el('image', { href: LOGO, x: PW - STRIP - 6 - 40, y: yb + 4.5, width: 40, height: 40 * 49 / 273 }, svg);
   txt('SEMI-MODULAR SYNTHESIZER', { x: STRIP + 6, y: yb + 10.4, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 4.2, 'letter-spacing': .9 }, svg);
-  txt('3 VCO · LADDER 24 dB · STATE VARIABLE 12 dB · SPRING REVERB · MIDI · USB · 1 V/OCT · EURORACK LEVELS', { x: STRIP + 112, y: yb + 10.2, fill: '#9a9a9a', 'font-family': FONT, 'font-weight': 600, 'font-size': 2.3, 'letter-spacing': .4 }, svg);
+  txt('3 VCO · LADDER 24 dB · STATE VARIABLE 12 dB · SPRING REVERB · MIDI · 1 V/OCT · EURORACK LEVELS', { x: STRIP + 112, y: yb + 10.2, fill: '#9a9a9a', 'font-family': FONT, 'font-weight': 600, 'font-size': 2.3, 'letter-spacing': .4 }, svg);
   gNorm = el('g', { id: 'normals', 'pointer-events': 'none' }, svg);
   gCables = el('g', { id: 'cables' }, svg);
   drawNormals(); renderCables(true);
@@ -142,11 +142,8 @@ function drawMidiJack(label, d, x, y, p) {
   el('polygon', { points: [0, 1, 2, 3, 4, 5].map(a => (x + 3.3 * Math.cos(a * Math.PI / 3 + Math.PI / 6)) + ',' + (y + 3.3 * Math.sin(a * Math.PI / 3 + Math.PI / 6))).join(' '), fill: '#3a3a3a', stroke: '#777', 'stroke-width': .2 }, p);
   el('circle', { cx: x, cy: y, r: 2.0, fill: '#060606', stroke: '#444', 'stroke-width': .2 }, p);
 }
-// USB-C (USB-MIDI), LEARN button (MIDI channel = channel of the next note), MIDI activity LED
+// LEARN button (MIDI channel = channel of the next note) and MIDI activity LED ; MIDI IN / OUT and USB are on the back panel
 function drawMidiPanel(x, y0, p) {
-  txt('USB', { x, y: y0 + 17, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle' }, p);
-  el('rect', { x: x - 4.6, y: y0 + 19.5, width: 9.2, height: 3.4, rx: 1.6, fill: '#bdbdbd', stroke: '#666', 'stroke-width': .25 }, p);
-  el('rect', { x: x - 3.4, y: y0 + 20.5, width: 6.8, height: 1.4, rx: .6, fill: '#111' }, p);
   txt('MIDI', { x, y: y0 + 36, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle' }, p);
   const c = el('circle', { cx: x, cy: y0 + 40, r: 1.5, fill: 'url(#lamp)', opacity: .15 }, p); el('circle', { cx: x, cy: y0 + 40, r: 1.9, fill: 'none', stroke: '#888', 'stroke-width': .25 }, p); LEDS.midi = c;
   txt('LEARN', { x, y: y0 + 56, fill: '#fff', 'font-family': FONT, 'font-weight': 700, 'font-size': 2.15, 'text-anchor': 'middle' }, p);

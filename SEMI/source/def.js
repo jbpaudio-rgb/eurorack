@@ -36,7 +36,7 @@ const SEMI_DEF = {
     ] },
     { title: 'CONTROL', secs: [
       { id: 'kb', title: 'KEYBOARD · MIDI', sl: [['glide', 'GLIDE', 0]], midi: 1,
-        in: [['cvin', 'CV IN'], ['gatein', 'GATE IN'], ['midiin', 'MIDI IN', 'midi']], out: [['cv', 'CV'], ['gate', 'GATE'], ['trig', 'TRIG'], ['vel', 'VEL'], ['mod', 'MOD'], ['midiout', 'MIDI OUT', 'midi']] },
+        in: [['cvin', 'CV IN'], ['gatein', 'GATE IN']], out: [['cv', 'CV'], ['gate', 'GATE'], ['trig', 'TRIG'], ['vel', 'VEL'], ['mod', 'MOD']] },   // MIDI IN / OUT and USB : back panel
       { id: 'env1', title: 'ENVELOPE 1', sl: [['a', 'ATTACK', .05], ['d', 'DECAY', .45], ['s', 'SUSTAIN', .3], ['r', 'RELEASE', .35]],
         sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,
         in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '−OUT']] },
