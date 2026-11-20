@@ -1,0 +1,72 @@
+// ocTavio SEMI - definition of the big semi-modular panel (single source for the engine and the panel).
+// Three tiers, sections left to right. Sliders = 60 mm travel, jacks = Thonkiconn 3.5 mm, Eurorack levels.
+// sl : sliders [id, label, default 0..1, scale ('bi' = -5..+5, 'oct' = -3..+3, or position names)]   sw : toggles [id, label, [positions], default index]
+// in / out : jacks [id, label, 'midi' = MIDI 3.5 mm TRS jack, not patchable with CV cables]            normals : input -> output it receives when nothing is plugged (or a fixed voltage)
+const SEMI_DEF = {
+  tiers: [
+    { title: 'SOURCES', secs: [
+      { id: 'vco1', title: 'OSCILLATOR 1', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .5, 'bi'], ['width', 'WIDTH', .5], ['fm', 'FM', 0], ['pwm', 'PWM', 0]],
+        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0]],
+        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },
+      { id: 'vco2', title: 'OSCILLATOR 2', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .52, 'bi'], ['width', 'WIDTH', .3], ['fm', 'FM', 0], ['pwm', 'PWM', 0]],
+        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0], ['sync', 'SYNC', ['OFF', 'ON'], 0]],
+        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM'], ['sync', 'SYNC']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },
+      { id: 'vco3', title: 'OSCILLATOR 3', sl: [['coarse', 'COARSE', .5, 'oct'], ['fine', 'FINE', .5, 'bi'], ['width', 'WIDTH', .5], ['fm', 'FM', 0], ['pwm', 'PWM', 0], ['stab', 'STABILITY', .2]],
+        sw: [['range', 'RANGE', ['AUDIO', 'LO'], 0], ['kbd', 'KBD', ['ON', 'OFF'], 0]],
+        in: [['voct', '1V/OCT'], ['fm', 'FM'], ['pwm', 'PWM']], out: [['sine', 'SINE'], ['tri', 'TRI'], ['saw', 'SAW'], ['pulse', 'PULSE']] },
+      { id: 'ring', title: 'RING MOD', sl: [['xl', 'X LEVEL', .7], ['yl', 'Y LEVEL', .7]],
+        in: [['x', 'X'], ['y', 'Y']], out: [['out', 'RING']] },
+      { id: 'sh', title: 'NOISE · S&H · LAG', sl: [['color', 'COLOR', 0], ['rate', 'CLOCK', .5], ['rise', 'RISE', .3], ['fall', 'FALL', .3]],
+        in: [['shin', 'S&H IN'], ['clk', 'CLOCK'], ['lagin', 'LAG IN']], out: [['noise', 'NOISE'], ['clock', 'CLOCK'], ['sh', 'S&H'], ['lag', 'LAG']] },
+    ] },
+    { title: 'FILTERS & AMPLIFIER', secs: [
+      { id: 'mix', title: 'AUDIO MIXER', sl: [['l1', 'OSC 1', .8], ['l2', 'OSC 2', .6], ['l3', 'OSC 3', 0], ['l4', 'NOISE', 0], ['l5', 'RING', 0]],
+        in: [['in1', 'OSC 1'], ['in2', 'OSC 2'], ['in3', 'OSC 3'], ['in4', 'NOISE'], ['in5', 'RING']], out: [['out', 'MIX']] },
+      { id: 'vcf', title: 'LADDER FILTER  24 dB', sl: [['freq', 'FREQUENCY', .46], ['emph', 'EMPHASIS', .35], ['mode', 'MODE', 0, ['LP', 'BP', 'HP']], ['kbd', 'KBD', 1], ['env', 'ENV', .45], ['mod', 'MOD', 0]],
+        in: [['in', 'IN'], ['kbd', 'KBD'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },
+      { id: 'svf', title: 'STATE VARIABLE  12 dB', sl: [['freq', 'FREQUENCY', .55], ['reso', 'RESONANCE', .3], ['mode', 'MODE', 0, ['LP', 'N', 'HP']], ['env', 'ENV', .3], ['mod', 'MOD', 0]],
+        sw: [['bp', 'BP', ['OFF', 'ON'], 0]],
+        in: [['in', 'IN'], ['env', 'ENV'], ['mod', 'MOD']], out: [['out', 'OUT']] },
+      { id: 'vca', title: 'AMPLIFIER', sl: [['l1', 'LADDER', .8], ['l2', 'STATE VAR.', 0], ['cv', 'ENV', 1], ['initial', 'INITIAL', 0], ['response', 'RESP.', .3, ['LIN', 'EXP']]],
+        in: [['in1', 'LADDER'], ['in2', 'ST. VAR.'], ['cv', 'CV']], out: [['out', 'OUT']] },
+      { id: 'rev', title: 'SPRING REVERB', sl: [['drive', 'DRIVE', .5], ['tone', 'TONE', .5], ['mix', 'MIX', .25]],
+        in: [['in', 'IN']], out: [['out', 'OUT']] },
+      { id: 'out', title: 'OUTPUT', sl: [['vol', 'VOLUME', .7]],
+        in: [['in', 'IN L'], ['inr', 'IN R']], out: [['main', 'MAIN'], ['phones', 'PHONES']], rear: 1 },   // MAIN = L+R (Eurorack level) ; rear : MAIN OUT L / R line level
+    ] },
+    { title: 'CONTROL', secs: [
+      { id: 'kb', title: 'KEYBOARD · MIDI', sl: [['glide', 'GLIDE', 0]], midi: 1,
+        in: [['cvin', 'CV IN'], ['gatein', 'GATE IN']], out: [['cv', 'CV'], ['gate', 'GATE'], ['trig', 'TRIG'], ['vel', 'VEL'], ['mod', 'MOD']] },   // MIDI IN / OUT and USB : back panel
+      { id: 'env1', title: 'ENVELOPE 1', sl: [['a', 'ATTACK', .05], ['d', 'DECAY', .45], ['s', 'SUSTAIN', .3], ['r', 'RELEASE', .35]],
+        sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,
+        in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '−OUT']] },
+      { id: 'env2', title: 'ENVELOPE 2', sl: [['a', 'ATTACK', .03], ['d', 'DECAY', .4], ['s', 'SUSTAIN', .7], ['r', 'RELEASE', .35]],
+        sw: [['speed', 'TIME', ['FAST', 'SLOW'], 0]], led: 1,
+        in: [['gate', 'GATE']], out: [['out', 'OUT'], ['inv', '−OUT']] },
+      { id: 'lfo1', title: 'LFO 1', sl: [['rate', 'RATE', .45], ['wave', 'WAVE', .5, ['~up', '~tri', '~dn']]], led: 1,
+        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['sq', 'SQ'], ['trig', 'TRIG']] },
+      { id: 'lfo2', title: 'LFO 2', sl: [['rate', 'RATE', .3], ['wave', 'WAVE', .5, ['~up', '~tri', '~dn']]], led: 1,
+        in: [['rcv', 'RATE CV']], out: [['out', 'OUT'], ['sq', 'SQ'], ['trig', 'TRIG']] },
+      { id: 'att', title: 'ATTENUVERTERS', sl: [['a1', '1', .5, 'bi'], ['a2', '2', .5, 'bi']],
+        in: [['in1', 'IN 1'], ['in2', 'IN 2']], out: [['o1', 'OUT 1'], ['o2', 'OUT 2']] },
+      { id: 'mult', title: 'SPEAKER · MULT', sl: [], spk: 1, sw: [['spk', 'SPEAKER', ['ON', 'OFF'], 1]],
+        in: [['in', 'IN']], out: [['o1', ''], ['o2', ''], ['o3', '']] },
+    ] },
+  ],
+  // pre-patched connections (switching jacks : plugging a cable into the input breaks the normal)
+  normals: {
+    'vco1.voct': 'kb.cv', 'vco2.voct': 'kb.cv', 'vco3.voct': 'kb.cv',
+    'vco1.fm': 'lfo1.out', 'vco2.fm': 'lfo1.out', 'vco3.fm': 'lfo1.out',
+    'vco1.pwm': 'lfo2.out', 'vco2.pwm': 'lfo2.out', 'vco3.pwm': 'lfo2.out',
+    'vco2.sync': 'vco1.pulse',
+    'ring.x': 'vco1.saw', 'ring.y': 'vco2.saw',
+    'sh.shin': 'sh.noise', 'sh.clk': 'sh.clock', 'sh.lagin': 'sh.sh',
+    'mix.in1': 'vco1.saw', 'mix.in2': 'vco2.pulse', 'mix.in3': 'vco3.saw', 'mix.in4': 'sh.noise', 'mix.in5': 'ring.out',
+    'vcf.in': 'mix.out', 'vcf.kbd': 'kb.cv', 'vcf.env': 'env1.out', 'vcf.mod': 'sh.sh',
+    'svf.in': 'mix.out', 'svf.env': 'env1.out', 'svf.mod': 'lfo2.out',
+    'vca.in1': 'vcf.out', 'vca.in2': 'svf.out', 'vca.cv': 'env2.out',
+    'rev.in': 'vca.out', 'out.in': 'rev.out', 'out.inr': 'rev.out',   // the reverb is normalled to both IN L and IN R
+    'env1.gate': 'kb.gate', 'env2.gate': 'kb.gate',
+    'att.in1': 5, 'att.in2': 5,
+  },
+};

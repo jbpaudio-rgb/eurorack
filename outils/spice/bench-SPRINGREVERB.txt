@@ -1,0 +1,4 @@
+== SPRINGREVERB
+  IN ±2 V, DRIVE au milieu, MIX 0.0 : courant dans la cuve ±0.82 mA, retour cuve ±0.47 mV, WET ±0.08 V, OUT ±1.92 V
+  IN ±2 V, DRIVE au milieu, MIX 0.5 : courant dans la cuve ±0.82 mA, retour cuve ±0.47 mV, WET ±0.08 V, OUT ±1.01 V
+  IN ±2 V, DRIVE au milieu, MIX 1.0 : courant dans la cuve ±0.82 mA, retour cuve ±0.47 mV, WET ±0.08 V, OUT ±0.10 V

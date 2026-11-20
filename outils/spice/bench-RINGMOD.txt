@@ -1,0 +1,3 @@
+== RINGMOD
+  X = 1 kHz ±5 V, Y = 150 Hz ±5 V : RING ±1.97 V ; bandes 850 / 1150 Hz 0.6 / 0.6 dBV ; fuite X (1 kHz) -23 dB, fuite Y (150 Hz) -44 dB (trimmers au milieu)
+  Y vide (+5 V) : RING ±1.90 V (le module devient un VCA)

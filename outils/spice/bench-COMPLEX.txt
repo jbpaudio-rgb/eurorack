@@ -1,0 +1,6 @@
+== COMPLEX
+  SINE       :   1066.2 Hz, de  -5.29 à   8.72 V
+  SQUARE     :    508.3 Hz, de  -5.04 à   5.04 V
+  FINAL      :    506.5 Hz, de  -2.74 à   2.92 V
+  TRI        :    839.7 Hz, de  -4.87 à   7.49 V
+  SIGNAL     :    839.7 Hz, de  -4.87 à   7.47 V

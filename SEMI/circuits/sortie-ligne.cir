@@ -1,0 +1,36 @@
+* rear MAIN OUT L / R line driver (one channel, x2 = one TL072). 10 Vpp Eurorack in -> 3.1 Vpp line out, 20 Hz-20 kHz within 0.2 dB (ngspice -b sortie-ligne.cir)
+.model DLIN D(n=0.01)
+.subckt TL07X inp inn out vp vn
+Rin inp inn 1e12
+Cin inp inn 2p
+Bg 0 n1 I = 0.69m*tanh((v(inp)-v(inn))*1.449)
+R1 n1 0 2e8
+C1 n1 0 53p
+Dh n1 hi DLIN
+Vh hi 0 14
+Dl lo n1 DLIN
+Vl lo 0 -14
+Bo no 0 V = min(max(v(n1), v(vn)+1.5), v(vp)-1.5)
+Ro no out 50
+.ends
+Vp vp 0 12
+Vn vn 0 -12
+Vin in 0 dc 0 ac 1 sin(0 5 1k)
+R1 in a 22k
+R2 a 0 10k
+C0 a 0 220p
+X1 a o o vp vn TL07X
+R3 o b 100
+C3 b out 10u
+R4 out 0 100k
+Rl out 0 10k
+.control
+ac dec 20 2 200k
+let g=db(v(out))
+meas ac g1k find g at=1k
+meas ac f_lo when g=g1k-3 cross=1
+meas ac f_hi when g=g1k-3 cross=last
+tran 5u 6m
+meas tran vpp pp v(out) from=2m to=6m
+.endc
+.end

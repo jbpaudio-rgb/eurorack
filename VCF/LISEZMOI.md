@@ -1,5 +1,7 @@
 # Octavio VCF — filtre ladder façon Moog, LP / BP / HP, Eurorack 10 HP (rev 0.3)
 
+> **17 nov. 2026 – SPICE** : le mode LP laissait passer le passe-bande (≈ −18 dB au-dessus de la coupure), parce que le gain de l'OTA « a » n'était pas exactement 1. R80 = 8,2k + trimmer RV7 (2k), et R82 = 7,5k + RV8 (2k) pour le HP. Réglés, le LP descend à ≈ −41 dB et le HP rejette le grave à ≈ −45 dB ; le LP gagne aussi ≈ 2 dB de niveau. Voir `simulation-spice-modes.png` et `outils/spice/LISEZMOI.md`.
+
 ## Façade (de haut en bas)
 - **rev 0.3 : passage en 10 HP** pour donner de l'espace : colonnes plus larges, atténuateurs CONTOUR / FREQ CV / EMPH CV plus gros.
 - **VCF** entre les trous du haut
@@ -22,6 +24,10 @@
 - Sortie couplée en alternatif (C20 2,2 µF), 1 kΩ. Phase inversée par rapport à l'entrée (inaudible).
 
 Simulation transistor (modèle Ebers-Moll + petits signaux) : gain unité dans les trois modes, pics de résonance à la coupure (≈ +7 dB à 3,5, ≈ +13 dB à 4,4 en LP), voir `simulation-modes.png`. Le plancher du HP vers 10 Hz est d'environ −45 dB (dépend de la précision des résistances du mélangeur, 1 %).
+
+## Réglage des modes (une fois, module chaud)
+1. Mode tout en bas (LP), EMPHASIS à 0, FREQUENCY vers 9 h. Entrer un sinus de 5 kHz dans IN 1 : tourner **RV7** pour avoir le **moins** de sortie possible (au son, ou à l'oscilloscope).
+2. Mode tout en haut (HP), FREQUENCY vers 15 h. Entrer un sinus de 30 Hz : tourner **RV8** pour le **moins** de sortie possible.
 
 ## À vérifier avant de commander
 - **Placement** : regrouper Q1–Q5 et C11–C14 serrés et symétriques au routage (le placement actuel est automatique).

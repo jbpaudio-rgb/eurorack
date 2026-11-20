@@ -1,0 +1,33 @@
+== MIDI IN (H11L1, sortie vers le RX du Pico à 3,3 V)
+  émetteur 5V  : courant LED 6.2 mA, RX de 0.10 à 3.30 V, 0 bit faux sur 30, retard des fronts 0.5 à 0.5 µs (bit = 32 µs)
+  émetteur 3V3 : courant LED 9.5 mA, RX de 0.10 à 3.30 V, 0 bit faux sur 30, retard des fronts 0.5 à 0.5 µs (bit = 32 µs)
+== MIDI OUT (3,3 V, 33 Ω / 10 Ω) vers une entrée MIDI standard (220 Ω + LED d optocoupleur)
+  bit 0 (TX bas)  : 6.7 mA dans la LED du récepteur (MIDI demande ≈ 5 mA pour un 0, ≈ 0 au repos)
+  repos (TX haut) : 0.0 mA dans la LED du récepteur (MIDI demande ≈ 5 mA pour un 0, ≈ 0 au repos)
+== Sorties CV (DAC MCP4822 → TL074)
+  code    0 : CV -3.564 V
+  code 1475 : CV -0.001 V
+  code 2048 : CV +1.383 V
+  code 4095 : CV +6.328 V
+  pente 2.416 mV par pas → un demi-ton = 34.5 pas (≈ 3 cents par pas, calibré en 2 points)
+  VEL / MOD : de 0.000 à 9.89 V
+  GATE 0.00 / 4.93 V, TRIG 0.00 / 9.97 V
+== Lecture de CV IN / GATE IN (CV → MIDI)
+  CV  -12.0 V → ADC -0.081 V
+  CV  -10.0 V → ADC 0.150 V
+  CV   -3.6 V → ADC 1.111 V
+  CV   +0.0 V → ADC 1.652 V
+  CV   +6.4 V → ADC 2.613 V
+  CV  +10.0 V → ADC 3.154 V
+  CV  +15.0 V → ADC 3.431 V
+  GATE  0.0 V → GP9 3.30 V (repos)
+  GATE  1.0 V → GP9 3.25 V (repos)
+  GATE  1.5 V → GP9 0.07 V (gate)
+  GATE  2.5 V → GP9 0.03 V (gate)
+  GATE  5.0 V → GP9 0.02 V (gate)
+  GATE 10.0 V → GP9 0.01 V (gate)
+== Haut-parleur (LM386, 8 Ω)
+  OUTPUT ±2,5 V         : ±0.90 V sur le HP, 50 mW
+  OUTPUT ±5 V           : ±1.79 V sur le HP, 200 mW
+  OUTPUT ±10 V (maximum): ±3.58 V sur le HP, 801 mW
+  casque branché : ±0.1 mV sur le HP (coupé)

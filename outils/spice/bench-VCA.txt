@@ -1,0 +1,19 @@
+== VCA
+  LIN, IN 1 = ±5 V, CV 1 =    0 V : OUT+   0.01 V crête, offset  360.3 mV
+  LIN, IN 1 = ±5 V, CV 1 =  2.5 V : OUT+   3.97 V crête, offset  615.2 mV
+  LIN, IN 1 = ±5 V, CV 1 =    5 V : OUT+   5.71 V crête, offset  475.5 mV
+  LIN, IN 1 = ±5 V, CV 1 =   10 V : OUT+   6.43 V crête, offset  416.9 mV
+  EXP, CV 1 = 5 V : OUT+   2.56 V crête
+  FIXED CONTROL VOLTAGE au maximum, sans CV : OUT+   5.47 V crête
+  fuite de CV (entrée muette, CV 0→10 V) : OUT+ se décale de  930.0 mV (trimmers au milieu)
+    RV2 0.05 : 2002 mV
+    RV2 0.15 : 1348 mV
+    RV2 0.25 : 696 mV
+    RV2 0.35 : 45 mV
+    RV2 0.45 : 605 mV
+    RV2 0.55 : 1255 mV
+    RV2 0.65 : 1905 mV
+    RV2 0.75 : 2555 mV
+    RV2 0.85 : 3207 mV
+    RV2 0.95 : 3859 mV
+  réglage CV REJECT (RV2) : meilleure fuite 45 mV avec RV2 à 0.35 de sa course

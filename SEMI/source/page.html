@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ocTavio SEMI – prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Barlow+Condensed:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{ color-scheme:dark;
+  --bg:#100f0e; --bar:#1a1815; --ink:#ece5d3; --dim:#968d7c; --line:#2f2b27; --lamp:#ffae3d;
+  --f-disp:'Big Shoulders Display','Arial Narrow',Impact,sans-serif; --f-ui:'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif; --f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace; }
+*{box-sizing:border-box} [hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);overscroll-behavior:none}
+body{color:var(--ink);font-family:var(--f-ui);display:flex;flex-direction:column;overflow:hidden;padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+button{font-family:var(--f-ui);font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#211f1b;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 10px;min-height:34px;cursor:pointer}
+button:active{background:#2c2924} button:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding-block:8px}
+.brand{font-family:var(--f-disp);font-weight:800;font-size:28px;line-height:.9;letter-spacing:.02em;margin-right:4px}
+.brand small{display:block;font-family:var(--f-ui);font-weight:500;font-size:10.5px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-top:3px}
+.grp{display:flex;gap:6px;align-items:center}
+.lb{display:flex;align-items:center;gap:8px}
+.led{width:10px;height:10px;border-radius:50%;background:#3a2414;box-shadow:inset 0 0 0 1px #000;flex:none}
+.led.on{background:var(--lamp);box-shadow:0 0 8px 2px #ffae3d88}
+#scope{height:34px;width:120px;background:#0b0a09;border:1px solid var(--line);border-radius:4px}
+#status{font-family:var(--f-mono);font-size:11px;color:var(--lamp);margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46ch}
+#wrap{flex:1;min-height:0;overflow:auto;position:relative;background:#0a0908;border-radius:6px;-webkit-overflow-scrolling:touch}
+.cab{position:relative;display:inline-block;margin:10px;padding:16px;border-radius:9px;
+  background:repeating-linear-gradient(90deg,rgba(0,0,0,.10) 0 2px,transparent 2px 7px),repeating-linear-gradient(90deg,rgba(255,214,170,.05) 0 1px,transparent 1px 19px),linear-gradient(180deg,#7d4828,#5c331b 55%,#45260f);
+  box-shadow:0 8px 20px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,220,180,.18)}
+#panel{display:block;touch-action:pan-x pan-y}
+.sl,.sw{cursor:ns-resize;touch-action:none} .sw{cursor:pointer}
+.jack{cursor:crosshair;touch-action:none}
+#panel.faded #cables{opacity:.3}
+#panel:not(.norm) #normals{display:none}
+#kbdWrap{display:flex;gap:8px;padding-block:8px calc(8px + env(safe-area-inset-bottom,0px));height:112px;flex:none}
+.octs{display:flex;flex-direction:column;gap:6px;justify-content:center;align-items:center}
+.octs button{width:44px;padding:0} .octs span{font-family:var(--f-mono);font-size:11px;color:var(--lamp)}
+#kHold{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:58px;padding:0;flex:none}
+#kHold.on{border-color:var(--lamp);color:var(--lamp)}
+#kbd{flex:1;position:relative;touch-action:none;background:#0b0a09;border-radius:4px;overflow:hidden;border-top:7px solid #5c331b;min-width:0}
+.wk{position:absolute;top:0;bottom:0;background:linear-gradient(#f4f0e4,#d9d2bf);border-right:1px solid #857c6d;border-radius:0 0 4px 4px}
+.wk span{position:absolute;bottom:5px;left:0;right:0;text-align:center;font:500 9px var(--f-mono);color:#6d6457;pointer-events:none}
+.wk.on{background:linear-gradient(#ffdca0,#e8b25e)}
+.bk{position:absolute;top:0;height:60%;z-index:2;background:linear-gradient(#2c2925,#0c0b0a);border-radius:0 0 3px 3px;box-shadow:0 2px 3px #000}
+.bk.on{background:linear-gradient(#b06d20,#5c330a)}
+.ov{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(5,4,3,.72);padding:16px}
+.card{background:var(--bar);border:1px solid var(--line);border-radius:8px;padding:22px;max-width:480px;width:100%;box-shadow:0 20px 50px #000;max-height:100%;overflow:auto}
+.card h2{font-family:var(--f-disp);font-weight:800;font-size:34px;line-height:1;margin:0 0 6px;text-wrap:balance}
+.card p{font-size:15px;line-height:1.4;color:#cfc6b3;margin:8px 0}
+.card ul{margin:10px 0 16px;padding-left:18px;font-size:15px;line-height:1.45;color:#cfc6b3}
+.card .go{width:100%;min-height:48px;font-size:17px;background:var(--lamp);color:#1a1209;border-color:var(--lamp)}
+@media (max-width:640px){ .brand small{display:none} #status{order:9;margin-left:0;max-width:100%;flex-basis:100%} button{font-size:13px;padding:6px 8px} #scope{display:none} }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">ocTavio SEMI<small>semi-modulaire · prototype</small></div>
+  <div class="grp">
+    <button id="power" class="lb"><span class="led" id="pled"></span>Son</button>
+    <button id="bSeq" class="lb"><span class="led on" id="sled"></span>Séquence</button>
+    <canvas id="scope" width="240" height="68"></canvas>
+  </div>
+  <div class="grp">
+    <button id="bNorm" class="lb"><span class="led" id="nled"></span>Normalisations</button>
+    <button id="bClear">Tout débrancher</button>
+    <button id="bReset">Réglages de départ</button>
+  </div>
+  <div class="grp">
+    <button id="zFit">Ajuster</button>
+    <button id="zOut" aria-label="Dézoomer">−</button>
+    <button id="zIn" aria-label="Zoomer">+</button>
+    <button id="cabOp">Câbles</button>
+    <button id="kbToggle" class="lb"><span class="led on" id="kled"></span>Clavier</button>
+    <button id="help" aria-label="Aide">?</button>
+  </div>
+  <div id="status">Glisse un slider pour lire sa valeur</div>
+</header>
+
+<div id="wrap"><div class="cab"><svg id="panel" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
+
+<div id="kbdWrap">
+  <div class="octs"><button id="kUp" aria-label="Octave plus haut">▲</button><span id="kOct">C3</span><button id="kDn" aria-label="Octave plus bas">▼</button></div>
+  <button id="kHold"><span class="led" id="hled"></span>Hold</button>
+  <div id="kbd" aria-label="Clavier"></div>
+</div>
+
+<div class="ov" id="startOv">
+  <div class="card">
+    <h2>ocTavio SEMI</h2>
+    <p>Prototype du grand semi-modulaire : 3 oscillateurs, filtre ladder 24 dB, filtre à variable d’état 12 dB, VCA, 2 enveloppes, 2 LFO, bruit · S&amp;H · lag, ring mod, réverbe à ressort. 62 sliders de 60 mm, jacks 3,5 mm aux niveaux Eurorack.</p>
+    <ul>
+      <li>Il sonne sans aucun câble : tout est pré-câblé (normalisations). Un câble branché dans une entrée coupe son câblage interne.</li>
+      <li>Sliders : glisse vers le haut ou le bas, double-touche pour revenir au réglage de départ. Inverseurs : touche.</li>
+      <li>Glisse d’une prise à une autre pour tirer un câble, touche une prise branchée pour la débrancher.</li>
+      <li>« Normalisations » montre en pointillé ce qui est câblé à l’intérieur.</li>
+    </ul>
+    <button class="go" id="startBtn">Allumer</button>
+  </div>
+</div>
+<div class="ov" id="helpOv" hidden>
+  <div class="card">
+    <h2>Le panneau</h2>
+    <ul>
+      <li><b>Rangée du haut :</b> 3 oscillateurs (façon 921), ring mod, bruit / S&amp;H / lag.</li>
+      <li><b>Milieu :</b> mixeur 5 entrées → filtre ladder et filtre à variable d’état en parallèle → amplificateur → réverbe → sortie.</li>
+      <li><b>Bas :</b> clavier (CV, GATE, TRIG, entrées CV IN / GATE IN pour un séquenceur Eurorack), 2 enveloppes FAST / SLOW, 2 LFO, 2 atténuateurs / inverseurs (entrée vide = +5 V), multiple.</li>
+      <li><b>Prises :</b> étiquette blanche = sortie, étiquette noire = entrée. 1 V/oct, audio ±5 V, enveloppes 0 à 10 V, comme les modules ocTavio Eurorack.</li>
+      <li><b>Son :</b> les mêmes modèles de comportement que le simulateur Eurorack ; ça montre le caractère et les plages, pas une vérification composant par composant.</li>
+    </ul>
+    <button class="go" id="helpClose">Compris</button>
+  </div>
+</div>
+<script>
+__DEF__
+__ENGINE__
+const WORKLET_SRC = __WORKLET__;
+const LOGO = '__LOGO__';
+__APP__
+</script>
+</body>
+</html>

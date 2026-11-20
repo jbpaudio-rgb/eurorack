@@ -1,0 +1,3 @@
+== MIX
+  IN 1 = ±2 V sinus + IN 2 = 1 V, niveaux à fond, MASTER au minimum : OUT ±2.00 V autour de 1.00 V, −OUT autour de -1.00 V
+  IN 1 = ±5 V, MASTER à fond : OUT de -7.66 à 7.66 V, 3e harmonique -12 dB (saturation douce)

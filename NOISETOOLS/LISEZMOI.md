@@ -1,5 +1,7 @@
 # Octavio NOISE TOOLS — bruit, impulsions, S&H et slew, Eurorack 10 HP (rev 0.1)
 
+> **17 nov. 2026 – SPICE** : R24 déplacée (100k entre la grille du JFET et l'entrée tamponnée, au lieu de 1M vers le condensateur, qui le vidait). Le S&H tient maintenant ses valeurs. Voir `outils/spice/LISEZMOI.md`.
+
 D'après l'**Intellijel Noise Tools** (module 1U de 22 HP), redessiné en 3U dans le style ocTavio. Tout est analogique et le circuit est le nôtre.
 
 ## Façade

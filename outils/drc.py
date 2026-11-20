@@ -1,7 +1,7 @@
 """Small independent DRC on the routed .kicad_pcb : every net fully connected (pads, tracks, vias),
 and copper-to-copper clearance between different nets on each layer."""
 import sys, math
-sys.path.insert(0, "/home/claude/work/fab")
+sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))
 from gerber import load, on
 
 def seg_pt(px, py, ax, ay, bx, by):

@@ -1,0 +1,6 @@
+== ATTINV
+  INV, bouton à fond      : gain +0.99 ; canal 2 vide (+5 V) → OUT 2 = +4.68 V
+  INV, bouton au milieu   : gain -0.00 ; canal 2 vide (+5 V) → OUT 2 = -0.00 V
+  INV, bouton au minimum  : gain -0.99 ; canal 2 vide (+5 V) → OUT 2 = -4.68 V
+  ATT, bouton à fond      : gain +0.99 ; canal 2 vide (+5 V) → OUT 2 = +4.68 V
+  ATT, bouton au milieu   : gain +0.50 ; canal 2 vide (+5 V) → OUT 2 = +2.34 V

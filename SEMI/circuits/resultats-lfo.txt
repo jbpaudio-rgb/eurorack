@@ -1,0 +1,18 @@
+== RATE (WAVE au triangle)
+  RATE 0.00 :    0.022 Hz, OUT de -4.87 à 4.87 V
+  RATE 0.25 :    0.150 Hz, OUT de -4.87 à 4.87 V
+  RATE 0.50 :    1.030 Hz, OUT de -4.87 à 4.87 V
+  RATE 0.75 :    7.194 Hz, OUT de -4.88 à 4.88 V
+  RATE 1.00 :   49.671 Hz, OUT de -4.89 à 4.89 V
+  -> 11.2 octaves (visé 0,02 → 50 Hz = 11,3)
+== RATE CV (RATE 0,5)
+  CV -2 V : × 0.252 (visé × 0.25), soit 0.995 oct/V
+  CV +1 V : × 1.990 (visé × 2), soit 0.993 oct/V
+  CV +2 V : × 3.950 (visé × 4), soit 0.991 oct/V
+== WAVE (RATE 0,5) : la vitesse doit rester la même
+  WAVE 0.00 RAMPE ↑  : 0.985 Hz, montée = 91.8 % du cycle
+  WAVE 0.25          : 1.027 Hz, montée = 73.7 % du cycle
+  WAVE 0.50 TRIANGLE : 1.030 Hz, montée = 50.0 % du cycle
+  WAVE 0.75          : 1.027 Hz, montée = 26.3 % du cycle
+  WAVE 1.00 RAMPE ↓  : 0.985 Hz, montée =  8.2 % du cycle
+== Sorties : SQ de -5.18 à 5.18 V ; TRIG 9.92 V pendant 5.6 ms au début de chaque montée

@@ -1,0 +1,4 @@
+== NOISETOOLS
+  PULSE : 16.2 Hz, de -1.48 à 10.03 V
+  S&H (entrée = sinus 3 Hz, TRIG = PULSE) : 143 paliers, de -4.80 à 4.92 V ; SLEW de -4.81 à 4.94 V
+  bruit (SPICE ne fait pas de bruit d avalanche : on vérifie la polarisation) : WHITE moyen 2.15 V, PINK moyen 0.47 V (doivent être ≈ 0 V)
