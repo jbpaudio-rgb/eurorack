@@ -130,7 +130,7 @@ function drawToggle(key, label, opts, x, y, p, title) {
   g.addEventListener('pointerdown', e => { e.preventDefault(); setParam(key, PARAMS[key] ? 0 : 1); });
   draw(key);
 }
-const NSHORT = { 'kb.cv': 'KBD CV', 'kb.gate': 'KBD GATE', 'lfo1.out': 'LFO 1', 'lfo2.out': 'LFO 2', 'vco1.pulse': 'OSC 1 PULSE', 'vco1.saw': 'OSC 1 SAW',
+const NSHORT = { 'out.in': 'IN L', 'kb.cv': 'KBD CV', 'kb.gate': 'KBD GATE', 'lfo1.out': 'LFO 1', 'lfo2.out': 'LFO 2', 'vco1.pulse': 'OSC 1 PULSE', 'vco1.saw': 'OSC 1 SAW',
   'vco2.saw': 'OSC 2 SAW', 'vco2.pulse': 'OSC 2 PULSE', 'vco3.saw': 'OSC 3 SAW', 'sh.noise': 'NOISE', 'sh.clock': 'CLOCK', 'sh.sh': 'S&H', 'ring.out': 'RING',
   'mix.out': 'MIX', 'env1.out': 'ENV 1', 'env2.out': 'ENV 2', 'vcf.out': 'LADDER', 'svf.out': 'ST. VAR.', 'vca.out': 'AMP', 'rev.out': 'REVERB' };
 const pitchOf = () => 11.5;

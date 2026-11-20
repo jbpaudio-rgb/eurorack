@@ -33,6 +33,10 @@ Raspberry Pi Pico, 2 × MCP4822 (DAC 12 bits), H11L1 (entrée MIDI), 2 × TL074,
 - **LEARN** : appuyer, puis jouer une note, et son canal devient celui du SEMI. Appui de 2 s = omni.
 - **Haut-parleur** 40 mm 8 Ω 1 W (au-dessus du MULT) : 200 mW pour une sortie à ±5 V, 0,8 W au maximum. Il est coupé quand un casque est branché, et par l'inverseur SPEAKER.
 
+## Sorties MAIN OUT L / R à l'arrière (`sortie-ligne.cir`)
+
+Par canal : diviseur 22k / 10k (+ 220 pF), suiveur TL072, 100 Ω, 10 µF, 100k vers la masse. 10 Vpp Eurorack donne 3,1 Vpp en ligne, plat de 20 Hz à 20 kHz à 0,2 dB près dans 10 kΩ. Un seul TL072 pour L et R. Le VOLUME de la façade passe à un slider double 60 mm (A10k ×2), IN R est normalisé sur IN L par le contact du jack.
+
 ## Ce qu'il reste à faire
 - Les schémas KiCad et les cartes des rangées (ces circuits seront dessinés avec le reste de leur rangée).
 - Sur le prototype : régler RV3 des LFO, et calibrer le CV du MIDI (LEARN maintenu à l'allumage, voir `../firmware/semi_midi/semi_midi.ino`).

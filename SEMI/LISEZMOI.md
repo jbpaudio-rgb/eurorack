@@ -67,6 +67,7 @@ Sur la façade, le nom de la source est imprimé en gris sous chaque entrée nor
 
 ## Panneau arrière (`apercu-arriere.png`)
 - **POWER** : embase IEC (C14) avec interrupteur et fusible (T 1 A), reliée à une alimentation fermée à **entrée universelle 100–240 V, 50/60 Hz** (Canada et Europe, sans commutateur ; seul le cordon change). Choix proposé : Mean Well RT-65C (+5 V, +15 V, −15 V, 88–264 VAC), suivie de régulateurs linéaires 7812 / 7912 pour des ±12 V propres. Le +5 V alimente le Pico. Plus simple mais plus bruyant : RT-65B (+5 V, +12 V, −12 V direct). Le 230 V ne va que de l'embase à l'alimentation : fils sertis et gainés, terre de l'embase vissée sur le châssis.
+- **MAIN OUT L / R** (jacks 6,35 mm, niveau ligne : 10 Vpp Eurorack → 3,1 Vpp). Sur la façade, la section OUTPUT a **IN L** et **IN R** ; IN R reçoit IN L tant que rien n'y est branché, donc un patch mono sort des deux côtés. Le VOLUME devient un slider double (stéréo). MAIN (façade) = L + R au niveau Eurorack, PHONES en stéréo.
 - **MIDI IN**, **MIDI OUT** (prises DIN 5 broches standard) et **USB-C** (USB-MIDI), juste à côté. Ils sont sur une petite carte arrière avec le Pico, l'optocoupleur, les DAC et leurs ampli-ops. Seuls les signaux CV / GATE / TRIG / VEL / MOD, la lecture de CV IN / GATE IN, le bouton LEARN et la LED vont vers la façade par une nappe. L'USB et le SPI restent courts.
 
 ## Circuits nouveaux

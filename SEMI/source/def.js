@@ -32,7 +32,7 @@ const SEMI_DEF = {
       { id: 'rev', title: 'SPRING REVERB', sl: [['drive', 'DRIVE', .5], ['tone', 'TONE', .5], ['mix', 'MIX', .25]],
         in: [['in', 'IN']], out: [['out', 'OUT']] },
       { id: 'out', title: 'OUTPUT', sl: [['vol', 'VOLUME', .7]],
-        in: [['in', 'IN']], out: [['main', 'MAIN'], ['phones', 'PHONES']] },
+        in: [['in', 'IN L'], ['inr', 'IN R']], out: [['main', 'MAIN'], ['phones', 'PHONES']], rear: 1 },   // MAIN = L+R (Eurorack level) ; rear : MAIN OUT L / R line level
     ] },
     { title: 'CONTROL', secs: [
       { id: 'kb', title: 'KEYBOARD · MIDI', sl: [['glide', 'GLIDE', 0]], midi: 1,
@@ -65,7 +65,7 @@ const SEMI_DEF = {
     'vcf.in': 'mix.out', 'vcf.kbd': 'kb.cv', 'vcf.env': 'env1.out', 'vcf.mod': 'sh.sh',
     'svf.in': 'mix.out', 'svf.env': 'env1.out', 'svf.mod': 'lfo2.out',
     'vca.in1': 'vcf.out', 'vca.in2': 'svf.out', 'vca.cv': 'env2.out',
-    'rev.in': 'vca.out', 'out.in': 'rev.out',
+    'rev.in': 'vca.out', 'out.in': 'rev.out', 'out.inr': 'out.in',   // IN R follows IN L until something is plugged into it
     'env1.gate': 'kb.gate', 'env2.gate': 'kb.gate',
     'att.in1': 5, 'att.in2': 5,
   },

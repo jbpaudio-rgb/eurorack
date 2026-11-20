@@ -1,4 +1,4 @@
-# Back panel of the SEMI (preview) : IEC power inlet (switch + fuse), MIDI IN / MIDI OUT (5-pin DIN, 180 deg, panel mount), USB-C (USB-MIDI).
+# Back panel of the SEMI (preview) : MAIN OUT L / R (6.35 mm, line level), IEC power inlet (switch + fuse), MIDI IN / MIDI OUT (5-pin DIN, 180 deg, panel mount), USB-C (USB-MIDI).
 # python3 source/arriere.py -> arriere.svg (then rendered to apercu-arriere.png)
 import base64, io, os
 from PIL import Image
@@ -32,7 +32,14 @@ s = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W *
      f'<image href="{logo}" x="20" y="{35 - 4}" width="44" height="{44 * 49 / 273}"/>',
      f'<text x="70" y="{35 + 3}" {L} font-size="3.4">3019 SEMI-MODULAR SYNTHESIZER</text>']
 # vents
-for k in range(14): s.append(f'<rect x="{150 + k * 9}" y="18" width="4" height="34" rx="2" fill="#050505"/>')
+for k in range(9): s.append(f'<rect x="{196 + k * 9}" y="18" width="4" height="34" rx="2" fill="#050505"/>')
+# MAIN OUT L / R (6.35 mm TRS jacks, line level, mono L -> both when R is empty on the panel)
+import math
+def big(x, y, lab):
+    return (f'<text x="{x}" y="{y - 11}" {F} font-size="3.2">{lab}</text>'
+            f'<polygon points="{" ".join(f"{x + 7 * math.cos(a * 1.0472 + .5236):.2f},{y + 7 * math.sin(a * 1.0472 + .5236):.2f}" for a in range(6))}" fill="#c9c9c3" stroke="#666" stroke-width=".3"/>'
+            f'<circle cx="{x}" cy="{y}" r="3.4" fill="#050505"/>')
+s += [big(152, 35, 'L'), big(174, 35, 'R'), f'<text x="163" y="16" {F} font-size="3.2">MAIN OUT</text>', f'<text x="163" y="49" {G} font-size="2.2">LIGNE · 6,35 mm</text>']
 # MIDI + USB
 x0 = 300
 s += [din(x0, 35, 'MIDI IN', 'DIN 5 broches'), din(x0 + 30, 35, 'MIDI OUT', 'DIN 5 broches')]

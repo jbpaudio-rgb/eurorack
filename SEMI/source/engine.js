@@ -48,8 +48,8 @@ class SemiEngine {
     this.cab = []; this.pat.fill(0);
     for (const [a, b] of list) { const oi = this.o[a], ii = this.i[b]; if (oi !== undefined && ii !== undefined) { this.cab.push([oi, ii]); this.pat[ii] = 1; } }
     // normalled inputs that are not plugged : [inIndex, outIndex] or a fixed voltage
-    this.nOut = []; this.nCst = [];
-    this.nrm.forEach((v, ii) => { if (v === null || this.pat[ii]) return; if (typeof v === 'number') this.nCst.push([ii, v]); else this.nOut.push([ii, this.o[v]]); });
+    this.nOut = []; this.nCst = []; this.nIn = [];
+    this.nrm.forEach((v, ii) => { if (v === null || this.pat[ii]) return; if (typeof v === 'number') this.nCst.push([ii, v]); else if (this.o[v] !== undefined) this.nOut.push([ii, this.o[v]]); else this.nIn.push([ii, this.i[v]]); });
   }
   rnd() { this.seed = (this.seed * 16807) % 2147483647; return this.seed / 2147483647; }
   gauss() { let u, v, q; do { u = 2 * this.rnd() - 1; v = 2 * this.rnd() - 1; q = u * u + v * v; } while (q >= 1 || q === 0); return u * Math.sqrt(-2 * Math.log(q) / q); }
@@ -93,6 +93,7 @@ class SemiEngine {
       for (let k = 0; k < nc; k++) I[cab[k][1]] += O[cab[k][0]];
       for (let k = 0; k < nO.length; k++) I[nO[k][0]] = O[nO[k][1]];
       for (let k = 0; k < nCs.length; k++) I[nCs[k][0]] = nCs[k][1];
+      for (let k = 0; k < this.nIn.length; k++) I[this.nIn[k][0]] = I[this.nIn[k][1]];
       // ---- KEYBOARD : on-screen keys / demo sequence, CV IN and GATE IN override, glide, trig
       const kb = S.kb; let kcv, kg;
       if (this.key !== null) { kcv = (this.key - 60) / 12; kg = 5; kb.lastCv = kcv; }
@@ -202,10 +203,11 @@ class SemiEngine {
       O[o['att.o1']] = cl(I[i['att.in1']] * a1, -11, 11); O[o['att.o2']] = cl(I[i['att.in2']] * a2, -11, 11);
       O[o['mult.o1']] = O[o['mult.o2']] = O[o['mult.o3']] = I[i['mult.in']];
       // ---- OUTPUT : VOLUME, MAIN (Eurorack level) and PHONES
-      const main = cl(I[i['out.in']] * vol * 1.4, -10, 10); O[o['out.main']] = main; O[o['out.phones']] = main;
-      let y = tanh(main * 0.2);
+      const mL = cl(I[i['out.in']] * vol * 1.4, -10, 10), mR = cl(I[i['out.inr']] * vol * 1.4, -10, 10), main = 0.5 * (mL + mR);
+      O[o['out.main']] = main; O[o['out.phones']] = main;      // stereo phones on the hardware ; the browser hears L / R below
+      let y = tanh(main * 0.2), yL = tanh(mL * 0.2), yR = tanh(mR * 0.2);
       if (spkOn) { const z = S.spk; z[0] += kS1 * (y - z[0]); const hpo = y - z[0]; z[1] += kS2 * (hpo - z[1]); z[2] += kS2 * (z[1] - z[2]); y = tanh(1.6 * z[2]) * 0.8; }   // little 40 mm speaker : ~180 Hz -> ~6 kHz
-      L[t] = y; if (R) R[t] = y;
+      if (spkOn) { L[t] = y; if (R) R[t] = y; } else { L[t] = R ? yL : y; if (R) R[t] = yR; }   // speaker = mono, rear MAIN OUT L / R = stereo
       S.scope[this.cnt % 1024] = main;
       if (++this.cnt >= 2048) {
         this.cnt = 0;
