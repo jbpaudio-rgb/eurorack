@@ -20,39 +20,39 @@ SAW,J8,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkicon
 PULSE,J9,Jack_3.5mm_Thonkiconn_PJ398SM,C9900080080,QingPu WQP-PJ301M-12 (Thonkiconn) - THT (wave soldering)
 "BC847DS,115","Q1,Q3",SOT-457,C549489,"BC847DS,115 (Nexperia, paire double) - SMT bottom"
 MMBFJ112,Q2,SOT-23,,"MMBFJ112 (JFET N, D-S-G) - SMT bottom - laisser JLC choisir (Basic de preference)"
-10k 1% 0805,"R1,R14,R16,R17,R20,R21,R23,R33,R35,R39,R41,R43,R55,R56,R57,R58,R59,R60,R61,R62,R63,R64,R65,R66,R69,R70,R72,R77,R82",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-680 1% 0805,"R10,R27,R28",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-910k 1% 0805,R11,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-1k 1% 0805,"R12,R71,R44,R45,R46,R47",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-14k 1% 0805,R13,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-22k 1% 0805,"R15,R42,R67,R68",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-20k 1% 0805,"R18,R22",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-48k7 1% 0805,R19,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-1k 0.1% 1% 0805,"R2,R6,R48,R49",R_0603_1608Metric,,"1k 0,1 % 25 ppm - SMT bottom - laisser JLC choisir (Basic de preference)"
-40k2 1% 0805,R24,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-95k3 1% 0805,R25,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-47k 1% 0805,"R26,R30,R31,R87,R90,R93",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-113k 1% 0805,R29,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-7k15 1% 0805,"R3,R4",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-12k 1% 0805,"R34,R36",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-562 1% 0805,R37,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-16k2 1% 0805,R38,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-22k1 1% 0805,R40,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-100k 0.1% 1% 0805,R5,R_0603_1608Metric,,"100k 0,1 % 25 ppm (précision 1 V/oct) - SMT bottom - laisser JLC choisir (Basic de preference)"
-4k99 0.1% 1% 0805,R50,R_0603_1608Metric,,"4k99 0,1 % 25 ppm - SMT bottom - laisser JLC choisir (Basic de preference)"
-4k99 1% 0805,R51,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-100k 1% 0805,"R52,R8",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-100k 0.1% 1% 0805,R53,R_0603_1608Metric,,"100k 0,1 % 25 ppm - SMT bottom - laisser JLC choisir (Basic de preference)"
-2k 1% 0805,R54,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-1M 1% 0805,"R7,R32",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-25k5 1% 0805,"R73,R78,R83",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-93k1 1% 0805,R74,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-7k5 1% 0805,"R75,R80,R85",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-1k2 1% 0805,"R76,R81,R86",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-26k1 1% 0805,R79,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-15k4 1% 0805,R84,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-100 1% 0805,"R88,R89,R91,R92,R94,R95",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
-1k TC 1% 0805,R9,R_0603_1608Metric,,"1k +3300 ppm/K (thermistance de compensation, collée à Q1) - SMT bottom - laisser JLC choisir (Basic de preference)"
+10k 1% 0603,"R1,R14,R16,R17,R20,R21,R23,R33,R35,R39,R41,R43,R55,R56,R57,R58,R59,R60,R61,R62,R63,R64,R65,R66,R69,R70,R72,R77,R82",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+680 1% 0603,"R10,R27,R28",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+910k 1% 0603,R11,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k 1% 0603,"R12,R71,R44,R45,R46,R47",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+14k 1% 0603,R13,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+22k 1% 0603,"R15,R42,R67,R68",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+20k 1% 0603,"R18,R22",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+48k7 1% 0603,R19,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k 0.1% 1% 0603,"R2,R6,R48,R49",R_0603_1608Metric,,"1k 0,1 % 25 ppm - SMT bottom - laisser JLC choisir (Basic de preference)"
+40k2 1% 0603,R24,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+95k3 1% 0603,R25,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+47k 1% 0603,"R26,R30,R31,R87,R90,R93",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+113k 1% 0603,R29,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+7k15 1% 0603,"R3,R4",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+12k 1% 0603,"R34,R36",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+562 1% 0603,R37,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+16k2 1% 0603,R38,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+22k1 1% 0603,R40,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100k 0.1% 1% 0603,R5,R_0603_1608Metric,,"100k 0,1 % 25 ppm (précision 1 V/oct) - SMT bottom - laisser JLC choisir (Basic de preference)"
+4k99 0.1% 1% 0603,R50,R_0603_1608Metric,,"4k99 0,1 % 25 ppm - SMT bottom - laisser JLC choisir (Basic de preference)"
+4k99 1% 0603,R51,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100k 1% 0603,"R52,R8",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100k 0.1% 1% 0603,R53,R_0603_1608Metric,,"100k 0,1 % 25 ppm - SMT bottom - laisser JLC choisir (Basic de preference)"
+2k 1% 0603,R54,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1M 1% 0603,"R7,R32",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+25k5 1% 0603,"R73,R78,R83",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+93k1 1% 0603,R74,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+7k5 1% 0603,"R75,R80,R85",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k2 1% 0603,"R76,R81,R86",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+26k1 1% 0603,R79,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+15k4 1% 0603,R84,R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+100 1% 0603,"R88,R89,R91,R92,R94,R95",R_0603_1608Metric,,SMT bottom - laisser JLC choisir (Basic de preference)
+1k TC 1% 0603,R9,R_0603_1608Metric,,"1k +3300 ppm/K (thermistance de compensation, collée à Q1) - SMT bottom - laisser JLC choisir (Basic de preference)"
 10k B,"RV2,RV3,RV4,RV5,RV6",Pot_Alpha_9mm_Vertical,,"POT-R09V-10K (9 mm vertical, B10k) - THT (wave soldering) - laisser JLC choisir (Basic de preference)"
 500 Bourns 3314J-1-501E,RV7,Trim_SMD_Bourns_3314J,,"Bourns 3314J-1-501E (trimmer CMS, réglage V/OCT) - SMT bottom - laisser JLC choisir (Basic de preference)"
 1k Bourns 3314J-1-102E,RV8,Trim_SMD_Bourns_3314J,,"Bourns 3314J-1-102E (trimmer CMS, réglage HF) - SMT bottom - laisser JLC choisir (Basic de preference)"
