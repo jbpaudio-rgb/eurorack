@@ -35,7 +35,7 @@ Raspberry Pi Pico, 2 × MCP4822 (DAC 12 bits), H11L1 (entrée MIDI), 2 × TL074,
 
 ## Sorties MAIN OUT L / R à l'arrière (`sortie-ligne.cir`)
 
-Par canal : diviseur 22k / 10k (+ 220 pF), suiveur TL072, 100 Ω, 10 µF, 100k vers la masse. 10 Vpp Eurorack donne 3,1 Vpp en ligne, plat de 20 Hz à 20 kHz à 0,2 dB près dans 10 kΩ. Un seul TL072 pour L et R. Le VOLUME de la façade passe à un slider double 60 mm (A10k ×2), IN R est normalisé sur IN L par le contact du jack.
+Par canal : diviseur 22k / 10k (+ 220 pF), suiveur TL072, 100 Ω, 10 µF, 100k vers la masse. 10 Vpp Eurorack donne 3,1 Vpp en ligne, plat de 20 Hz à 20 kHz à 0,2 dB près dans 10 kΩ. Un seul TL072 pour L et R. Le VOLUME de la façade passe à un slider double 60 mm (A10k ×2), IN L et IN R sont normalisées sur la sortie de la reverb par le contact de leur jack.
 
 ## Ce qu'il reste à faire
 - Les schémas KiCad et les cartes des rangées (ces circuits seront dessinés avec le reste de leur rangée).

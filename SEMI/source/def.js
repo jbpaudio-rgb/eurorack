@@ -65,7 +65,7 @@ const SEMI_DEF = {
     'vcf.in': 'mix.out', 'vcf.kbd': 'kb.cv', 'vcf.env': 'env1.out', 'vcf.mod': 'sh.sh',
     'svf.in': 'mix.out', 'svf.env': 'env1.out', 'svf.mod': 'lfo2.out',
     'vca.in1': 'vcf.out', 'vca.in2': 'svf.out', 'vca.cv': 'env2.out',
-    'rev.in': 'vca.out', 'out.in': 'rev.out', 'out.inr': 'out.in',   // IN R follows IN L until something is plugged into it
+    'rev.in': 'vca.out', 'out.in': 'rev.out', 'out.inr': 'rev.out',   // the reverb is normalled to both IN L and IN R
     'env1.gate': 'kb.gate', 'env2.gate': 'kb.gate',
     'att.in1': 5, 'att.in2': 5,
   },
